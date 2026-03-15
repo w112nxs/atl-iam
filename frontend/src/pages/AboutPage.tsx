@@ -18,7 +18,7 @@ export function AboutPage() {
         {/* Main content */}
         <div>
           <h1 style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 32,
             color: T.text,
@@ -28,7 +28,7 @@ export function AboutPage() {
             Who We Are
           </h1>
           <p style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 14,
             color: T.subtle,
             lineHeight: 1.7,
@@ -38,7 +38,7 @@ export function AboutPage() {
             The Atlanta IAM User Group is a practitioner-first, vendor-neutral community for Identity & Access Management professionals in the greater Atlanta area. We bring together enterprise security leaders, architects, and engineers to share real-world experiences, discuss emerging trends, and build lasting professional connections.
           </p>
           <p style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 14,
             color: T.subtle,
             lineHeight: 1.7,
@@ -54,7 +54,7 @@ export function AboutPage() {
               <Card key={r.num}>
                 <div style={{ display: 'flex', gap: 14 }}>
                   <span style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 24,
                     color: T.accent,
@@ -66,7 +66,7 @@ export function AboutPage() {
                   </span>
                   <div>
                     <h3 style={{
-                      fontFamily: "'Poppins', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontWeight: 700,
                       fontSize: 16,
                       color: T.text,
@@ -76,7 +76,7 @@ export function AboutPage() {
                       {r.title}
                     </h3>
                     <p style={{
-                      fontFamily: "'Poppins', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontSize: 13,
                       color: T.subtle,
                       margin: 0,
@@ -102,7 +102,7 @@ export function AboutPage() {
               ].map(v => (
                 <Card key={v.title} style={{ borderTop: `2px solid ${v.color}` }}>
                   <h4 style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 15,
                     color: v.color,
@@ -112,7 +112,7 @@ export function AboutPage() {
                     {v.title}
                   </h4>
                   <p style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontSize: 12,
                     color: T.subtle,
                     margin: 0,
@@ -145,10 +145,10 @@ export function AboutPage() {
                 borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
                 transition: 'border-color 0.25s',
               }}>
-                <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, transition: 'color 0.25s' }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, transition: 'color 0.25s' }}>
                   {item.label}
                 </span>
-                <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, fontWeight: 600, color: T.text, transition: 'color 0.25s' }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600, color: T.text, transition: 'color 0.25s' }}>
                   {item.value}
                 </span>
               </div>
@@ -175,7 +175,7 @@ export function AboutPage() {
 
           <SectionLabel text="Contact" color={T.green} />
           <Card>
-            <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8, transition: 'color 0.25s' }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8, transition: 'color 0.25s' }}>
               <div>hello@atlantaiam.com</div>
               <div>Atlanta, Georgia</div>
               <div style={{ marginTop: 6 }}>

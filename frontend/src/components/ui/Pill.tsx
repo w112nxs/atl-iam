@@ -1,7 +1,7 @@
 export function Pill({ label, color, size = 10 }: { label: string; color: string; size?: number }) {
   return (
     <span style={{
-      fontFamily: "'Poppins', sans-serif",
+      fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: size,
       letterSpacing: '0.08em',

@@ -59,7 +59,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
         {/* Header */}
         <div style={{ padding: '24px 24px 16px', borderBottom: `1px solid ${T.border}`, transition: 'border-color 0.25s' }}>
           <h2 style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 22,
             color: T.text,
@@ -69,7 +69,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
             Terms of Service & Privacy Policy
           </h2>
           <p style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 13,
             color: T.muted,
             margin: '8px 0 0',
@@ -92,7 +92,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
           {sections.map(s => (
             <div key={s.title} style={{ marginBottom: 20 }}>
               <h3 style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 15,
                 color: T.accent,
@@ -102,7 +102,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
                 {s.title}
               </h3>
               <p style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 color: T.subtle,
                 lineHeight: 1.7,
@@ -114,7 +114,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
             </div>
           ))}
           <p style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 11,
             color: T.muted,
             fontStyle: 'italic',
@@ -147,7 +147,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
               style={{ marginTop: 3, accentColor: T.accent }}
             />
             <span style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.text,
               lineHeight: 1.5,
@@ -173,7 +173,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
               style={{ marginTop: 3, accentColor: T.accent }}
             />
             <span style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.text,
               lineHeight: 1.5,
@@ -192,7 +192,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
                 border: `1px solid ${T.border}`,
                 borderRadius: 8,
                 color: T.muted,
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 12,
                 letterSpacing: '0.08em',
@@ -212,7 +212,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
                 border: 'none',
                 borderRadius: 8,
                 color: canAccept ? '#fff' : T.muted,
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 12,
                 letterSpacing: '0.08em',

@@ -98,7 +98,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
         <span style={{ fontSize: 24 }}>◆</span>
         <h1 style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontWeight: 700,
           fontSize: 24,
           color: T.gold,
@@ -108,7 +108,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
           SPONSOR PORTAL
         </h1>
         <span style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontWeight: 700,
           fontSize: 16,
           color: T.text,
@@ -126,7 +126,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
         borderRadius: 10,
         padding: '12px 18px',
         marginBottom: 24,
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontSize: 12,
         color: T.amber,
         lineHeight: 1.6,
@@ -147,7 +147,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                 border: `1px solid ${selectedEventId === evt.id ? T.accent + '44' : T.border}`,
                 borderRadius: 20,
                 color: selectedEventId === evt.id ? T.accent : T.muted,
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 12,
                 letterSpacing: '0.06em',
@@ -167,7 +167,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <h2 style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 20,
               color: T.text,
@@ -177,7 +177,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
               {selectedEvent.name}
             </h2>
             <div style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 13,
               color: T.muted,
               transition: 'color 0.25s',
@@ -213,7 +213,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
               border: 'none',
               borderBottom: activeTab === tab.key ? `2px solid ${T.accent}` : '2px solid transparent',
               color: activeTab === tab.key ? T.accent : T.muted,
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 13,
               letterSpacing: '0.06em',
@@ -241,7 +241,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                 border: `1px solid ${T.border}`,
                 background: T.inputBg,
                 color: T.text,
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
                 outline: 'none',
                 width: '100%',
@@ -257,7 +257,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                   border: `1px solid ${T.accent}44`,
                   borderRadius: 6,
                   color: T.accent,
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 11,
                   letterSpacing: '0.08em',
@@ -270,7 +270,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
               </button>
             ) : (
               <span style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 11,
                 letterSpacing: '0.08em',
@@ -284,7 +284,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
 
           {optedOutCount > 0 && (
             <div style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.muted,
               marginBottom: 12,
@@ -311,7 +311,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                     ];
                     return cols.filter(c => c.show).map(col => (
                       <th key={col.label} style={{
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontWeight: 700,
                         fontSize: 10,
                         letterSpacing: '0.15em',
@@ -373,7 +373,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
             borderRadius: 8,
             padding: '10px 14px',
             marginBottom: 20,
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 12,
             color: T.accent,
             transition: 'background 0.25s, color 0.25s',
@@ -395,7 +395,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <div>
                       <div style={{
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontWeight: 700,
                         fontSize: 15,
                         color: T.text,
@@ -404,7 +404,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                         {session.title}
                       </div>
                       <div style={{
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontSize: 12,
                         color: T.muted,
                         transition: 'color 0.25s',
@@ -413,7 +413,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                       </div>
                     </div>
                     <div style={{
-                      fontFamily: "'Poppins', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontWeight: 700,
                       fontSize: 14,
                       color: T.accent,
@@ -469,7 +469,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                     </div>
                   )}
                   <h3 style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 18,
                     color: isActive ? color : T.muted,
@@ -482,7 +482,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                     const has = tier === 'Gold' ? cap.gold : tier === 'Silver' ? cap.silver : cap.community;
                     return (
                       <div key={cap.label} style={{
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontSize: 13,
                         color: has ? (isActive ? color : T.subtle) : T.muted + '66',
                         padding: '3px 0',
@@ -509,7 +509,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                 'Retaining data beyond 12 months',
               ].map(item => (
                 <div key={item} style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 13,
                   color: T.red,
                   transition: 'color 0.25s',
@@ -537,7 +537,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
 
 function cellStyle(T: ReturnType<typeof useTheme>['T']): React.CSSProperties {
   return {
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontSize: 13,
     color: T.text,
     padding: '10px 10px',

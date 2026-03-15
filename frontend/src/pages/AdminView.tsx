@@ -16,7 +16,7 @@ export function AdminView() {
 
   if (!selectedEvent) {
     return (
-      <div style={{ padding: 48, textAlign: 'center', color: T.muted, fontFamily: "'Poppins', sans-serif" }}>
+      <div style={{ padding: 48, textAlign: 'center', color: T.muted, fontFamily: "'Inter', sans-serif" }}>
         Loading events...
       </div>
     );
@@ -25,7 +25,7 @@ export function AdminView() {
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         fontSize: 32,
         color: T.text,
@@ -46,7 +46,7 @@ export function AdminView() {
               border: `1px solid ${selectedEventId === evt.id ? T.red + '44' : T.border}`,
               borderRadius: 20,
               color: selectedEventId === evt.id ? T.red : T.muted,
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 12,
               letterSpacing: '0.06em',
@@ -76,7 +76,7 @@ export function AdminView() {
       {/* Sponsor breakdown */}
       <Card>
         <div style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontWeight: 700,
           fontSize: 11,
           letterSpacing: '0.2em',
@@ -91,7 +91,7 @@ export function AdminView() {
             <div key={sp.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Pill label={sp.tier} color={tierColor(sp.tier)} />
               <span style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 15,
                 color: T.text,
@@ -100,7 +100,7 @@ export function AdminView() {
                 {sp.name}
               </span>
               <span style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontSize: 12,
                 color: T.muted,
                 transition: 'color 0.25s',

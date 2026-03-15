@@ -35,9 +35,9 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
       background: T.navBg,
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
-      borderBottom: `1px solid ${T.border}`,
+      borderBottom: `2px solid ${T.accent}`,
       padding: '0 20px',
-      height: 48,
+      height: 64,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -48,24 +48,9 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
         style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', flexShrink: 0 }}
         onClick={() => onNavigate('/')}
       >
-        <div style={{
-          width: 28,
-          height: 28,
-          borderRadius: 7,
-          background: `linear-gradient(135deg, ${T.accent}, ${T.purple})`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: "'Poppins', sans-serif",
-          fontWeight: 700,
-          fontSize: 15,
-          color: '#fff',
-          transition: 'background 0.25s',
-        }}>
-          A
-        </div>
+        <img src="/badge.png" alt="Atlanta IAM" width="32" height="32" style={{ borderRadius: '50%' }} />
         <span style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Rajdhani', sans-serif",
           fontWeight: 700,
           fontSize: 15,
           color: T.text,
@@ -89,7 +74,7 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
                 border: 'none',
                 borderBottom: active ? `2px solid ${tab.color}` : '2px solid transparent',
                 color: active ? tab.color : T.muted,
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 12,
                 letterSpacing: '0.04em',
@@ -120,7 +105,7 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
             >
               <Avatar name={user.name} size={26} role={user.role} />
               <span style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontSize: 12,
                 fontWeight: 600,
                 color: T.text,
@@ -137,7 +122,7 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
                 border: `1px solid ${T.border}`,
                 borderRadius: 5,
                 color: T.muted,
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 10,
                 letterSpacing: '0.08em',
@@ -157,7 +142,7 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
               border: 'none',
               borderRadius: 5,
               color: '#fff',
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 11,
               letterSpacing: '0.08em',

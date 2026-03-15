@@ -34,7 +34,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         fontSize: 32,
         color: T.text,
@@ -53,7 +53,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
               <Avatar name={user.name} size={50} role={user.role} />
               <div>
                 <h2 style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 20,
                   color: T.text,
@@ -86,8 +86,8 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
                   borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
                   transition: 'border-color 0.25s',
                 }}>
-                  <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 13, color: T.muted, transition: 'color 0.25s' }}>{row.label}</span>
-                  <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 13, fontWeight: 500, color: T.text, transition: 'color 0.25s' }}>{row.value}</span>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.muted, transition: 'color 0.25s' }}>{row.label}</span>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: T.text, transition: 'color 0.25s' }}>{row.value}</span>
                 </div>
               ))}
               <div style={{
@@ -97,7 +97,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
                 borderTop: `1px solid ${T.border}`,
                 transition: 'border-color 0.25s',
               }}>
-                <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 13, color: T.muted, transition: 'color 0.25s' }}>Terms Accepted</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.muted, transition: 'color 0.25s' }}>Terms Accepted</span>
                 <Pill
                   label={user.termsAccepted ? 'Accepted' : 'Pending'}
                   color={user.termsAccepted ? T.green : T.amber}
@@ -114,7 +114,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
           <SectionLabel text="Display Preferences" color={T.purple} />
           <Card>
             <div style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 13,
               color: T.text,
               marginBottom: 3,
@@ -123,7 +123,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
               {isDark ? 'Dark mode active' : 'Light mode active'}
             </div>
             <div style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.muted,
               marginBottom: 14,
@@ -141,7 +141,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
                     border: `1px solid ${T.border}`,
                     borderRadius: 5,
                     color: T.muted,
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 10,
                     letterSpacing: '0.08em',
@@ -160,7 +160,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
           <SectionLabel text="Passkey" color={T.accent} />
           <Card>
             <div style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 13,
               color: T.text,
               marginBottom: 10,
@@ -176,7 +176,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
                 border: `1px solid ${passkeyStatus === 'done' ? T.green + '44' : T.border}`,
                 borderRadius: 6,
                 color: passkeyStatus === 'done' ? T.green : T.accent,
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: 11,
                 letterSpacing: '0.08em',
@@ -205,7 +205,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
                 key={item.label}
                 onClick={() => onNavigate?.(item.path)}
                 style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 13,
                   color: item.color,
                   padding: '6px 0',
@@ -225,7 +225,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
               <SectionLabel text="Sponsor Access" color={T.gold} />
               <Card accent={T.gold}>
                 <div style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 13,
                   color: T.text,
                   marginBottom: 6,

@@ -54,7 +54,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
             animation: 'pulse 2s infinite',
           }} />
           <span style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.1em',
@@ -66,13 +66,14 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
         </div>
 
         <h1 style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Rajdhani', sans-serif",
           fontWeight: 700,
-          fontSize: 'clamp(30px, 4.5vw, 48px)',
+          fontSize: 'clamp(36px, 6vw, 64px)',
           color: T.text,
           margin: '0 auto 12px',
           maxWidth: '90%',
           lineHeight: 1.08,
+          letterSpacing: '0.04em',
           transition: 'color 0.25s',
         }}>
           Atlanta's Premier{' '}
@@ -81,7 +82,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
         </h1>
 
         <p style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontSize: 15,
           color: T.subtle,
           margin: '0 0 28px',
@@ -101,7 +102,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
               border: 'none',
               borderRadius: 6,
               color: '#fff',
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 13,
               letterSpacing: '0.06em',
@@ -119,7 +120,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
               border: `1px solid ${T.accent}`,
               borderRadius: 6,
               color: T.accent,
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 13,
               letterSpacing: '0.06em',
@@ -137,7 +138,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
               border: `1px solid ${T.muted}44`,
               borderRadius: 6,
               color: T.muted,
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 13,
               letterSpacing: '0.06em',
@@ -172,7 +173,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <div>
                   <h3 style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 19,
                     color: T.text,
@@ -182,7 +183,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                     {nextEvent.name}
                   </h3>
                   <div style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontSize: 12,
                     color: T.muted,
                     transition: 'color 0.25s',
@@ -197,7 +198,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                     border: `1px solid ${T.accent}44`,
                     borderRadius: 5,
                     color: T.accent,
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 10,
                     letterSpacing: '0.08em',
@@ -224,7 +225,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontWeight: 700,
                         fontSize: 11,
                         color: T.muted,
@@ -235,7 +236,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                       </span>
                       <div>
                         <div style={{
-                          fontFamily: "'Poppins', sans-serif",
+                          fontFamily: "'Inter', sans-serif",
                           fontSize: 13,
                           fontWeight: 600,
                           color: T.text,
@@ -244,7 +245,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                           {s.title}
                         </div>
                         <div style={{
-                          fontFamily: "'Poppins', sans-serif",
+                          fontFamily: "'Inter', sans-serif",
                           fontSize: 11,
                           color: T.muted,
                           transition: 'color 0.25s',
@@ -264,7 +265,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
             <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Card style={{ borderLeft: `3px solid ${T.accent}` }}>
                 <div style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 12,
                   color: T.accent,
@@ -275,7 +276,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                   RULE 01
                 </div>
                 <h3 style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 16,
                   color: T.text,
@@ -285,7 +286,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                   Enterprise-Led Presentations
                 </h3>
                 <p style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 12,
                   color: T.subtle,
                   margin: 0,
@@ -297,7 +298,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
               </Card>
               <Card style={{ borderLeft: `3px solid ${T.gold}` }}>
                 <div style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 12,
                   color: T.gold,
@@ -308,7 +309,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                   RULE 02
                 </div>
                 <h3 style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 16,
                   color: T.text,
@@ -318,7 +319,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                   Vendor Sponsorships
                 </h3>
                 <p style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 12,
                   color: T.subtle,
                   margin: 0,
@@ -344,7 +345,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                     alignItems: 'center',
                   }}>
                     <span style={{
-                      fontFamily: "'Poppins', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontSize: 13,
                       fontWeight: 600,
                       color: T.text,
@@ -367,7 +368,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                   border: `1px solid ${T.border}`,
                   borderRadius: 5,
                   color: T.muted,
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 10,
                   letterSpacing: '0.08em',
@@ -401,7 +402,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                     padding: '7px 0',
                     borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
                     cursor: 'pointer',
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontSize: 13,
                     color: T.subtle,
                     transition: 'color 0.25s, border-color 0.25s',
@@ -438,7 +439,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
                           border: `1px solid ${T[acc.color]}33`,
                           borderRadius: 6,
                           color: T[acc.color],
-                          fontFamily: "'Poppins', sans-serif",
+                          fontFamily: "'Inter', sans-serif",
                           fontWeight: 700,
                           fontSize: 12,
                           letterSpacing: '0.04em',

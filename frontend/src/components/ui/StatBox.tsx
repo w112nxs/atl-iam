@@ -7,7 +7,7 @@ export function StatBox({ label, value, color, sub }: { label: string; value: st
     <Card>
       <div style={{
         fontSize: 10,
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         letterSpacing: '0.18em',
         textTransform: 'uppercase',
@@ -19,7 +19,7 @@ export function StatBox({ label, value, color, sub }: { label: string; value: st
       </div>
       <div style={{
         fontSize: 26,
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         color,
         lineHeight: 1,
@@ -30,7 +30,7 @@ export function StatBox({ label, value, color, sub }: { label: string; value: st
       {sub && (
         <div style={{
           fontSize: 11,
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           color: T.muted,
           marginTop: 3,
           transition: 'color 0.25s',

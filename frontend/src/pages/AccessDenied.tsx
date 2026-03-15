@@ -10,7 +10,7 @@ export function AccessDenied({ onNavigate }: { onNavigate: (path: string) => voi
       textAlign: 'center',
     }}>
       <h1 style={{
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         fontSize: 36,
         color: T.red,
@@ -20,7 +20,7 @@ export function AccessDenied({ onNavigate }: { onNavigate: (path: string) => voi
         Access Denied
       </h1>
       <p style={{
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontSize: 15,
         color: T.muted,
         margin: '0 0 24px',
@@ -35,7 +35,7 @@ export function AccessDenied({ onNavigate }: { onNavigate: (path: string) => voi
           border: 'none',
           borderRadius: 8,
           color: '#fff',
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontWeight: 700,
           fontSize: 14,
           letterSpacing: '0.06em',

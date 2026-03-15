@@ -41,7 +41,7 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
         }}
       >
         <h3 style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontWeight: 700,
           fontSize: 18,
           color: T.amber,
@@ -52,7 +52,7 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
         </h3>
 
         <p style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontSize: 13,
           color: T.text,
           margin: '0 0 12px',
@@ -64,7 +64,7 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
         <div style={{ marginBottom: 16 }}>
           {included.map(col => (
             <div key={col} style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 600,
               fontSize: 13,
               color: T.green,
@@ -81,7 +81,7 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
           borderRadius: 8,
           padding: '10px 14px',
           marginBottom: 20,
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontWeight: 700,
           fontSize: 14,
           color: T.green,
@@ -99,7 +99,7 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
               border: `1px solid ${T.border}`,
               borderRadius: 8,
               color: T.muted,
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 12,
               letterSpacing: '0.08em',
@@ -118,7 +118,7 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
               border: 'none',
               borderRadius: 8,
               color: '#000',
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 12,
               letterSpacing: '0.08em',

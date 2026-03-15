@@ -9,7 +9,7 @@ export function Footer({ onNavigate }: FooterProps) {
   const { T } = useTheme();
 
   const linkStyle = {
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontSize: 13,
     color: T.subtle,
     cursor: 'pointer' as const,
@@ -24,7 +24,7 @@ export function Footer({ onNavigate }: FooterProps) {
 
   return (
     <footer style={{
-      borderTop: `1px solid ${T.border}`,
+      borderTop: `2px solid ${T.accent}`,
       padding: '28px 32px 20px',
       transition: 'border-color 0.25s',
     }}>
@@ -38,7 +38,7 @@ export function Footer({ onNavigate }: FooterProps) {
         {/* Brand */}
         <div>
           <div style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Rajdhani', sans-serif",
             fontWeight: 700,
             fontSize: 15,
             color: T.text,
@@ -48,8 +48,16 @@ export function Footer({ onNavigate }: FooterProps) {
           }}>
             Atlanta IAM
           </div>
+          <div style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 10,
+            color: T.accent,
+            letterSpacing: '0.1em',
+          }}>
+            atlantaiam.com
+          </div>
           <p style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 12,
             color: T.muted,
             margin: 0,
@@ -63,7 +71,7 @@ export function Footer({ onNavigate }: FooterProps) {
         {/* Quick Links */}
         <div>
           <div style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.18em',
@@ -83,7 +91,7 @@ export function Footer({ onNavigate }: FooterProps) {
         {/* Resources */}
         <div>
           <div style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.18em',
@@ -103,7 +111,7 @@ export function Footer({ onNavigate }: FooterProps) {
         {/* Theme */}
         <div>
           <div style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.18em',
@@ -130,7 +138,7 @@ export function Footer({ onNavigate }: FooterProps) {
         transition: 'border-color 0.25s',
       }}>
         <span style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontSize: 11,
           color: T.muted,
           transition: 'color 0.25s',
@@ -138,7 +146,7 @@ export function Footer({ onNavigate }: FooterProps) {
           &copy; 2026 Atlanta IAM User Group. All rights reserved.
         </span>
         <span style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontSize: 11,
           color: T.muted,
           transition: 'color 0.25s',

@@ -25,7 +25,7 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
     border: `1px solid ${T.border}`,
     background: T.inputBg,
     color: T.text,
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontSize: 14,
     outline: 'none',
     transition: 'background 0.25s, color 0.25s, border-color 0.25s',
@@ -60,7 +60,7 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
   return (
     <div style={{ width: '90%', maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         fontSize: 32,
         color: T.text,
@@ -73,7 +73,7 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
       <Card>
         <div style={{ marginBottom: 20 }}>
           <div style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.15em',
@@ -93,7 +93,7 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
                   border: `1px solid ${tier === t ? tierColors[t] + '44' : T.border}`,
                   borderRadius: 20,
                   color: tier === t ? tierColors[t] : T.muted,
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 12,
                   letterSpacing: '0.06em',
@@ -109,15 +109,15 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company Name</label>
+          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company Name</label>
           <input value={company} onChange={e => setCompany(e.target.value)} style={inputStyle} />
         </div>
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Contact Email</label>
+          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Contact Email</label>
           <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle} />
         </div>
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Notes</label>
+          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Notes</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
         </div>
 
@@ -128,7 +128,7 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
             border: 'none',
             borderRadius: 8,
             color: tier === 'Gold' ? '#000' : '#fff',
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 14,
             letterSpacing: '0.06em',

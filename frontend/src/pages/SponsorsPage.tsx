@@ -36,7 +36,7 @@ export function SponsorsPage() {
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         fontSize: 32,
         color: T.text,
@@ -56,7 +56,7 @@ export function SponsorsPage() {
                 {tier.items.map(sp => (
                   <Card key={sp.name} accent={tier.color}>
                     <h3 style={{
-                      fontFamily: "'Poppins', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontWeight: 700,
                       fontSize: 17,
                       color: T.text,
@@ -66,7 +66,7 @@ export function SponsorsPage() {
                       {sp.name}
                     </h3>
                     <div style={{
-                      fontFamily: "'Poppins', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontSize: 12,
                       color: T.muted,
                       marginBottom: 8,
@@ -77,7 +77,7 @@ export function SponsorsPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                       {sp.events.map(e => (
                         <div key={e} style={{
-                          fontFamily: "'Poppins', sans-serif",
+                          fontFamily: "'Inter', sans-serif",
                           fontSize: 11,
                           color: T.subtle,
                           transition: 'color 0.25s',
@@ -100,7 +100,7 @@ export function SponsorsPage() {
             <Card key={tb.tier} style={{ borderTop: `2px solid ${tb.color}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <h3 style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 16,
                   color: tb.color,
@@ -112,7 +112,7 @@ export function SponsorsPage() {
               </div>
               {tb.perks.map(perk => (
                 <div key={perk} style={{
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 12,
                   color: T.subtle,
                   padding: '2px 0',
@@ -130,7 +130,7 @@ export function SponsorsPage() {
           <SectionLabel text="Data Privacy" color={T.amber} />
           <Card accent={T.amber}>
             <p style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.amber,
               margin: 0,
@@ -144,7 +144,7 @@ export function SponsorsPage() {
           <SectionLabel text="Become a Sponsor" color={T.accent} />
           <Card>
             <p style={{
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.subtle,
               margin: '0 0 10px',

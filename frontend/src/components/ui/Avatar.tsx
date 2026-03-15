@@ -24,7 +24,7 @@ export function Avatar({ name, size = 36, role = 'member' }: { name: string; siz
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontFamily: "'Poppins', sans-serif",
+      fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: size * 0.38,
       color,

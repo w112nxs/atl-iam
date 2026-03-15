@@ -24,7 +24,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
     border: `1px solid ${T.border}`,
     background: T.inputBg,
     color: T.text,
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontSize: 14,
     outline: 'none',
     transition: 'background 0.25s, color 0.25s, border-color 0.25s',
@@ -64,7 +64,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
   return (
     <div style={{ width: '90%', maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
-        fontFamily: "'Poppins', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontWeight: 700,
         fontSize: 32,
         color: T.text,
@@ -78,7 +78,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
         {/* Role selector */}
         <div style={{ marginBottom: 20 }}>
           <div style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.15em',
@@ -101,7 +101,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
                   border: `1px solid ${type === opt.val ? T.accent + '44' : T.border}`,
                   borderRadius: 6,
                   color: type === opt.val ? T.accent : T.muted,
-                  fontFamily: "'Poppins', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: 700,
                   fontSize: 12,
                   letterSpacing: '0.06em',
@@ -118,11 +118,11 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
 
         {/* Fields */}
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Name</label>
+          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Name</label>
           <input value={user.name} readOnly style={{ ...inputStyle, opacity: 0.6 }} />
         </div>
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company</label>
+          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company</label>
           <input value={company} onChange={e => setCompany(e.target.value)} style={inputStyle} />
         </div>
 
@@ -134,7 +134,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
               borderRadius: 8,
               padding: '10px 14px',
               marginBottom: 14,
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.amber,
               transition: 'background 0.25s, color 0.25s, border-color 0.25s',
@@ -142,18 +142,18 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
               Vendor representatives cannot present solo. An enterprise co-presenter is required.
             </div>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Enterprise Co-Presenter</label>
+              <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Enterprise Co-Presenter</label>
               <input value={coPresenter} onChange={e => setCoPresenter(e.target.value)} placeholder="Name & company" style={inputStyle} />
             </div>
           </>
         )}
 
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Session Title</label>
+          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Session Title</label>
           <input value={title} onChange={e => setTitle(e.target.value)} style={inputStyle} />
         </div>
         <div style={{ marginBottom: 20 }}>
-          <label style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Abstract</label>
+          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Abstract</label>
           <textarea value={abstract} onChange={e => setAbstract(e.target.value)} rows={5} style={{ ...inputStyle, resize: 'vertical' }} />
         </div>
 
@@ -164,7 +164,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
             border: 'none',
             borderRadius: 8,
             color: '#fff',
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 14,
             letterSpacing: '0.06em',

@@ -128,7 +128,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 18,
             color: '#fff',
@@ -136,7 +136,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             A
           </div>
           <span style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 18,
             color: T.text,
@@ -147,7 +147,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
         </div>
 
         <p style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontSize: 13,
           color: T.muted,
           margin: '0 0 24px',
@@ -163,7 +163,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             borderRadius: 8,
             padding: '8px 12px',
             marginBottom: 16,
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 12,
             color: T.red,
           }}>
@@ -186,7 +186,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
                 borderRadius: 10,
                 padding: '12px 16px',
                 cursor: 'pointer',
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontSize: 14,
                 fontWeight: 600,
                 color: sp.color,
@@ -210,7 +210,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
         }}>
           <div style={{ flex: 1, height: 1, background: T.border, transition: 'background 0.25s' }} />
           <span style={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.1em',
@@ -237,7 +237,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             borderRadius: 10,
             padding: '12px 16px',
             cursor: passkeyLoading ? 'wait' : 'pointer',
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 14,
             fontWeight: 600,
             color: T.accent,
@@ -268,7 +268,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
               background: 'none',
               border: 'none',
               color: T.muted,
-              fontFamily: "'Poppins', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
               fontSize: 11,
               letterSpacing: '0.08em',
@@ -319,7 +319,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
                     }} />
                     <div>
                       <div style={{
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontWeight: 700,
                         fontSize: 13,
                         color: T.text,
@@ -328,7 +328,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
                         {acc.label}
                       </div>
                       <div style={{
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontSize: 10,
                         color: T.muted,
                         transition: 'color 0.25s',

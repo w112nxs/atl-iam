@@ -23,7 +23,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h1 style={{
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           fontWeight: 700,
           fontSize: 32,
           color: T.text,
@@ -32,7 +32,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
         }}>
           Events
         </h1>
-        <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.muted, transition: 'color 0.25s' }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, transition: 'color 0.25s' }}>
           {events.length} events
         </div>
       </div>
@@ -49,7 +49,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                 <div>
                   <div style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 11,
                     letterSpacing: '0.12em',
@@ -60,7 +60,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
                     {evt.date} &middot; {evt.venue}
                   </div>
                   <h2 style={{
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
                     fontSize: 20,
                     color: T.text,
@@ -87,7 +87,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
                           border: `1px solid ${T.gold}44`,
                           borderRadius: 5,
                           color: T.gold,
-                          fontFamily: "'Poppins', sans-serif",
+                          fontFamily: "'Inter', sans-serif",
                           fontWeight: 700,
                           fontSize: 10,
                           letterSpacing: '0.08em',
@@ -125,7 +125,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
                     transition: 'background 0.25s',
                   }}>
                     <span style={{
-                      fontFamily: "'Poppins', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontWeight: 700,
                       fontSize: 10,
                       color: T.muted,
@@ -135,10 +135,10 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
                       {s.time}
                     </span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, fontWeight: 600, color: T.text, transition: 'color 0.25s' }}>
+                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600, color: T.text, transition: 'color 0.25s' }}>
                         {s.title}
                       </div>
-                      <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 11, color: T.muted, transition: 'color 0.25s' }}>
+                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.muted, transition: 'color 0.25s' }}>
                         {s.speaker} &middot; {s.cpe} CPE
                       </div>
                     </div>
