@@ -17,6 +17,47 @@ import { SponsorPortal } from './pages/SponsorPortal';
 import { AdminView } from './pages/AdminView';
 import { AccessDenied } from './pages/AccessDenied';
 
+function DevBanner() {
+  const { T } = useTheme();
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <div style={{
+      background: `linear-gradient(90deg, ${T.gold}, ${T.accent})`,
+      color: '#000',
+      textAlign: 'center',
+      padding: '8px 40px 8px 16px',
+      fontFamily: "'Poppins', sans-serif",
+      fontSize: 13,
+      fontWeight: 600,
+      letterSpacing: '0.03em',
+      position: 'relative',
+    }}>
+      Under Development — This site is being actively built. All features are available for testing.
+      <button
+        onClick={() => setDismissed(true)}
+        style={{
+          position: 'absolute',
+          right: 12,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'none',
+          border: 'none',
+          color: '#000',
+          fontSize: 18,
+          cursor: 'pointer',
+          fontWeight: 700,
+          lineHeight: 1,
+          padding: '0 4px',
+        }}
+        aria-label="Dismiss banner"
+      >
+        x
+      </button>
+    </div>
+  );
+}
+
 function AppInner() {
   const { T } = useTheme();
   const { user, login, loginWithToken, logout, acceptTerms } = useAuth();
@@ -92,6 +133,7 @@ function AppInner() {
         onSignIn={() => setShowAuth(true)}
         onSignOut={() => { logout(); navigate('/'); }}
       />
+      <DevBanner />
       <main style={{ flex: 1 }}>
         {renderPage()}
       </main>
