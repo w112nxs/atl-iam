@@ -20,7 +20,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
   const { events } = useEvents();
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h1 style={{
           fontFamily: "'Poppins', sans-serif",
@@ -104,7 +104,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
               </div>
 
               {/* Stats row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+              <div className="grid-4col" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
                 <StatBox label="Registered" value={evt.stats.registered} color={T.accent} />
                 <StatBox label="Checked In" value={evt.stats.checkedIn} color={T.green} sub={`${Math.round((evt.stats.checkedIn / evt.stats.registered) * 100)}%`} />
                 <StatBox label="Enterprise" value={evt.stats.enterprise} color={T.purple} />
@@ -113,7 +113,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
 
               {/* Sessions */}
               <SectionLabel text="Sessions" color={T.accent} />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+              <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
                 {evt.sessions.map(s => (
                   <div key={s.id} style={{
                     display: 'flex',

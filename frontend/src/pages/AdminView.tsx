@@ -23,7 +23,7 @@ export function AdminView() {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
         fontFamily: "'Poppins', sans-serif",
         fontWeight: 700,

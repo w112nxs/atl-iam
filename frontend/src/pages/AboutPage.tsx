@@ -13,8 +13,8 @@ export function AboutPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
+      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
         {/* Main content */}
         <div>
           <h1 style={{
@@ -94,7 +94,7 @@ export function AboutPage() {
           {/* Mission values */}
           <div style={{ marginTop: 24 }}>
             <SectionLabel text="Our Values" color={T.green} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginTop: 12 }}>
+            <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginTop: 12 }}>
               {[
                 { title: 'Practitioner-First', desc: 'Real-world knowledge from those in the trenches, not marketing decks.', color: T.accent },
                 { title: 'Vendor-Neutral', desc: 'No product pitches. Technology discussions grounded in use cases.', color: T.green },

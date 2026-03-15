@@ -34,7 +34,7 @@ export function SponsorsPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
         fontFamily: "'Poppins', sans-serif",
         fontWeight: 700,
@@ -46,7 +46,7 @@ export function SponsorsPage() {
         Sponsors
       </h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
+      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
         {/* Main: Sponsor cards */}
         <div>
           {tiers.filter(t => t.items.length > 0).map(tier => (

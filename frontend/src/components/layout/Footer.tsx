@@ -29,7 +29,7 @@ export function Footer({ onNavigate }: FooterProps) {
       transition: 'border-color 0.25s',
     }}>
       <div style={{
-        maxWidth: 1200,
+        width: '90%',
         margin: '0 auto',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -120,7 +120,7 @@ export function Footer({ onNavigate }: FooterProps) {
 
       {/* Bottom bar */}
       <div style={{
-        maxWidth: 1200,
+        width: '90%',
         margin: '20px auto 0',
         paddingTop: 16,
         borderTop: `1px solid ${T.border}`,

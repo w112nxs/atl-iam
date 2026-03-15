@@ -93,7 +93,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
         <span style={{ fontSize: 24 }}>◆</span>
@@ -191,7 +191,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
             <Pill label={`${optedOutCount} opted out`} color={T.muted} />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}>
+        <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}>
           <StatBox label="Total Attended" value={selectedEvent.stats.checkedIn} color={T.accent} />
           <StatBox label="Consented" value={consentedAttendees.length} color={T.green} />
           <StatBox label="Your Tier" value={currentTier} color={tierColor(currentTier, T)} />
@@ -244,7 +244,8 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                 fontFamily: "'Poppins', sans-serif",
                 fontSize: 13,
                 outline: 'none',
-                width: 260,
+                width: '100%',
+                maxWidth: 300,
                 transition: 'background 0.25s, color 0.25s, border-color 0.25s',
               }}
             />

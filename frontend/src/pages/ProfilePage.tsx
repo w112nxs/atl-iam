@@ -32,7 +32,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
   const roleColor = user.role === 'admin' ? T.red : user.role === 'sponsor' ? T.gold : T.accent;
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
         fontFamily: "'Poppins', sans-serif",
         fontWeight: 700,
@@ -44,7 +44,7 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
         My Profile
       </h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+      <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
         {/* Left column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Profile header */}

@@ -62,7 +62,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ width: '90%', maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
         fontFamily: "'Poppins', sans-serif",
         fontWeight: 700,

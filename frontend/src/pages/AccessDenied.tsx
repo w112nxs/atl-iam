@@ -4,9 +4,9 @@ export function AccessDenied({ onNavigate }: { onNavigate: (path: string) => voi
   const { T } = useTheme();
   return (
     <div style={{
+      width: '90%',
       maxWidth: 500,
       margin: '80px auto',
-      padding: '0 24px',
       textAlign: 'center',
     }}>
       <h1 style={{

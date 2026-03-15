@@ -71,7 +71,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
           fontSize: 'clamp(30px, 4.5vw, 48px)',
           color: T.text,
           margin: '0 auto 12px',
-          maxWidth: 680,
+          maxWidth: '90%',
           lineHeight: 1.08,
           transition: 'color 0.25s',
         }}>
@@ -152,8 +152,8 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
       </section>
 
       {/* Stats */}
-      <section style={{ padding: '28px 24px', maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+      <section style={{ padding: '28px 24px', width: '90%', margin: '0 auto' }}>
+        <div className="grid-4col" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           <StatBox label="Events Hosted" value={14} color={T.accent} />
           <StatBox label="Community Members" value="1.2K+" color={T.green} />
           <StatBox label="Enterprise Speakers" value="40+" color={T.purple} />
@@ -162,8 +162,8 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
       </section>
 
       {/* Main content: 2-column layout */}
-      <section style={{ padding: '8px 24px 32px', maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
+      <section style={{ padding: '8px 24px 32px', width: '90%', margin: '0 auto' }}>
+        <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
 
           {/* Left: Upcoming Event + Sessions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -261,7 +261,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
 
             {/* Community Rules */}
             <SectionLabel text="Community Rules" color={T.gold} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Card style={{ borderLeft: `3px solid ${T.accent}` }}>
                 <div style={{
                   fontFamily: "'Poppins', sans-serif",

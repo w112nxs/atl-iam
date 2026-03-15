@@ -47,3 +47,22 @@ h1, h2, h3, h4 {
   background: var(--t-border, #1c1d2e);
   border-radius: 3px;
 }
+
+/* Responsive grid utilities */
+@media (max-width: 768px) {
+  .grid-sidebar {
+    grid-template-columns: 1fr !important;
+  }
+  .grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+  .grid-3col {
+    grid-template-columns: 1fr !important;
+  }
+  .grid-4col {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .flex-col-mobile {
+    flex-direction: column !important;
+  }
+}
