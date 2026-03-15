@@ -55,9 +55,9 @@ export const demoUsers: Record<string, User> = {
   admin: {
     id: 'u1',
     name: 'Nishad Sankaranarayanan',
-    email: 'nishad@atliam.org',
+    email: 'nishad@atlantaiam.com',
     role: 'admin',
-    company: 'ATL IAM',
+    company: 'Atlanta IAM',
     sponsorId: null,
     termsAccepted: true,
   },

@@ -25,5 +25,5 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`ATL IAM API running on port ${PORT}`);
+  console.log(`Atlanta IAM API running on port ${PORT}`);
 });

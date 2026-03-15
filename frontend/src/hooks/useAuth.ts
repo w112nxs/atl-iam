@@ -3,8 +3,8 @@ import type { User } from '../types';
 import { api } from '../api/client';
 import { demoUsers } from '../data/seed';
 
-const AUTH_KEY = 'atliam-user';
-const TOKEN_KEY = 'atliam-token';
+const AUTH_KEY = 'atlanta-iam-user';
+const TOKEN_KEY = 'atlanta-iam-token';
 
 function loadUser(): User | null {
   try {

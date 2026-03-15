@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { events } from '../data';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'atliam-dev-secret';
+const JWT_SECRET = process.env.JWT_SECRET || 'atlanta-iam-dev-secret';
 
 export interface AuthRequest extends Request {
   user?: {

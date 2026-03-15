@@ -142,7 +142,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             color: T.text,
             transition: 'color 0.25s',
           }}>
-            Sign in to ATL IAM
+            Sign in to Atlanta IAM
           </span>
         </div>
 

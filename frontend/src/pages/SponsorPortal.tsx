@@ -77,7 +77,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `atliam-attendees-${selectedEventId}.csv`;
+    link.download = `atlanta-iam-attendees-${selectedEventId}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     setShowExportModal(false);

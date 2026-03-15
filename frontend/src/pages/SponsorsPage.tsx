@@ -153,7 +153,7 @@ export function SponsorsPage() {
             }}>
               Interested in supporting the Atlanta IAM community? We'd love to hear from you.
             </p>
-            <Pill label="Contact us at sponsors@atliam.org" color={T.accent} size={9} />
+            <Pill label="Contact us at sponsors@atlantaiam.com" color={T.accent} size={9} />
           </Card>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import type { ThemeTokens } from '../types';
 
-const STORAGE_KEY = 'atliam-theme';
+const STORAGE_KEY = 'atlanta-iam-theme';
 
 const dark: ThemeTokens = {
   bg: '#07080f',

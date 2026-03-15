@@ -3,7 +3,7 @@
 
 -- Users
 INSERT INTO users (id, name, email, role, company, sponsor_id, terms_accepted) VALUES
-  ('00000000-0000-0000-0000-000000000001', 'Nishad Sankaranarayanan', 'nishad@atliam.org', 'admin', 'ATL IAM', NULL, TRUE),
+  ('00000000-0000-0000-0000-000000000001', 'Nishad Sankaranarayanan', 'nishad@atlantaiam.com', 'admin', 'Atlanta IAM', NULL, TRUE),
   ('00000000-0000-0000-0000-000000000002', 'Marcus Webb', 'marcus@delta.com', 'member', 'Delta Air Lines', NULL, FALSE),
   ('00000000-0000-0000-0000-000000000003', 'Alex Morgan', 'alex@saviynt.com', 'sponsor', 'Saviynt', 'sp1', TRUE),
   ('00000000-0000-0000-0000-000000000004', 'Taylor Brooks', 'taylor@cyberark.com', 'sponsor', 'CyberArk', 'sp3', FALSE);

@@ -176,7 +176,7 @@ export function AboutPage() {
           <SectionLabel text="Contact" color={T.green} />
           <Card>
             <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8, transition: 'color 0.25s' }}>
-              <div>hello@atliam.org</div>
+              <div>hello@atlantaiam.com</div>
               <div>Atlanta, Georgia</div>
               <div style={{ marginTop: 6 }}>
                 <Pill label="LinkedIn" color={T.accent} size={9} />

@@ -1,4 +1,4 @@
-# Deploying ATL IAM Frontend to Cloudflare Pages
+# Deploying Atlanta IAM Frontend to Cloudflare Pages
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ cd /path/to/iam_meetup_1
 git init
 git add .
 git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/atl-iam.git
+git remote add origin https://github.com/YOUR_USERNAME/atlanta-iam.git
 git push -u origin main
 ```
 
@@ -27,13 +27,13 @@ git push -u origin main
 2. Click **Workers & Pages** in the sidebar
 3. Click **Create** → **Pages** → **Connect to Git**
 4. Authorize Cloudflare to access your GitHub account
-5. Select your `atl-iam` repository
+5. Select your `atlanta-iam` repository
 
 ### Step 3 — Configure build settings
 
 | Setting              | Value            |
 |----------------------|------------------|
-| Project name         | `atl-iam`        |
+| Project name         | `atlanta-iam`    |
 | Production branch    | `main`           |
 | Framework preset     | `None`           |
 | Root directory       | `frontend`       |
@@ -60,7 +60,7 @@ Click **Save and Deploy**. Cloudflare will:
 3. Run `npm run build` (which runs `tsc -b && vite build`)
 4. Deploy the `dist/` folder to its global CDN
 
-Your site will be live at: `https://atl-iam.pages.dev`
+Your site will be live at: `https://atlanta-iam.pages.dev`
 
 ---
 
@@ -90,7 +90,7 @@ VITE_API_URL=https://your-backend-url.com/api npm run build
 ### Step 4 — Deploy
 
 ```bash
-wrangler pages deploy dist --project-name=atl-iam
+wrangler pages deploy dist --project-name=atlanta-iam
 ```
 
 First run will create the project. Subsequent runs update it.
@@ -98,22 +98,22 @@ First run will create the project. Subsequent runs update it.
 ### Step 5 — Set up production branch (optional)
 
 ```bash
-wrangler pages project create atl-iam --production-branch=main
+wrangler pages project create atlanta-iam --production-branch=main
 ```
 
 ---
 
 ## Custom Domain Setup
 
-1. In Cloudflare dashboard, go to **Workers & Pages** → `atl-iam` → **Custom domains**
+1. In Cloudflare dashboard, go to **Workers & Pages** → `atlanta-iam` → **Custom domains**
 2. Click **Set up a custom domain**
-3. Enter your domain (e.g., `atliam.org`)
+3. Enter your domain (e.g., `atlantaiam.com`)
 4. Cloudflare will automatically provision SSL and configure DNS if the domain is on Cloudflare
 
 If your domain is **not** on Cloudflare DNS:
 1. Add a CNAME record at your DNS provider:
    ```
-   CNAME  @  atl-iam.pages.dev
+   CNAME  @  atlanta-iam.pages.dev
    ```
 2. Cloudflare will verify and issue an SSL certificate
 
@@ -139,7 +139,7 @@ This tells Cloudflare Pages to serve `index.html` for all routes (e.g., `/events
 Every push to a non-production branch automatically gets a preview URL:
 
 ```
-https://<commit-hash>.atl-iam.pages.dev
+https://<commit-hash>.atlanta-iam.pages.dev
 ```
 
 This is great for testing PRs before merging to `main`.
@@ -150,14 +150,14 @@ This is great for testing PRs before merging to `main`.
 
 You can set different env vars for production vs. preview:
 
-1. Go to **Workers & Pages** → `atl-iam` → **Settings** → **Environment variables**
+1. Go to **Workers & Pages** → `atlanta-iam` → **Settings** → **Environment variables**
 2. Add variables under **Production** or **Preview** tabs separately
 
 Example:
-| Environment | `VITE_API_URL`                          |
-|-------------|------------------------------------------|
-| Production  | `https://api.atliam.org/api`             |
-| Preview     | `https://api-staging.atliam.org/api`     |
+| Environment | `VITE_API_URL`                            |
+|-------------|-------------------------------------------|
+| Production  | `https://api.atlantaiam.com/api`          |
+| Preview     | `https://api-staging.atlantaiam.com/api`  |
 
 ---
 
@@ -200,7 +200,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy frontend/dist --project-name=atl-iam
+          command: pages deploy frontend/dist --project-name=atlanta-iam
 ```
 
 **Required GitHub secrets:**
@@ -212,7 +212,7 @@ jobs:
 **Required GitHub variable:**
 | Variable       | Value                              |
 |----------------|------------------------------------|
-| `VITE_API_URL` | `https://api.atliam.org/api`       |
+| `VITE_API_URL` | `https://api.atlantaiam.com/api`   |
 
 ---
 
@@ -243,4 +243,4 @@ jobs:
 - [ ] `VITE_API_URL` env var configured
 - [ ] `frontend/public/_redirects` file created for SPA routing
 - [ ] Custom domain configured (optional)
-- [ ] Verify site loads at `https://atl-iam.pages.dev`
+- [ ] Verify site loads at `https://atlanta-iam.pages.dev`

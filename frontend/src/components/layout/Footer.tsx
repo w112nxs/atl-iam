@@ -46,7 +46,7 @@ export function Footer({ onNavigate }: FooterProps) {
             letterSpacing: '0.04em',
             transition: 'color 0.25s',
           }}>
-            ATL IAM
+            Atlanta IAM
           </div>
           <p style={{
             fontFamily: "'Poppins', sans-serif",

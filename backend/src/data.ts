@@ -107,7 +107,7 @@ export const events: EventData[] = [
 ];
 
 export const demoUsers: Record<string, User> = {
-  admin: { id: 'u1', name: 'Nishad Sankaranarayanan', email: 'nishad@atliam.org', role: 'admin', company: 'ATL IAM', sponsorId: null, termsAccepted: true },
+  admin: { id: 'u1', name: 'Nishad Sankaranarayanan', email: 'nishad@atlantaiam.com', role: 'admin', company: 'Atlanta IAM', sponsorId: null, termsAccepted: true },
   member: { id: 'u2', name: 'Marcus Webb', email: 'marcus@delta.com', role: 'member', company: 'Delta Air Lines', sponsorId: null, termsAccepted: false },
   saviynt: { id: 'u3', name: 'Alex Morgan', email: 'alex@saviynt.com', role: 'sponsor', company: 'Saviynt', sponsorId: 'sp1', termsAccepted: true },
   cyberark: { id: 'u4', name: 'Taylor Brooks', email: 'taylor@cyberark.com', role: 'sponsor', company: 'CyberArk', sponsorId: 'sp3', termsAccepted: false },

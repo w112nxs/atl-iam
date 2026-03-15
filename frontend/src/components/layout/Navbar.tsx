@@ -72,7 +72,7 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
           letterSpacing: '0.04em',
           transition: 'color 0.25s',
         }}>
-          ATL IAM
+          Atlanta IAM
         </span>
       </div>
 
