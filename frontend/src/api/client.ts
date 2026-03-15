@@ -1,3 +1,5 @@
+import type { PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -80,24 +82,3 @@ export const api = {
   getAdminEvents: () => request<import('../types').Event[]>('/admin/events'),
 };
 
-// WebAuthn JSON types (from @simplewebauthn/types simplified)
-interface PublicKeyCredentialCreationOptionsJSON {
-  challenge: string;
-  rp: { name: string; id?: string };
-  user: { id: string; name: string; displayName: string };
-  pubKeyCredParams: { type: string; alg: number }[];
-  timeout?: number;
-  excludeCredentials?: { id: string; type: string; transports?: string[] }[];
-  authenticatorSelection?: Record<string, unknown>;
-  attestation?: string;
-  extensions?: Record<string, unknown>;
-}
-
-interface PublicKeyCredentialRequestOptionsJSON {
-  challenge: string;
-  timeout?: number;
-  rpId?: string;
-  allowCredentials?: { id: string; type: string; transports?: string[] }[];
-  userVerification?: string;
-  extensions?: Record<string, unknown>;
-}
