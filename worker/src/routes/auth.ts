@@ -189,8 +189,10 @@ app.post('/passkey/register-options', requireAuth, async (c) => {
     attestationType: 'none',
     excludeCredentials,
     authenticatorSelection: {
-      residentKey: 'preferred',
-      userVerification: 'preferred',
+      authenticatorAttachment: 'platform',
+      residentKey: 'required',
+      requireResidentKey: true,
+      userVerification: 'required',
     },
   });
 
