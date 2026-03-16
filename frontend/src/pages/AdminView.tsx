@@ -8,10 +8,11 @@ import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { api } from '../api/client';
 import type { User, Event, ThemeTokens } from '../types';
 import { EVENT_TYPE_LABELS } from '../types';
+import { InviteButton } from '../components/ui/InviteButton';
 
 type AdminTab = 'events' | 'members' | 'sponsors';
 
-export function AdminView() {
+export function AdminView({ onInvite }: { onInvite?: () => void }) {
   const { T } = useTheme();
   const [activeTab, setActiveTab] = useState<AdminTab>('members');
 
@@ -23,12 +24,15 @@ export function AdminView() {
 
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
-      <h1 style={{
-        fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28,
-        color: T.text, margin: '0 0 20px', transition: 'color 0.25s',
-      }}>
-        <span style={{ color: T.red }}>●</span> Admin Dashboard
-      </h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+        <h1 style={{
+          fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28,
+          color: T.text, margin: 0, transition: 'color 0.25s',
+        }}>
+          <span style={{ color: T.red }}>●</span> Admin Dashboard
+        </h1>
+        {onInvite && <InviteButton onClick={onInvite} label="Invite Member" variant="compact" />}
+      </div>
 
       <div style={{ display: 'flex', gap: 4, marginBottom: 24, borderBottom: `1px solid ${T.border}`, paddingBottom: 0 }}>
         {tabs.map(tab => (

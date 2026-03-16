@@ -6,15 +6,17 @@ import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { api } from '../api/client';
+import { InviteButton } from '../components/ui/InviteButton';
 import type { User, Session } from '../types';
 
 interface ProfilePageProps {
   user: User;
   onNavigate?: (path: string) => void;
   onUserUpdate?: (user: User) => void;
+  onInvite?: () => void;
 }
 
-export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps) {
+export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: ProfilePageProps) {
   const { T, isDark, isAuto, resetToSystem } = useTheme();
   const [passkeyStatus, setPasskeyStatus] = useState<'idle' | 'registering' | 'done' | 'error'>('idle');
   const [passkeyError, setPasskeyError] = useState('');
@@ -512,6 +514,14 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
               </div>
             ))}
           </Card>
+
+          {/* Invite */}
+          {onInvite && (
+            <>
+              <SectionLabel text="Grow the Community" color={T.accent} />
+              <InviteButton onClick={onInvite} variant="cta" />
+            </>
+          )}
 
           {/* Sponsor Portal (if applicable) */}
           {user.sponsorId && (

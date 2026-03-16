@@ -164,7 +164,7 @@ function AppInner() {
   const renderPage = () => {
     switch (path) {
       case '/':
-        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={() => {}} />;
+        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={() => {}} onInvite={isMember ? () => setShowInvite(true) : undefined} />;
       case '/about':
         return <AboutPage />;
       case '/events':
@@ -176,9 +176,9 @@ function AppInner() {
       case '/submit-sponsor':
         return isMember ? <SponsorshipForm user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
       case '/members':
-        return isMember ? <MemberDirectory user={user!} /> : <AccessDenied onNavigate={navigate} />;
+        return isMember ? <MemberDirectory user={user!} onInvite={() => setShowInvite(true)} /> : <AccessDenied onNavigate={navigate} />;
       case '/my-profile':
-        return isMember ? <ProfilePage user={user!} onNavigate={navigate} onUserUpdate={(u) => loginWithToken(localStorage.getItem('atlanta-iam-token') || '', u)} /> : <AccessDenied onNavigate={navigate} />;
+        return isMember ? <ProfilePage user={user!} onNavigate={navigate} onUserUpdate={(u) => loginWithToken(localStorage.getItem('atlanta-iam-token') || '', u)} onInvite={() => setShowInvite(true)} /> : <AccessDenied onNavigate={navigate} />;
       case '/sponsor-portal':
         return isSponsor ? <SponsorPortal user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
       case '/privacy':
@@ -188,9 +188,9 @@ function AppInner() {
       case '/conduct':
         return <CodeOfConductPage onNavigate={navigate} />;
       case '/admin':
-        return isAdmin ? <AdminView /> : <AccessDenied onNavigate={navigate} />;
+        return isAdmin ? <AdminView onInvite={() => setShowInvite(true)} /> : <AccessDenied onNavigate={navigate} />;
       default:
-        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={() => {}} />;
+        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={() => {}} onInvite={isMember ? () => setShowInvite(true) : undefined} />;
     }
   };
 

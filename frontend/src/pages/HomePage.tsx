@@ -10,6 +10,7 @@ interface HomePageProps {
   onNavigate: (path: string) => void;
   onSignIn: () => void;
   onLogin?: (key: string) => void | Promise<void>;
+  onInvite?: () => void;
 }
 
 const aboutCards = [
@@ -52,7 +53,7 @@ const aboutCards = [
   },
 ];
 
-export function HomePage({ user, onNavigate, onSignIn }: HomePageProps) {
+export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps) {
   const { T } = useTheme();
   const { events } = useEvents();
   const nextEvent = events[0];
@@ -712,6 +713,49 @@ export function HomePage({ user, onNavigate, onSignIn }: HomePageProps) {
             </div>
           </button>
         </div>
+
+        {/* Invite CTA — shown to logged-in members */}
+        {user && onInvite && (
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={onInvite}
+              style={{
+                width: '100%',
+                background: T.card,
+                border: `1px solid ${T.border}`,
+                borderLeft: `3px solid ${T.green}`,
+                borderRadius: 10,
+                padding: '18px 24px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'border-color 0.25s, background 0.25s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+              }}
+            >
+              <div style={{
+                width: 40, height: 40, borderRadius: 8, background: T.greenDim,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" />
+                </svg>
+              </div>
+              <div>
+                <div style={{
+                  fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20,
+                  color: T.text, letterSpacing: '0.04em', transition: 'color 0.25s',
+                }}>
+                  Know an IAM Practitioner? →
+                </div>
+                <div style={{ fontSize: 12, color: T.muted, marginTop: 2, lineHeight: 1.5 }}>
+                  Invite a colleague to join the Atlanta IAM community with a personalized invite link.
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

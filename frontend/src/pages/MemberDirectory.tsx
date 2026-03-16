@@ -6,13 +6,15 @@ import { Pill } from '../components/ui/Pill';
 import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
+import { InviteButton } from '../components/ui/InviteButton';
 import type { MemberProfile, User, ThemeTokens } from '../types';
 
 interface MemberDirectoryProps {
   user?: User;
+  onInvite?: () => void;
 }
 
-export function MemberDirectory({ user }: MemberDirectoryProps) {
+export function MemberDirectory({ user, onInvite }: MemberDirectoryProps) {
   const { T } = useTheme();
   const isAdmin = user?.role === 'admin';
   const [query, setQuery] = useState('');
@@ -90,12 +92,15 @@ export function MemberDirectory({ user }: MemberDirectoryProps) {
       }}>
         Member Directory
       </h1>
-      <p style={{
-        fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.muted,
-        margin: '0 0 24px', transition: 'color 0.25s',
-      }}>
-        Connect with {total} Atlanta IAM community members
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 10 }}>
+        <p style={{
+          fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.muted,
+          margin: 0, transition: 'color 0.25s',
+        }}>
+          Connect with {total} Atlanta IAM community members
+        </p>
+        {onInvite && <InviteButton onClick={onInvite} variant="compact" />}
+      </div>
 
       {toast && (
         <div style={{
