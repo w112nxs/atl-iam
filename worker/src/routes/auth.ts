@@ -24,6 +24,8 @@ const DEMO_KEYS: Record<string, string> = {
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // ── Helper: build user payload from DB row ──
+const USER_COLUMNS = 'id, name, email, role, company, sponsor_id, terms_accepted, avatar_url, first_name, last_name, phone, user_type, work_email, consent_email, consent_text, consent_data_sharing, linkedin_url, onboarding_complete';
+
 function rowToUser(row: Record<string, unknown>) {
   return {
     id: String(row.id),
@@ -34,6 +36,16 @@ function rowToUser(row: Record<string, unknown>) {
     sponsorId: row.sponsor_id ? String(row.sponsor_id) : null,
     termsAccepted: Boolean(row.terms_accepted),
     avatarUrl: String(row.avatar_url || ''),
+    firstName: String(row.first_name || ''),
+    lastName: String(row.last_name || ''),
+    phone: String(row.phone || ''),
+    userType: String(row.user_type || '') as '' | 'enterprise' | 'vendor',
+    workEmail: String(row.work_email || ''),
+    consentEmail: Boolean(row.consent_email),
+    consentText: Boolean(row.consent_text),
+    consentDataSharing: Boolean(row.consent_data_sharing),
+    linkedinUrl: String(row.linkedin_url || ''),
+    onboardingComplete: Boolean(row.onboarding_complete),
   };
 }
 
@@ -44,7 +56,7 @@ app.post('/demo-login', async (c) => {
   if (!userId) return c.json({ error: 'Invalid demo key' }, 400);
 
   const row = await c.env.DB.prepare(
-    'SELECT id, name, email, role, company, sponsor_id, terms_accepted, avatar_url FROM users WHERE id = ?',
+    `SELECT ${USER_COLUMNS} FROM users WHERE id = ?`,
   ).bind(userId).first();
   if (!row) return c.json({ error: 'User not found' }, 404);
 
@@ -149,7 +161,7 @@ app.get('/oauth/:provider/callback', async (c) => {
 
     // Fetch full user for JWT
     const row = await c.env.DB.prepare(
-      'SELECT id, name, email, role, company, sponsor_id, terms_accepted, avatar_url FROM users WHERE id = ?',
+      `SELECT ${USER_COLUMNS} FROM users WHERE id = ?`,
     ).bind(userId).first();
     if (!row) return c.json({ error: 'User not found after OAuth' }, 500);
 
@@ -327,7 +339,7 @@ app.post('/passkey/auth-verify', async (c) => {
 
     // Get user and issue JWT
     const row = await c.env.DB.prepare(
-      'SELECT id, name, email, role, company, sponsor_id, terms_accepted, avatar_url FROM users WHERE id = ?',
+      `SELECT ${USER_COLUMNS} FROM users WHERE id = ?`,
     ).bind(String(storedCred.user_id)).first();
 
     if (!row) return c.json({ error: 'User not found' }, 500);

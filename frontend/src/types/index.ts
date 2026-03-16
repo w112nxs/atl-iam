@@ -30,6 +30,16 @@ export interface User {
   sponsorId: string | null;
   termsAccepted: boolean;
   avatarUrl?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  userType?: 'enterprise' | 'vendor' | '';
+  workEmail?: string;
+  consentEmail?: boolean;
+  consentText?: boolean;
+  consentDataSharing?: boolean;
+  linkedinUrl?: string;
+  onboardingComplete?: boolean;
 }
 
 export type Tier = 'Gold' | 'Silver' | 'Community';

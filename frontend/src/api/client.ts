@@ -59,6 +59,16 @@ export const api = {
     method: 'PUT',
     body: JSON.stringify({ accepted: true }),
   }),
+  completeOnboarding: (data: {
+    firstName: string; lastName: string; phone?: string;
+    userType: 'enterprise' | 'vendor'; workEmail?: string; company?: string;
+    consentEmail: boolean; consentText: boolean; consentDataSharing: boolean;
+    linkedinUrl?: string; termsAccepted: boolean;
+  }) => request<{ success: boolean; user: import('../types').User }>('/users/me/onboarding', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  getProviders: () => request<{ provider: string; connectedAt: string }[]>('/users/me/providers'),
 
   // Events
   getEvents: () => request<import('../types').Event[]>('/events'),

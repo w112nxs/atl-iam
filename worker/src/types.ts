@@ -20,6 +20,8 @@ export type UserPayload = {
   company: string;
   sponsorId: string | null;
   termsAccepted: boolean;
+  onboardingComplete: boolean;
+  avatarUrl: string;
 };
 
 export type Variables = {

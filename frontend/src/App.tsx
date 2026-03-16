@@ -1,11 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useAuth } from './hooks/useAuth';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { AuthModal } from './components/modals/AuthModal';
-import { TermsModal } from './components/modals/TermsModal';
+import { OnboardingModal } from './components/modals/OnboardingModal';
 import { Toast } from './components/ui/Toast';
+import { api } from './api/client';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { EventsPage } from './pages/EventsPage';
@@ -60,7 +61,7 @@ function DevBanner() {
 
 function AppInner() {
   const { T } = useTheme();
-  const { user, login, loginWithToken, logout, acceptTerms } = useAuth();
+  const { user, login, loginWithToken, logout } = useAuth();
   const [path, setPath] = useState(window.location.pathname);
   const [showAuth, setShowAuth] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -87,9 +88,12 @@ function AppInner() {
   }, []);
 
   // Handle OAuth redirect: #token=... or #auth-error=...
+  const oauthHandled = useRef(false);
   useEffect(() => {
+    if (oauthHandled.current) return;
     const hash = window.location.hash;
     if (hash.startsWith('#token=')) {
+      oauthHandled.current = true;
       const token = hash.slice(7);
       try {
         const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
@@ -101,21 +105,27 @@ function AppInner() {
           company: payload.company || '',
           sponsorId: payload.sponsorId || null,
           termsAccepted: Boolean(payload.termsAccepted),
+          onboardingComplete: Boolean(payload.onboardingComplete),
           avatarUrl: payload.avatarUrl || '',
         };
         loginWithToken(token, u);
+        // Fetch full profile from API to get all onboarding fields
+        api.getMe().then(fullUser => {
+          loginWithToken(token, fullUser);
+        }).catch(() => {});
       } catch {
         showToast('OAuth login failed — invalid token', 'error');
       }
       window.history.replaceState(null, '', '/');
     } else if (hash.startsWith('#auth-error=')) {
+      oauthHandled.current = true;
       const err = decodeURIComponent(hash.slice(12));
       showToast(`Sign-in failed: ${err}`, 'error');
       window.history.replaceState(null, '', '/');
     }
   }, [loginWithToken, showToast]);
 
-  const showTerms = user && !user.termsAccepted;
+  const needsOnboarding = user && !user.onboardingComplete;
   const isMember = user && ['member', 'sponsor', 'admin'].includes(user.role);
   const isSponsor = user && ['sponsor', 'admin'].includes(user.role);
   const isAdmin = user?.role === 'admin';
@@ -175,9 +185,10 @@ function AppInner() {
           onClose={() => setShowAuth(false)}
         />
       )}
-      {showTerms && (
-        <TermsModal
-          onAccept={acceptTerms}
+      {needsOnboarding && (
+        <OnboardingModal
+          user={user!}
+          onComplete={(updatedUser) => { loginWithToken(localStorage.getItem('atlanta-iam-token') || '', updatedUser); }}
           onDecline={() => { logout(); navigate('/'); }}
         />
       )}
