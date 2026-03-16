@@ -371,7 +371,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
 
               {/* Sessions */}
               <SectionLabel text="Sessions" color={T.accent} />
-              <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+              <div className="grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 8 }}>
                 {evt.sessions.map(s => (
                   <div key={s.id} style={{
                     display: 'flex',

@@ -164,8 +164,8 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
         </div>
       </Card>
 
-      <div className="grid-2col" style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start', marginTop: 16,
+      <div className="grid-sidebar" style={{
+        display: 'grid', gridTemplateColumns: '1fr minmax(0, 340px)', gap: 20, alignItems: 'start', marginTop: 16,
       }}>
         {/* ── Left Column ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

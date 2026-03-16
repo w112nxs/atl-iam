@@ -532,10 +532,10 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
           Just real practitioners solving real problems.
         </p>
 
-        <div className="grid-2col" style={{
+        <div className="grid-4col" style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 20,
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 16,
         }}>
           {aboutCards.map(card => (
             <Card key={card.title} style={{ padding: '28px 24px' }}>
@@ -639,7 +639,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
         </div>
 
         {/* Submit actions */}
-        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}>
+        <div className={user && onInvite ? 'grid-3col' : 'grid-2col'} style={{ display: 'grid', gridTemplateColumns: user && onInvite ? 'repeat(3, 1fr)' : '1fr 1fr', gap: 12, marginTop: 16 }}>
           <button
             onClick={() => user ? onNavigate('/submit-speaking') : onSignIn()}
             style={{
@@ -712,50 +712,46 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
               Support Atlanta's IAM community and reach enterprise practitioners.
             </div>
           </button>
-        </div>
-
-        {/* Invite CTA — shown to logged-in members */}
-        {user && onInvite && (
-          <div style={{ marginTop: 16 }}>
+          {/* Invite CTA — shown to logged-in members */}
+          {user && onInvite && (
             <button
               onClick={onInvite}
               style={{
-                width: '100%',
                 background: T.card,
                 border: `1px solid ${T.border}`,
-                borderLeft: `3px solid ${T.green}`,
                 borderRadius: 10,
-                padding: '18px 24px',
+                padding: '20px 24px',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'border-color 0.25s, background 0.25s',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 14,
               }}
             >
               <div style={{
-                width: 40, height: 40, borderRadius: 8, background: T.greenDim,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                fontFamily: "'Space Mono', monospace",
+                fontSize: 9,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase' as const,
+                color: T.green,
+                marginBottom: 8,
               }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" />
-                </svg>
+                Community
               </div>
-              <div>
-                <div style={{
-                  fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20,
-                  color: T.text, letterSpacing: '0.04em', transition: 'color 0.25s',
-                }}>
-                  Know an IAM Practitioner? →
-                </div>
-                <div style={{ fontSize: 12, color: T.muted, marginTop: 2, lineHeight: 1.5 }}>
-                  Invite a colleague to join the Atlanta IAM community with a personalized invite link.
-                </div>
+              <div style={{
+                fontFamily: "'Rajdhani', sans-serif",
+                fontSize: 20,
+                fontWeight: 700,
+                color: T.text,
+                letterSpacing: '0.04em',
+                transition: 'color 0.25s',
+              }}>
+                Invite a Colleague →
+              </div>
+              <div style={{ fontSize: 12, color: T.muted, marginTop: 4, lineHeight: 1.5 }}>
+                Know an IAM practitioner? Send them a personalized invite link.
               </div>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </section>
     </div>
   );
