@@ -9,6 +9,7 @@ import adminRoutes from './routes/admin';
 import kioskRoutes from './routes/kiosk';
 import auditRoutes from './routes/audit';
 import calendarRoutes from './routes/calendar';
+import inviteRoutes from './routes/invites';
 import type { Bindings, Variables } from './types';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
@@ -36,6 +37,7 @@ app.route('/api/admin', adminRoutes);
 app.route('/api/kiosk', kioskRoutes);
 app.route('/api/audit', auditRoutes);
 app.route('/api/calendar', calendarRoutes);
+app.route('/api/invites', inviteRoutes);
 
 app.get('/api/health', async (c) => {
   // Opportunistically clean up old rate limit entries (older than 1 hour)

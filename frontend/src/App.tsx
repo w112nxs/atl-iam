@@ -23,6 +23,7 @@ import { KioskPage } from './pages/KioskPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { CodeOfConductPage } from './pages/CodeOfConductPage';
+import { InviteModal } from './components/modals/InviteModal';
 
 function DevBanner() {
   const { T } = useTheme();
@@ -70,6 +71,7 @@ function AppInner() {
   const { user, loginWithToken, logout } = useAuth();
   const [path, setPath] = useState(window.location.pathname);
   const [showAuth, setShowAuth] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   const navigate = useCallback((p: string) => {
@@ -208,6 +210,7 @@ function AppInner() {
         onNavigate={navigate}
         onSignIn={() => setShowAuth(true)}
         onSignOut={() => { logout(); navigate('/'); }}
+        onInvite={isMember ? () => setShowInvite(true) : undefined}
       />
       <DevBanner />
       {profileIsStale && (
@@ -266,6 +269,13 @@ function AppInner() {
           user={user!}
           onComplete={(updatedUser) => { loginWithToken(localStorage.getItem('atlanta-iam-token') || '', updatedUser); }}
           onDecline={() => { logout(); navigate('/'); }}
+        />
+      )}
+      {showInvite && user && (
+        <InviteModal
+          user={user}
+          onClose={() => setShowInvite(false)}
+          onToast={showToast}
         />
       )}
       {toast && <Toast msg={toast.msg} type={toast.type} onDone={() => setToast(null)} />}

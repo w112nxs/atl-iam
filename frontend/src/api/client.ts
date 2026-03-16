@@ -192,6 +192,21 @@ export const api = {
     return url.replace(/^https?:/, 'webcal:');
   },
 
+  // Invites
+  sendInvite: (data: { email: string; name?: string; message?: string }) =>
+    request<{ success: boolean; invite: { id: string; code: string; email: string; name: string; inviteUrl: string } }>('/invites', {
+      method: 'POST', body: JSON.stringify(data),
+    }),
+
+  getMyInvites: () =>
+    request<{ id: string; email: string; name: string; code: string; status: string; createdAt: string; acceptedAt: string | null }[]>('/invites/mine'),
+
+  validateInvite: (code: string) =>
+    request<{ valid: boolean; inviterName: string; inviterCompany: string; inviteeName: string; message: string }>(`/invites/validate/${code}`),
+
+  acceptInvite: (code: string) =>
+    request<{ success: boolean }>(`/invites/accept/${code}`, { method: 'POST' }),
+
   // Kiosk
   kioskGetEventData: (eventId: string, kioskToken: string) =>
     request<{

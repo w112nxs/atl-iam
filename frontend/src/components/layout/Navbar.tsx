@@ -11,9 +11,10 @@ interface NavbarProps {
   onNavigate: (path: string) => void;
   onSignIn: () => void;
   onSignOut: () => void;
+  onInvite?: () => void;
 }
 
-export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: NavbarProps) {
+export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onInvite }: NavbarProps) {
   const { T } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -124,6 +125,34 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut }: N
                 </span>
               </div>
               <Pill label={user.role} color={roleColor} size={8} />
+              {onInvite && (
+                <button
+                  onClick={onInvite}
+                  className="nav-user-name"
+                  style={{
+                    background: T.accentDim,
+                    border: `1px solid ${T.accent}44`,
+                    borderRadius: 5,
+                    color: T.accent,
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 9,
+                    letterSpacing: '0.08em',
+                    padding: '2px 8px',
+                    cursor: 'pointer',
+                    transition: 'background 0.25s, border-color 0.25s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 3,
+                  }}
+                  title="Invite a colleague"
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" />
+                  </svg>
+                  INVITE
+                </button>
+              )}
               <button
                 onClick={onSignOut}
                 className="nav-user-name"
