@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import type { Bindings, Variables } from '../types';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // Kiosk authentication middleware — validates pre-shared token
-const requireKiosk = async (c: Parameters<Parameters<typeof app.use>[1]>[0], next: () => Promise<void>) => {
+const requireKiosk = async (c: Context<{ Bindings: Bindings; Variables: Variables }>, next: () => Promise<void>) => {
   const auth = c.req.header('Authorization') || '';
   const match = auth.match(/^Bearer kiosk:(.+)$/);
   if (!match || match[1] !== c.env.KIOSK_SECRET) {
@@ -15,15 +16,34 @@ const requireKiosk = async (c: Parameters<Parameters<typeof app.use>[1]>[0], nex
 
 app.use('/*', requireKiosk);
 
+// Compute stats dynamically from attendees
+async function computeStats(db: D1Database, eventId: string) {
+  const row = await db.prepare(
+    `SELECT
+      COUNT(*) as registered,
+      SUM(CASE WHEN checked_in = 1 THEN 1 ELSE 0 END) as checked_in,
+      SUM(CASE WHEN type = 'enterprise' THEN 1 ELSE 0 END) as enterprise,
+      SUM(CASE WHEN type = 'vendor' THEN 1 ELSE 0 END) as vendor
+    FROM attendees WHERE event_id = ?`
+  ).bind(eventId).first();
+  return {
+    registered: Number(row?.registered || 0),
+    checkedIn: Number(row?.checked_in || 0),
+    enterprise: Number(row?.enterprise || 0),
+    vendor: Number(row?.vendor || 0),
+  };
+}
+
 // Get full event data for kiosk cache (attendees + event info)
 app.get('/event/:id/data', async (c) => {
   const eventId = c.req.param('id');
 
-  const [eventRow, attendeesRes] = await Promise.all([
+  const [eventRow, attendeesRes, stats] = await Promise.all([
     c.env.DB.prepare('SELECT * FROM events WHERE id = ?').bind(eventId).first(),
     c.env.DB.prepare(
       'SELECT id, name, email, company, title, type, checked_in FROM attendees WHERE event_id = ? ORDER BY name ASC'
     ).bind(eventId).all(),
+    computeStats(c.env.DB, eventId),
   ]);
 
   if (!eventRow) return c.json({ error: 'Event not found' }, 404);
@@ -45,12 +65,7 @@ app.get('/event/:id/data', async (c) => {
       type: String(a.type || 'enterprise'),
       checkedIn: Boolean(a.checked_in),
     })),
-    stats: {
-      registered: Number(eventRow.stats_registered || 0),
-      checkedIn: Number(eventRow.stats_checked_in || 0),
-      enterprise: Number(eventRow.stats_enterprise || 0),
-      vendor: Number(eventRow.stats_vendor || 0),
-    },
+    stats,
   });
 });
 
@@ -60,7 +75,6 @@ app.post('/event/:eventId/checkin/:attendeeId', async (c) => {
   const attendeeId = c.req.param('attendeeId');
   const body = await c.req.json<{ stationId?: string }>().catch(() => ({}));
 
-  // Get attendee
   const attendee = await c.env.DB.prepare(
     'SELECT * FROM attendees WHERE id = ? AND event_id = ?'
   ).bind(attendeeId, eventId).first();
@@ -70,14 +84,9 @@ app.post('/event/:eventId/checkin/:attendeeId', async (c) => {
   // Idempotent: if already checked in, just return success
   if (!attendee.checked_in) {
     const now = new Date().toISOString();
-    await c.env.DB.batch([
-      c.env.DB.prepare(
-        'UPDATE attendees SET checked_in = 1, checked_in_at = ?, checked_in_by = ? WHERE id = ?'
-      ).bind(now, (body as Record<string, string>).stationId || 'kiosk', attendeeId),
-      c.env.DB.prepare(
-        'UPDATE events SET stats_checked_in = stats_checked_in + 1 WHERE id = ?'
-      ).bind(eventId),
-    ]);
+    await c.env.DB.prepare(
+      'UPDATE attendees SET checked_in = 1, checked_in_at = ?, checked_in_by = ? WHERE id = ?'
+    ).bind(now, (body as Record<string, string>).stationId || 'kiosk', attendeeId).run();
   }
 
   return c.json({
@@ -111,14 +120,9 @@ app.post('/event/:eventId/walkin', async (c) => {
   if (existing) {
     // Already registered — just check them in
     if (!existing.checked_in) {
-      await c.env.DB.batch([
-        c.env.DB.prepare(
-          'UPDATE attendees SET checked_in = 1, checked_in_at = ?, checked_in_by = ? WHERE id = ?'
-        ).bind(new Date().toISOString(), 'kiosk-walkin', String(existing.id)),
-        c.env.DB.prepare(
-          'UPDATE events SET stats_checked_in = stats_checked_in + 1 WHERE id = ?'
-        ).bind(eventId),
-      ]);
+      await c.env.DB.prepare(
+        'UPDATE attendees SET checked_in = 1, checked_in_at = ?, checked_in_by = ? WHERE id = ?'
+      ).bind(new Date().toISOString(), 'kiosk-walkin', String(existing.id)).run();
     }
     const row = await c.env.DB.prepare('SELECT * FROM attendees WHERE id = ?').bind(String(existing.id)).first();
     return c.json({
@@ -138,14 +142,9 @@ app.post('/event/:eventId/walkin', async (c) => {
   const now = new Date().toISOString();
   const attendeeType = body.type === 'vendor' ? 'vendor' : 'enterprise';
 
-  await c.env.DB.batch([
-    c.env.DB.prepare(
-      'INSERT INTO attendees (id, event_id, name, email, company, title, type, checked_in, checked_in_at, checked_in_by) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)'
-    ).bind(id, eventId, body.name, body.email.toLowerCase(), body.company || '', body.title || '', attendeeType, now, 'kiosk-walkin'),
-    c.env.DB.prepare(
-      'UPDATE events SET stats_registered = stats_registered + 1, stats_checked_in = stats_checked_in + 1 WHERE id = ?'
-    ).bind(eventId),
-  ]);
+  await c.env.DB.prepare(
+    'INSERT INTO attendees (id, event_id, name, email, company, title, type, checked_in, checked_in_at, checked_in_by) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)'
+  ).bind(id, eventId, body.name, body.email.toLowerCase(), body.company || '', body.title || '', attendeeType, now, 'kiosk-walkin').run();
 
   return c.json({
     success: true,
@@ -159,21 +158,14 @@ app.post('/event/:eventId/walkin', async (c) => {
   });
 });
 
-// Live stats
+// Live stats — computed dynamically
 app.get('/event/:id/stats', async (c) => {
   const eventId = c.req.param('id');
-  const row = await c.env.DB.prepare(
-    'SELECT stats_registered, stats_checked_in, stats_enterprise, stats_vendor FROM events WHERE id = ?'
-  ).bind(eventId).first();
+  const eventExists = await c.env.DB.prepare('SELECT id FROM events WHERE id = ?').bind(eventId).first();
+  if (!eventExists) return c.json({ error: 'Event not found' }, 404);
 
-  if (!row) return c.json({ error: 'Event not found' }, 404);
-
-  return c.json({
-    registered: Number(row.stats_registered || 0),
-    checkedIn: Number(row.stats_checked_in || 0),
-    enterprise: Number(row.stats_enterprise || 0),
-    vendor: Number(row.stats_vendor || 0),
-  });
+  const stats = await computeStats(c.env.DB, eventId);
+  return c.json(stats);
 });
 
 export default app;
