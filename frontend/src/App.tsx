@@ -6,6 +6,7 @@ import { Footer } from './components/layout/Footer';
 import { AuthModal } from './components/modals/AuthModal';
 import { OnboardingModal } from './components/modals/OnboardingModal';
 import { Toast } from './components/ui/Toast';
+import { CookieConsent } from './components/ui/CookieConsent';
 import { api } from './api/client';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
@@ -259,6 +260,7 @@ function AppInner() {
         />
       )}
       {toast && <Toast msg={toast.msg} type={toast.type} onDone={() => setToast(null)} />}
+      <CookieConsent />
     </div>
   );
 }
