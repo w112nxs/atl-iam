@@ -122,7 +122,29 @@ export const api = {
     email: string; phone: string; linkedinUrl: string;
     consentNameListed: boolean; consentLinkedinLinked: boolean; consentWebsiteListed: boolean;
   }) =>
-    request<{ success: boolean }>('/submissions/speaking', { method: 'POST', body: JSON.stringify(data) }),
+    request<{ success: boolean; id: string }>('/submissions/speaking', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Speaking wizard
+  saveSpeakingDraft: (data: Record<string, unknown>) =>
+    request<{ success: boolean; id: string }>('/submissions/speaking', { method: 'POST', body: JSON.stringify(data) }),
+
+  updateSpeakingDraft: (id: string, data: Record<string, unknown>) =>
+    request<{ success: boolean }>(`/submissions/speaking/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  submitSpeakingFinal: (id: string) =>
+    request<{ success: boolean }>(`/submissions/speaking/${id}/submit`, { method: 'POST' }),
+
+  getMySpeakingSubmissions: () =>
+    request<import('../types').SpeakingSubmissionSummary[]>('/submissions/speaking/mine'),
+
+  getSpeakingSubmission: (id: string) =>
+    request<Record<string, unknown>>(`/submissions/speaking/${id}`),
+
+  getAdminSpeakingSubmissions: () =>
+    request<Record<string, unknown>[]>('/admin/speaking-submissions'),
+
+  reviewSpeakingSubmission: (id: string, data: { status: 'approved' | 'rejected'; comment: string }) =>
+    request<{ success: boolean }>(`/admin/speaking-submissions/${id}/review`, { method: 'PUT', body: JSON.stringify(data) }),
 
   submitSponsor: (data: { companyName: string; contactEmail: string; tier: string; notes?: string }) =>
     request<{ success: boolean }>('/submissions/sponsor', { method: 'POST', body: JSON.stringify(data) }),

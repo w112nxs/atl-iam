@@ -280,4 +280,78 @@ app.delete('/sponsors/:eventId/:sponsorId', requireAuth, requireRole('admin'), a
   return c.json({ success: true });
 });
 
+// ── Speaking Submissions ──
+
+// List all non-draft speaking submissions for admin review
+app.get('/speaking-submissions', requireAuth, requireRole('admin'), async (c) => {
+  const rows = await c.env.DB.prepare(
+    `SELECT * FROM submissions_speaking WHERE status != 'draft' ORDER BY updated_at DESC`,
+  ).all();
+
+  return c.json(
+    (rows.results || []).map((r) => ({
+      id: r.id,
+      userId: r.user_id,
+      status: r.status || 'pending',
+      currentStep: r.current_step ?? 1,
+      presenterType: r.presenter_type || '',
+      company: r.company || '',
+      title: r.title || '',
+      abstract: r.abstract || '',
+      coPresenter: r.co_presenter || '',
+      email: r.email || '',
+      phone: r.phone || '',
+      linkedinUrl: r.linkedin_url || '',
+      consentNameListed: Boolean(r.consent_name_listed),
+      consentLinkedinLinked: Boolean(r.consent_linkedin_linked),
+      consentWebsiteListed: Boolean(r.consent_website_listed),
+      submitterName: r.submitter_name || '',
+      submitterEmail: r.submitter_email || '',
+      submitterPhone: r.submitter_phone || '',
+      submitterCompany: r.submitter_company || '',
+      speakerName: r.speaker_name || '',
+      speakerEmail: r.speaker_email || '',
+      speakerPhone: r.speaker_phone || '',
+      speakerCompany: r.speaker_company || '',
+      speakerLinkedinUrl: r.speaker_linkedin_url || '',
+      adminComment: r.admin_comment || '',
+      reviewedBy: r.reviewed_by || '',
+      reviewedAt: r.reviewed_at || '',
+      createdAt: r.created_at || '',
+      updatedAt: r.updated_at || '',
+    })),
+  );
+});
+
+// Review a speaking submission (approve or reject)
+app.put('/speaking-submissions/:id/review', requireAuth, requireRole('admin'), async (c) => {
+  const admin = c.get('user');
+  const id = c.req.param('id');
+  const { status, comment } = await c.req.json<{ status: string; comment?: string }>();
+
+  if (status !== 'approved' && status !== 'rejected') {
+    return c.json({ error: 'Status must be approved or rejected' }, 400);
+  }
+
+  const existing = await c.env.DB.prepare(
+    'SELECT status FROM submissions_speaking WHERE id = ?',
+  )
+    .bind(id)
+    .first();
+
+  if (!existing) {
+    return c.json({ error: 'Submission not found' }, 404);
+  }
+
+  await c.env.DB.prepare(
+    `UPDATE submissions_speaking
+     SET status = ?, admin_comment = ?, reviewed_by = ?, reviewed_at = datetime('now'), updated_at = datetime('now')
+     WHERE id = ?`,
+  )
+    .bind(status, comment || '', admin.id, id)
+    .run();
+
+  return c.json({ success: true });
+});
+
 export default app;

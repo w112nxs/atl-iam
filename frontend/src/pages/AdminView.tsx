@@ -6,11 +6,11 @@ import { StatBox } from '../components/ui/StatBox';
 import { Avatar } from '../components/ui/Avatar';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { api } from '../api/client';
-import type { User, Event, ThemeTokens } from '../types';
+import type { User, Event, ThemeTokens, SpeakingSubmissionStatus } from '../types';
 import { EVENT_TYPE_LABELS } from '../types';
 import { InviteButton } from '../components/ui/InviteButton';
 
-type AdminTab = 'events' | 'members' | 'sponsors';
+type AdminTab = 'events' | 'members' | 'sponsors' | 'speaking';
 
 /** Convert human-readable date ("April 15, 2026") to YYYY-MM-DD for date input */
 function toISODate(display: string): string {
@@ -38,6 +38,7 @@ export function AdminView({ onInvite }: { onInvite?: () => void }) {
     { id: 'members', label: 'Members', color: T.accent },
     { id: 'sponsors', label: 'Sponsors', color: T.gold },
     { id: 'events', label: 'Events', color: T.purple },
+    { id: 'speaking', label: 'Speaking', color: T.green },
   ];
 
   return (
@@ -80,6 +81,7 @@ export function AdminView({ onInvite }: { onInvite?: () => void }) {
       {activeTab === 'events' && <EventsTab />}
       {activeTab === 'members' && <MembersTab />}
       {activeTab === 'sponsors' && <SponsorsTab />}
+      {activeTab === 'speaking' && <SpeakingTab />}
     </div>
   );
 }
@@ -1140,6 +1142,208 @@ function AddSponsorModal({ T, events, onAdd, onClose }: {
           >ADD</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Speaking Submissions Tab ──
+type SpeakingRow = {
+  id: string; title: string; status: string; speakerName: string; speakerEmail: string;
+  speakerCompany: string; submitterName: string; abstract: string;
+  createdAt: string; updatedAt: string; adminComment: string; reviewedBy: string; reviewedAt: string;
+};
+
+function SpeakingTab() {
+  const { T } = useTheme();
+  const [submissions, setSubmissions] = useState<SpeakingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | SpeakingSubmissionStatus>('pending');
+  const [selected, setSelected] = useState<SpeakingRow | null>(null);
+  const [reviewComment, setReviewComment] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.getAdminSpeakingSubmissions();
+      setSubmissions(data as unknown as SpeakingRow[]);
+    } catch { setSubmissions([]); }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const filtered = filter === 'all' ? submissions : submissions.filter(s => s.status === filter);
+
+  const statusColor = (s: string) => {
+    if (s === 'pending') return T.amber;
+    if (s === 'approved') return T.green;
+    if (s === 'rejected') return T.red;
+    return T.muted;
+  };
+
+  const handleReview = async (status: 'approved' | 'rejected') => {
+    if (!selected) return;
+    setSaving(true);
+    try {
+      await api.reviewSpeakingSubmission(selected.id, { status, comment: reviewComment });
+      setToast(`Submission ${status}`);
+      setSelected(null);
+      setReviewComment('');
+      load();
+      setTimeout(() => setToast(''), 2500);
+    } catch (e) {
+      setToast(`Error: ${(e as Error).message}`);
+      setTimeout(() => setToast(''), 3000);
+    }
+    setSaving(false);
+  };
+
+  if (loading) return <p style={{ color: T.muted, fontFamily: "'Inter', sans-serif", fontSize: 13 }}>Loading submissions...</p>;
+
+  return (
+    <div>
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 20, right: 20, zIndex: 999, background: T.green,
+          color: '#fff', padding: '10px 20px', borderRadius: 8, fontFamily: "'Inter', sans-serif",
+          fontSize: 13, fontWeight: 600,
+        }}>{toast}</div>
+      )}
+
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+        {(['pending', 'approved', 'rejected', 'all'] as const).map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            background: filter === f ? T.green : 'transparent',
+            border: `1px solid ${filter === f ? T.green : T.border}`,
+            borderRadius: 6, padding: '5px 14px', cursor: 'pointer',
+            fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700,
+            color: filter === f ? '#fff' : T.muted, letterSpacing: '0.05em',
+            textTransform: 'uppercase' as const,
+          }}>{f} {f !== 'all' ? `(${submissions.filter(s => s.status === f).length})` : `(${submissions.length})`}</button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <p style={{ color: T.muted, fontFamily: "'Inter', sans-serif", fontSize: 13 }}>No submissions found.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map(sub => (
+            <Card key={sub.id} style={{ padding: '14px 18px', cursor: 'pointer' }} onClick={() => { setSelected(sub); setReviewComment(sub.adminComment || ''); }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16, color: T.text }}>{sub.title || '(Untitled)'}</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, marginTop: 2 }}>
+                    {sub.speakerName} {sub.speakerCompany ? `· ${sub.speakerCompany}` : ''}
+                  </div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.subtle, marginTop: 2 }}>
+                    Submitted by {sub.submitterName} · {sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : ''}
+                  </div>
+                </div>
+                <Pill label={sub.status.toUpperCase()} color={statusColor(sub.status)} />
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {selected && (
+        <div style={modalOverlay()} onClick={() => setSelected(null)}>
+          <div style={modalBox(T, 560)} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: T.text, margin: '0 0 16px' }}>
+              Review Submission
+            </h3>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle(T)}>TITLE</label>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.text }}>{selected.title || '(Untitled)'}</div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div>
+                <label style={labelStyle(T)}>SPEAKER</label>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text }}>{selected.speakerName}</div>
+              </div>
+              <div>
+                <label style={labelStyle(T)}>COMPANY</label>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text }}>{selected.speakerCompany || '—'}</div>
+              </div>
+              <div>
+                <label style={labelStyle(T)}>EMAIL</label>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text }}>{selected.speakerEmail || '—'}</div>
+              </div>
+              <div>
+                <label style={labelStyle(T)}>SUBMITTED BY</label>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text }}>{selected.submitterName}</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle(T)}>ABSTRACT</label>
+              <div style={{
+                fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text,
+                background: T.inputBg, borderRadius: 8, padding: 12, maxHeight: 160, overflowY: 'auto',
+                border: `1px solid ${T.border}`, whiteSpace: 'pre-wrap',
+              }}>{selected.abstract || '(No abstract)'}</div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
+              <Pill label={selected.status.toUpperCase()} color={statusColor(selected.status)} />
+              {selected.reviewedAt && (
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.subtle }}>
+                  Reviewed {new Date(selected.reviewedAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle(T)}>ADMIN COMMENT</label>
+              <textarea
+                value={reviewComment}
+                onChange={e => setReviewComment(e.target.value)}
+                rows={3}
+                placeholder="Add feedback for the speaker..."
+                style={{
+                  ...inputStyle(T), resize: 'vertical' as const,
+                  minHeight: 60,
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setSelected(null)} style={{
+                background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6,
+                padding: '8px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+                fontSize: 12, fontWeight: 700, color: T.muted,
+              }}>CANCEL</button>
+              {selected.status === 'pending' && (
+                <>
+                  <button
+                    disabled={saving}
+                    onClick={() => handleReview('rejected')}
+                    style={{
+                      background: T.red, border: 'none', borderRadius: 6,
+                      padding: '8px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+                      fontSize: 12, fontWeight: 700, color: '#fff', opacity: saving ? 0.5 : 1,
+                    }}
+                  >REJECT</button>
+                  <button
+                    disabled={saving}
+                    onClick={() => handleReview('approved')}
+                    style={{
+                      background: T.green, border: 'none', borderRadius: 6,
+                      padding: '8px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+                      fontSize: 12, fontWeight: 700, color: '#fff', opacity: saving ? 0.5 : 1,
+                    }}
+                  >APPROVE</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

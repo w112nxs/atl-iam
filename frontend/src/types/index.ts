@@ -108,6 +108,38 @@ export const EVENT_TYPE_COLORS: Record<EventType, string> = {
   hackathon: 'red',
 };
 
+export type SpeakingSubmissionStatus = 'draft' | 'pending' | 'approved' | 'rejected';
+
+export interface SpeakingSubmissionSummary {
+  id: string;
+  title: string;
+  status: SpeakingSubmissionStatus;
+  currentStep: number;
+  createdAt: string;
+  updatedAt: string;
+  adminComment: string;
+  speakerName: string;
+}
+
+export interface SpeakingFormData {
+  submitterName: string;
+  submitterEmail: string;
+  submitterPhone: string;
+  submitterCompany: string;
+  presenterType: 'enterprise' | 'copresenter';
+  speakerName: string;
+  speakerEmail: string;
+  speakerPhone: string;
+  speakerCompany: string;
+  speakerLinkedinUrl: string;
+  coPresenter: string;
+  title: string;
+  abstract: string;
+  consentNameListed: boolean;
+  consentLinkedinLinked: boolean;
+  consentWebsiteListed: boolean;
+}
+
 export type Tier = 'Gold' | 'Silver' | 'Community';
 
 export interface ThemeTokens {
