@@ -107,6 +107,32 @@ app.delete('/events/:id', requireAuth, requireRole('admin'), async (c) => {
   return c.json({ success: true });
 });
 
+// Admin: get attendees for an event with check-in details
+app.get('/events/:id/attendees', requireAuth, requireRole('admin'), async (c) => {
+  const eventId = c.req.param('id');
+  const filter = c.req.query('filter'); // 'checked_in', 'not_checked_in', 'enterprise', 'vendor'
+
+  let sql = 'SELECT * FROM attendees WHERE event_id = ?';
+  if (filter === 'checked_in') sql += ' AND checked_in = 1';
+  else if (filter === 'not_checked_in') sql += ' AND checked_in = 0';
+  else if (filter === 'enterprise') sql += " AND type = 'enterprise'";
+  else if (filter === 'vendor') sql += " AND type = 'vendor'";
+  sql += ' ORDER BY name ASC';
+
+  const rows = await c.env.DB.prepare(sql).bind(eventId).all();
+  return c.json((rows.results || []).map(a => ({
+    id: a.id,
+    name: a.name,
+    email: a.email,
+    company: a.company || '',
+    title: a.title || '',
+    type: a.type || 'enterprise',
+    checkedIn: Boolean(a.checked_in),
+    checkedInAt: a.checked_in_at || '',
+    checkedInBy: a.checked_in_by || '',
+  })));
+});
+
 // ── Sessions (within events) ──
 
 // Add session to event

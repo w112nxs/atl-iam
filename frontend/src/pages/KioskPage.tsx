@@ -35,7 +35,7 @@ type KioskAttendee = {
   title: string; type: string; checkedIn: boolean;
 };
 
-type Screen = 'welcome' | 'search' | 'walkin' | 'confirm';
+type Screen = 'welcome' | 'search' | 'walkin' | 'confirm' | 'printing';
 
 export function KioskPage() {
   // Parse URL params
@@ -106,10 +106,13 @@ export function KioskPage() {
     };
   }, [resetIdle]);
 
-  const handleCheckIn = async (attendee: KioskAttendee) => {
+  const [printAfterConfirm, setPrintAfterConfirm] = useState(false);
+
+  const handleCheckIn = async (attendee: KioskAttendee, print = false) => {
     try {
       const result = await api.kioskCheckIn(eventId, attendee.id, kioskToken, stationId);
       setConfirmedAttendee(result.attendee);
+      setPrintAfterConfirm(print);
       setScreen('confirm');
       // Mark as checked in locally
       setAttendees(prev => prev.map(a => a.id === attendee.id ? { ...a, checkedIn: true } : a));
@@ -123,6 +126,7 @@ export function KioskPage() {
     try {
       const result = await api.kioskWalkIn(eventId, data, kioskToken);
       setConfirmedAttendee(result.attendee);
+      setPrintAfterConfirm(true);
       setScreen('confirm');
       // Add to local list
       setAttendees(prev => [...prev, { id: result.attendee.id, ...data, company: data.company || '', title: data.title || '', type: data.type || 'enterprise', checkedIn: true }]);
@@ -215,7 +219,9 @@ export function KioskPage() {
         {screen === 'confirm' && confirmedAttendee && (
           <ConfirmScreen
             attendee={confirmedAttendee}
-            onDone={() => { setConfirmedAttendee(null); setScreen('welcome'); }}
+            eventName={eventInfo?.name || ''}
+            autoPrint={printAfterConfirm}
+            onDone={() => { setConfirmedAttendee(null); setPrintAfterConfirm(false); setScreen('welcome'); }}
           />
         )}
       </div>
@@ -272,7 +278,7 @@ function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
 
 // ── Search Screen ──
 function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
-  attendees: KioskAttendee[]; onSelect: (a: KioskAttendee) => void;
+  attendees: KioskAttendee[]; onSelect: (a: KioskAttendee, print: boolean) => void;
   onBack: () => void; error: string; onClearError: () => void;
 }) {
   const [query, setQuery] = useState('');
@@ -327,15 +333,13 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
           </div>
         ) : (
           filtered.map(a => (
-            <button
+            <div
               key={a.id}
-              onClick={() => onSelect(a)}
-              disabled={a.checkedIn}
               style={{
                 display: 'flex', alignItems: 'center', gap: 16,
                 background: a.checkedIn ? K.green + '11' : K.card,
                 border: `1px solid ${a.checkedIn ? K.green + '33' : K.border}`,
-                borderRadius: 12, padding: '16px 20px', cursor: a.checkedIn ? 'default' : 'pointer',
+                borderRadius: 12, padding: '16px 20px',
                 textAlign: 'left', width: '100%',
                 opacity: a.checkedIn ? 0.6 : 1,
               }}
@@ -359,14 +363,36 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
                   CHECKED IN
                 </span>
               ) : (
-                <span style={{
-                  background: K.accent, borderRadius: 8, padding: '8px 20px',
-                  fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: '#fff',
-                }}>
-                  CHECK IN
-                </span>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <span
+                    onClick={(e) => { e.stopPropagation(); onSelect(a, false); }}
+                    style={{
+                      background: K.accent, borderRadius: 8, padding: '8px 16px',
+                      fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: '#fff',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    CHECK IN
+                  </span>
+                  <span
+                    onClick={(e) => { e.stopPropagation(); onSelect(a, true); }}
+                    style={{
+                      background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
+                      borderRadius: 8, padding: '8px 16px',
+                      fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: '#fff',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 6 2 18 2 18 9" />
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                      <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                    PRINT
+                  </span>
+                </div>
               )}
-            </button>
+            </div>
           ))
         )}
       </div>
@@ -465,7 +491,7 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
             fontFamily: "'Rajdhani', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff',
           }}
         >
-          {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN'}
+          {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN + PRINT BADGE'}
         </button>
       </div>
     </div>
@@ -473,25 +499,89 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
 }
 
 // ── Confirmation Screen ──
-function ConfirmScreen({ attendee, onDone }: {
+function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
   attendee: { name: string; company: string; title: string; type: string };
-  onDone: () => void;
+  eventName: string; autoPrint: boolean; onDone: () => void;
 }) {
-  // Auto-dismiss after 8 seconds
+  const [printing, setPrinting] = useState(false);
+  const badgeRef = useRef<HTMLDivElement>(null);
+
+  // Auto-dismiss after 10 seconds (longer if printing)
   useEffect(() => {
-    const t = setTimeout(onDone, 8000);
+    const t = setTimeout(onDone, printing ? 30000 : 10000);
     return () => clearTimeout(t);
-  }, [onDone]);
+  }, [onDone, printing]);
+
+  // Auto-print if requested
+  useEffect(() => {
+    if (autoPrint) {
+      setTimeout(() => printBadge(), 500);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const printBadge = () => {
+    setPrinting(true);
+    const badgeEl = badgeRef.current;
+    if (!badgeEl) return;
+
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    if (!printWindow) {
+      setPrinting(false);
+      return;
+    }
+
+    const typeColor = attendee.type === 'enterprise' ? '#4f8cff' : '#f0b429';
+    const typeLabel = attendee.type === 'enterprise' ? 'ENTERPRISE' : 'VENDOR';
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Badge — ${attendee.name}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;600;700&display=swap');
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          @page { size: 4in 3in; margin: 0; }
+          body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fff; }
+          .badge {
+            width: 4in; height: 3in; padding: 0.3in 0.4in;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; border: 2px dashed #ccc; border-radius: 12px;
+          }
+          .event-name { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+          .name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 32px; color: #111; text-transform: uppercase; line-height: 1.1; }
+          .detail { font-family: 'Inter', sans-serif; font-size: 14px; color: #555; margin-top: 2px; }
+          .type-bar { margin-top: 12px; padding: 6px 24px; border-radius: 6px; background: ${typeColor}; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; }
+        </style>
+      </head>
+      <body>
+        <div class="badge">
+          <div class="event-name">${eventName}</div>
+          <div class="name">${attendee.name}</div>
+          ${attendee.title ? `<div class="detail">${attendee.title}</div>` : ''}
+          ${attendee.company ? `<div class="detail">${attendee.company}</div>` : ''}
+          <div class="type-bar">${typeLabel}</div>
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); window.close(); }, 400);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => setPrinting(false), 2000);
+  };
 
   const typeColor = attendee.type === 'enterprise' ? K.accent : K.gold;
 
   return (
     <div
-      onClick={onDone}
       style={{
         flex: 1, display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', gap: 24, padding: 40,
-        cursor: 'pointer',
       }}
     >
       {/* Big checkmark */}
@@ -510,10 +600,13 @@ function ConfirmScreen({ attendee, onDone }: {
       </h1>
 
       {/* Badge preview */}
-      <div style={{
+      <div ref={badgeRef} style={{
         background: '#fff', borderRadius: 16, padding: '24px 32px', minWidth: 360,
         textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
       }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: '#888', letterSpacing: '0.1em', marginBottom: 6 }}>
+          {eventName}
+        </div>
         <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 32, color: '#111', textTransform: 'uppercase' }}>
           {attendee.name}
         </div>
@@ -537,8 +630,42 @@ function ConfirmScreen({ attendee, onDone }: {
         </div>
       </div>
 
-      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.muted, margin: 0 }}>
-        Tap anywhere to continue
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+        <button
+          onClick={printBadge}
+          disabled={printing}
+          style={{
+            background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
+            border: 'none', borderRadius: 12, padding: '14px 32px',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9" />
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+            <rect x="6" y="14" width="12" height="8" />
+          </svg>
+          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: '#fff' }}>
+            {printing ? 'PRINTING...' : 'PRINT BADGE'}
+          </span>
+        </button>
+
+        <button
+          onClick={onDone}
+          style={{
+            background: 'transparent', border: `2px solid ${K.border}`,
+            borderRadius: 12, padding: '14px 32px', cursor: 'pointer',
+          }}
+        >
+          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: K.muted }}>
+            DONE
+          </span>
+        </button>
+      </div>
+
+      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: 0 }}>
+        Screen auto-resets in a few seconds
       </p>
     </div>
   );

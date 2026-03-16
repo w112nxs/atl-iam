@@ -153,6 +153,13 @@ export const api = {
   }) => request<{ success: boolean }>(`/admin/events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAdminEvent: (id: string) =>
     request<{ success: boolean }>(`/admin/events/${id}`, { method: 'DELETE' }),
+  getAdminEventAttendees: (eventId: string, filter?: string) => {
+    const qs = filter ? `?filter=${filter}` : '';
+    return request<{
+      id: string; name: string; email: string; company: string; title: string;
+      type: string; checkedIn: boolean; checkedInAt: string; checkedInBy: string;
+    }[]>(`/admin/events/${eventId}/attendees${qs}`);
+  },
 
   // Admin — Sessions
   createAdminSession: (eventId: string, data: { title: string; speaker?: string; time?: string; cpe?: number }) =>
