@@ -21,6 +21,8 @@ import { AccessDenied } from './pages/AccessDenied';
 import { MemberDirectory } from './pages/MemberDirectory';
 import { KioskPage } from './pages/KioskPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { CodeOfConductPage } from './pages/CodeOfConductPage';
 
 function DevBanner() {
   const { T } = useTheme();
@@ -178,7 +180,11 @@ function AppInner() {
       case '/sponsor-portal':
         return isSponsor ? <SponsorPortal user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
       case '/privacy':
-        return <PrivacyPolicyPage />;
+        return <PrivacyPolicyPage onNavigate={navigate} />;
+      case '/terms':
+        return <TermsOfServicePage onNavigate={navigate} />;
+      case '/conduct':
+        return <CodeOfConductPage onNavigate={navigate} />;
       case '/admin':
         return isAdmin ? <AdminView /> : <AccessDenied onNavigate={navigate} />;
       default:

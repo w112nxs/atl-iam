@@ -102,9 +102,9 @@ export function Footer({ onNavigate }: FooterProps) {
           }}>
             Resources
           </div>
-          <div style={linkStyle}>CPE Tracking</div>
-          <div style={linkStyle}>Code of Conduct</div>
+          <button onClick={() => onNavigate('/terms')} style={linkStyle}>Terms of Service</button>
           <button onClick={() => onNavigate('/privacy')} style={linkStyle}>Privacy Policy</button>
+          <button onClick={() => onNavigate('/conduct')} style={linkStyle}>Code of Conduct</button>
           <div style={linkStyle}>Sponsor Portal Guide</div>
         </div>
 
