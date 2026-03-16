@@ -86,6 +86,35 @@ function AppInner() {
     setToast({ msg, type });
   }, []);
 
+  // Handle OAuth redirect: #token=... or #auth-error=...
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#token=')) {
+      const token = hash.slice(7);
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const u = {
+          id: payload.id,
+          name: payload.name,
+          email: payload.email,
+          role: payload.role,
+          company: payload.company || '',
+          sponsorId: payload.sponsorId || null,
+          termsAccepted: Boolean(payload.termsAccepted),
+          avatarUrl: payload.avatarUrl || '',
+        };
+        loginWithToken(token, u);
+      } catch {
+        showToast('OAuth login failed — invalid token', 'error');
+      }
+      window.history.replaceState(null, '', '/');
+    } else if (hash.startsWith('#auth-error=')) {
+      const err = decodeURIComponent(hash.slice(12));
+      showToast(`Sign-in failed: ${err}`, 'error');
+      window.history.replaceState(null, '', '/');
+    }
+  }, [loginWithToken, showToast]);
+
   const showTerms = user && !user.termsAccepted;
   const isMember = user && ['member', 'sponsor', 'admin'].includes(user.role);
   const isSponsor = user && ['sponsor', 'admin'].includes(user.role);

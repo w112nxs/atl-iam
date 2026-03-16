@@ -1,6 +1,18 @@
 import { Hono } from 'hono';
-import { signToken } from '../lib/jwt';
+import { signToken, verifyToken } from '../lib/jwt';
+import { getProvider, getClientId, getClientSecret, exchangeCode, fetchUserInfo } from '../lib/oauth';
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
+} from '@simplewebauthn/server';
 import type { Bindings, Variables } from '../types';
+import { requireAuth } from '../middleware/auth';
+
+const RP_NAME = 'Atlanta IAM';
+const RP_ID = 'atlantaiam.com';
+const RP_ORIGIN = 'https://atlantaiam.com';
 
 const DEMO_KEYS: Record<string, string> = {
   admin: 'u1',
@@ -11,57 +23,321 @@ const DEMO_KEYS: Record<string, string> = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
-// Demo login
+// ── Helper: build user payload from DB row ──
+function rowToUser(row: Record<string, unknown>) {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    email: String(row.email),
+    role: String(row.role),
+    company: String(row.company || ''),
+    sponsorId: row.sponsor_id ? String(row.sponsor_id) : null,
+    termsAccepted: Boolean(row.terms_accepted),
+    avatarUrl: String(row.avatar_url || ''),
+  };
+}
+
+// ── Demo login (kept for development) ──
 app.post('/demo-login', async (c) => {
   const { key } = await c.req.json<{ key: string }>();
   const userId = DEMO_KEYS[key];
   if (!userId) return c.json({ error: 'Invalid demo key' }, 400);
 
   const row = await c.env.DB.prepare(
-    'SELECT id, name, email, role, company, sponsor_id, terms_accepted FROM users WHERE id = ?',
-  )
-    .bind(userId)
-    .first();
+    'SELECT id, name, email, role, company, sponsor_id, terms_accepted, avatar_url FROM users WHERE id = ?',
+  ).bind(userId).first();
   if (!row) return c.json({ error: 'User not found' }, 404);
 
-  const user = {
-    id: row.id as string,
-    name: row.name as string,
-    email: row.email as string,
-    role: row.role as string,
-    company: row.company as string,
-    sponsorId: (row.sponsor_id as string) || null,
-    termsAccepted: Boolean(row.terms_accepted),
-  };
-
+  const user = rowToUser(row);
   const token = await signToken(user, c.env.JWT_SECRET);
   return c.json({ token, user });
 });
 
-// OAuth stubs
+// ━━━━━━━━━━━━━━━━━━━━━━ OAuth ━━━━━━━━━━━━━━━━━━━━━━
+
+// Step 1: Redirect to provider
 app.get('/oauth/:provider', (c) => {
-  return c.json({ error: 'OAuth not yet configured' }, 503);
+  const providerName = c.req.param('provider');
+  const provider = getProvider(providerName, c.env as unknown as Record<string, string>);
+  if (!provider) return c.json({ error: 'Unknown provider' }, 400);
+
+  const clientId = getClientId(providerName, c.env as unknown as Record<string, string>);
+  if (!clientId) return c.json({ error: `${providerName} OAuth not configured` }, 503);
+
+  const redirectUri = `${c.env.FRONTEND_URL}/api/auth/oauth/${providerName}/callback`;
+  const state = crypto.randomUUID();
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: provider.scopes.join(' '),
+    state,
+  });
+
+  return c.redirect(`${provider.authorizeUrl}?${params.toString()}`);
 });
 
-app.get('/oauth/:provider/callback', (c) => {
-  return c.json({ error: 'OAuth not yet configured' }, 503);
+// Step 2: Handle callback from provider
+app.get('/oauth/:provider/callback', async (c) => {
+  const providerName = c.req.param('provider');
+  const provider = getProvider(providerName, c.env as unknown as Record<string, string>);
+  if (!provider) return c.json({ error: 'Unknown provider' }, 400);
+
+  const code = c.req.query('code');
+  const error = c.req.query('error');
+  if (error) return c.redirect(`${c.env.FRONTEND_URL}/#auth-error=${encodeURIComponent(error)}`);
+  if (!code) return c.json({ error: 'Missing code' }, 400);
+
+  const clientId = getClientId(providerName, c.env as unknown as Record<string, string>);
+  const clientSecret = getClientSecret(providerName, c.env as unknown as Record<string, string>);
+  const redirectUri = `${c.env.FRONTEND_URL}/api/auth/oauth/${providerName}/callback`;
+
+  try {
+    // Exchange code for access token
+    const accessToken = await exchangeCode(provider, providerName, code, redirectUri, clientId, clientSecret);
+
+    // Fetch user profile from provider
+    const profile = await fetchUserInfo(provider, providerName, accessToken);
+
+    if (!profile.email) {
+      return c.redirect(`${c.env.FRONTEND_URL}/#auth-error=no-email`);
+    }
+
+    // Check if this OAuth link already exists
+    const existing = await c.env.DB.prepare(
+      'SELECT user_id FROM user_oauth WHERE provider = ? AND provider_user_id = ?',
+    ).bind(providerName, profile.id).first();
+
+    let userId: string;
+
+    if (existing) {
+      // Returning user via this provider
+      userId = String(existing.user_id);
+      // Update access token
+      await c.env.DB.prepare(
+        'UPDATE user_oauth SET access_token = ? WHERE provider = ? AND provider_user_id = ?',
+      ).bind(accessToken, providerName, profile.id).run();
+    } else {
+      // Check if a user with this email already exists (link accounts)
+      const existingUser = await c.env.DB.prepare(
+        'SELECT id FROM users WHERE email = ?',
+      ).bind(profile.email).first();
+
+      if (existingUser) {
+        userId = String(existingUser.id);
+      } else {
+        // Create new user
+        userId = crypto.randomUUID();
+        await c.env.DB.prepare(
+          'INSERT INTO users (id, name, email, role, avatar_url) VALUES (?, ?, ?, ?, ?)',
+        ).bind(userId, profile.name, profile.email, 'member', profile.avatarUrl).run();
+      }
+
+      // Create OAuth link
+      await c.env.DB.prepare(
+        'INSERT INTO user_oauth (provider, provider_user_id, user_id, access_token) VALUES (?, ?, ?, ?)',
+      ).bind(providerName, profile.id, userId, accessToken).run();
+    }
+
+    // Update avatar if we have one and user doesn't
+    if (profile.avatarUrl) {
+      await c.env.DB.prepare(
+        "UPDATE users SET avatar_url = ? WHERE id = ? AND (avatar_url IS NULL OR avatar_url = '')",
+      ).bind(profile.avatarUrl, userId).run();
+    }
+
+    // Fetch full user for JWT
+    const row = await c.env.DB.prepare(
+      'SELECT id, name, email, role, company, sponsor_id, terms_accepted, avatar_url FROM users WHERE id = ?',
+    ).bind(userId).first();
+    if (!row) return c.json({ error: 'User not found after OAuth' }, 500);
+
+    const user = rowToUser(row);
+    const token = await signToken(user, c.env.JWT_SECRET);
+
+    // Redirect to frontend with token in URL hash (not visible to server)
+    return c.redirect(`${c.env.FRONTEND_URL}/#token=${token}`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'OAuth failed';
+    console.error('OAuth error:', msg);
+    return c.redirect(`${c.env.FRONTEND_URL}/#auth-error=${encodeURIComponent(msg)}`);
+  }
 });
 
-// Passkey stubs
-app.post('/passkey/register-options', (c) => {
-  return c.json({ error: 'Passkey support coming soon' }, 501);
+// ━━━━━━━━━━━━━━━━━━━━━━ Passkeys (WebAuthn) ━━━━━━━━━━━━━━━━━━━━━━
+
+// Register: Generate options (requires auth — user is adding a passkey to their account)
+app.post('/passkey/register-options', requireAuth, async (c) => {
+  const user = c.get('user');
+
+  // Get existing passkeys for this user
+  const rows = await c.env.DB.prepare(
+    'SELECT credential_id, transports FROM user_passkeys WHERE user_id = ?',
+  ).bind(user.id).all();
+
+  const excludeCredentials = rows.results.map((r) => ({
+    id: String(r.credential_id),
+    transports: JSON.parse(String(r.transports || '[]')),
+  }));
+
+  const options = await generateRegistrationOptions({
+    rpName: RP_NAME,
+    rpID: RP_ID,
+    userName: user.email,
+    userDisplayName: user.name,
+    attestationType: 'none',
+    excludeCredentials,
+    authenticatorSelection: {
+      residentKey: 'preferred',
+      userVerification: 'preferred',
+    },
+  });
+
+  // Store challenge temporarily
+  const challengeId = crypto.randomUUID();
+  await c.env.DB.prepare(
+    'INSERT INTO webauthn_challenges (id, challenge, user_id) VALUES (?, ?, ?)',
+  ).bind(challengeId, options.challenge, user.id).run();
+
+  return c.json({ ...options, _challengeId: challengeId });
 });
 
-app.post('/passkey/register-verify', (c) => {
-  return c.json({ error: 'Passkey support coming soon' }, 501);
+// Register: Verify credential
+app.post('/passkey/register-verify', requireAuth, async (c) => {
+  const user = c.get('user');
+  const body = await c.req.json();
+  const { _challengeId, ...credential } = body;
+
+  // Retrieve stored challenge
+  const challengeRow = await c.env.DB.prepare(
+    'SELECT challenge FROM webauthn_challenges WHERE id = ? AND user_id = ?',
+  ).bind(_challengeId, user.id).first();
+
+  if (!challengeRow) return c.json({ error: 'Challenge not found or expired' }, 400);
+  const expectedChallenge = String(challengeRow.challenge);
+
+  // Clean up challenge
+  await c.env.DB.prepare('DELETE FROM webauthn_challenges WHERE id = ?').bind(_challengeId).run();
+
+  try {
+    const verification = await verifyRegistrationResponse({
+      response: credential,
+      expectedChallenge,
+      expectedOrigin: RP_ORIGIN,
+      expectedRPID: RP_ID,
+    });
+
+    if (!verification.verified || !verification.registrationInfo) {
+      return c.json({ verified: false }, 400);
+    }
+
+    const { credential: cred, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
+
+    // Store the credential
+    await c.env.DB.prepare(
+      'INSERT INTO user_passkeys (credential_id, user_id, public_key, counter, transports) VALUES (?, ?, ?, ?, ?)',
+    ).bind(
+      cred.id,
+      user.id,
+      Buffer.from(cred.publicKey).toString('base64'),
+      cred.counter,
+      JSON.stringify(credential.response?.transports || []),
+    ).run();
+
+    return c.json({ verified: true, deviceType: credentialDeviceType, backedUp: credentialBackedUp });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Verification failed';
+    return c.json({ error: msg, verified: false }, 400);
+  }
 });
 
-app.post('/passkey/auth-options', (c) => {
-  return c.json({ error: 'Passkey support coming soon' }, 501);
+// Authenticate: Generate options (no auth required — this is the login flow)
+app.post('/passkey/auth-options', async (c) => {
+  const options = await generateAuthenticationOptions({
+    rpID: RP_ID,
+    userVerification: 'preferred',
+  });
+
+  // Store challenge
+  const challengeId = crypto.randomUUID();
+  await c.env.DB.prepare(
+    'INSERT INTO webauthn_challenges (id, challenge) VALUES (?, ?)',
+  ).bind(challengeId, options.challenge).run();
+
+  return c.json({ ...options, _challengeId: challengeId });
 });
 
-app.post('/passkey/auth-verify', (c) => {
-  return c.json({ error: 'Passkey support coming soon' }, 501);
+// Authenticate: Verify assertion
+app.post('/passkey/auth-verify', async (c) => {
+  const body = await c.req.json();
+  const { _challengeId, _options, ...credential } = body;
+
+  const challengeId = _challengeId || _options?.challengeId;
+  const expectedChallenge = _options?.challenge;
+
+  // Look up challenge from DB if not provided directly
+  let challenge = expectedChallenge;
+  if (!challenge && challengeId) {
+    const challengeRow = await c.env.DB.prepare(
+      'SELECT challenge FROM webauthn_challenges WHERE id = ?',
+    ).bind(challengeId).first();
+    if (challengeRow) challenge = String(challengeRow.challenge);
+  }
+
+  if (!challenge) return c.json({ error: 'Challenge not found' }, 400);
+
+  // Clean up used challenge
+  if (challengeId) {
+    await c.env.DB.prepare('DELETE FROM webauthn_challenges WHERE id = ?').bind(challengeId).run();
+  }
+
+  // Look up the credential in our database
+  const credentialId = credential.id || credential.rawId;
+  const storedCred = await c.env.DB.prepare(
+    'SELECT credential_id, user_id, public_key, counter, transports FROM user_passkeys WHERE credential_id = ?',
+  ).bind(credentialId).first();
+
+  if (!storedCred) return c.json({ error: 'Credential not found' }, 400);
+
+  try {
+    const verification = await verifyAuthenticationResponse({
+      response: credential,
+      expectedChallenge: challenge,
+      expectedOrigin: RP_ORIGIN,
+      expectedRPID: RP_ID,
+      credential: {
+        id: String(storedCred.credential_id),
+        publicKey: new Uint8Array(Buffer.from(String(storedCred.public_key), 'base64')),
+        counter: Number(storedCred.counter),
+        transports: JSON.parse(String(storedCred.transports || '[]')),
+      },
+    });
+
+    if (!verification.verified) {
+      return c.json({ verified: false }, 400);
+    }
+
+    // Update counter
+    await c.env.DB.prepare(
+      'UPDATE user_passkeys SET counter = ? WHERE credential_id = ?',
+    ).bind(verification.authenticationInfo.newCounter, credentialId).run();
+
+    // Get user and issue JWT
+    const row = await c.env.DB.prepare(
+      'SELECT id, name, email, role, company, sponsor_id, terms_accepted, avatar_url FROM users WHERE id = ?',
+    ).bind(String(storedCred.user_id)).first();
+
+    if (!row) return c.json({ error: 'User not found' }, 500);
+
+    const user = rowToUser(row);
+    const token = await signToken(user, c.env.JWT_SECRET);
+
+    return c.json({ verified: true, token, user });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Verification failed';
+    return c.json({ error: msg, verified: false }, 400);
+  }
 });
 
 export default app;

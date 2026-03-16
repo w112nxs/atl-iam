@@ -9,14 +9,18 @@
     "db:seed": "wrangler d1 execute atlanta-iam-db --file=./src/db/seed.sql --remote",
     "db:schema:local": "wrangler d1 execute atlanta-iam-db --file=./src/db/schema.sql --local",
     "db:seed:local": "wrangler d1 execute atlanta-iam-db --file=./src/db/seed.sql --local",
-    "db:reset:local": "npm run db:schema:local && npm run db:seed:local"
+    "db:migrate:auth": "wrangler d1 execute atlanta-iam-db --file=./src/db/migration-001-auth.sql --remote",
+    "db:migrate:auth:local": "wrangler d1 execute atlanta-iam-db --file=./src/db/migration-001-auth.sql --local",
+    "db:reset:local": "npm run db:schema:local && npm run db:seed:local && npm run db:migrate:auth:local"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^11.0.0",
     "hono": "^4.7.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241230.0",
-    "wrangler": "^4.14.0",
-    "typescript": "~5.7.0"
+    "@types/node": "^25.5.0",
+    "typescript": "~5.7.0",
+    "wrangler": "^4.14.0"
   }
 }

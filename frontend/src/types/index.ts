@@ -29,6 +29,7 @@ export interface User {
   company: string;
   sponsorId: string | null;
   termsAccepted: boolean;
+  avatarUrl?: string;
 }
 
 export type Tier = 'Gold' | 'Silver' | 'Community';

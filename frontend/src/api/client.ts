@@ -31,7 +31,7 @@ export const api = {
     }),
 
   // Auth — OAuth redirect URL
-  getOAuthUrl: (provider: 'google' | 'facebook' | 'linkedin') =>
+  getOAuthUrl: (provider: 'google' | 'github' | 'linkedin') =>
     `${API_BASE}/auth/oauth/${provider}`,
 
   // Auth — Passkeys
