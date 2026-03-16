@@ -5,6 +5,7 @@ import { Pill } from '../components/ui/Pill';
 import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { Icon } from '../components/ui/Icon';
 import { api } from '../api/client';
 import { InviteButton } from '../components/ui/InviteButton';
 import type { User, Session } from '../types';
@@ -226,26 +227,25 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                     </div>
                     {connected ? (
                       <div style={{
-                        display: 'flex', alignItems: 'center', gap: 4,
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
                         fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
                         color: T.green, letterSpacing: '0.06em',
                       }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
+                        <Icon name="check_circle" size={14} filled />
                         CONNECTED
                       </div>
                     ) : (
                       <button
                         onClick={() => { window.location.href = api.getOAuthUrl(p.id); }}
                         style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
                           background: 'transparent', border: `1px solid ${T.accent}55`,
                           borderRadius: 6, padding: '5px 14px', cursor: 'pointer',
                           fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
                           color: T.accent, letterSpacing: '0.06em', transition: 'all 0.25s',
                         }}
                       >
-                        CONNECT
+                        <Icon name="link" size={14} /> CONNECT
                       </button>
                     )}
                   </div>
@@ -306,6 +306,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                         <button
                           onClick={() => revokeSession(s.id)}
                           style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
                             background: 'transparent', border: `1px solid ${T.red}44`,
                             borderRadius: 5, padding: '3px 10px', cursor: 'pointer',
                             fontFamily: "'Inter', sans-serif", fontSize: 9, fontWeight: 700,
@@ -313,7 +314,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                             transition: 'all 0.25s',
                           }}
                         >
-                          REVOKE
+                          <Icon name="logout" size={14} /> REVOKE
                         </button>
                       )}
                     </div>
@@ -323,6 +324,8 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                   <button
                     onClick={revokeOthers}
                     style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      justifyContent: 'center',
                       width: '100%', marginTop: 10, padding: '8px 0',
                       background: 'transparent', border: `1px solid ${T.red}33`,
                       borderRadius: 6, cursor: 'pointer',
@@ -331,7 +334,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                       transition: 'all 0.25s',
                     }}
                   >
-                    REVOKE ALL OTHER SESSIONS
+                    <Icon name="logout" size={14} /> REVOKE ALL OTHER SESSIONS
                   </button>
                 )}
               </>
@@ -388,6 +391,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                         setPasskeys(prev => prev.filter(p => p.credentialId !== pk.credentialId));
                       }}
                       style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
                         background: 'transparent', border: `1px solid ${T.red}44`,
                         borderRadius: 5, padding: '3px 10px', cursor: 'pointer',
                         fontFamily: "'Inter', sans-serif", fontSize: 9, fontWeight: 700,
@@ -395,7 +399,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                         transition: 'all 0.25s',
                       }}
                     >
-                      REMOVE
+                      <Icon name="delete" size={14} /> REMOVE
                     </button>
                   </div>
                 ))}
@@ -407,7 +411,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
               onClick={() => { setPasskeyStatus('idle'); registerPasskey(); }}
               disabled={passkeyStatus === 'registering'}
               style={{
-                display: 'flex', alignItems: 'center', gap: 8,
+                display: 'inline-flex', alignItems: 'center', gap: 4,
                 background: passkeyStatus === 'done' ? T.greenDim : 'transparent',
                 border: `1px solid ${passkeyStatus === 'done' ? T.green + '44' : passkeyStatus === 'error' ? T.red + '44' : T.border}`,
                 borderRadius: 8, color: passkeyStatus === 'done' ? T.green : passkeyStatus === 'error' ? T.red : T.accent,
@@ -417,10 +421,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                 transition: 'all 0.25s',
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"/>
-                <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>
-              </svg>
+              <Icon name="fingerprint" size={14} />
               {passkeyStatus === 'idle' && (passkeys.length > 0 ? 'ADD ANOTHER PASSKEY' : 'REGISTER PASSKEY')}
               {passkeyStatus === 'registering' && 'WAITING FOR BIOMETRIC...'}
               {passkeyStatus === 'done' && 'PASSKEY REGISTERED'}
@@ -489,6 +490,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
               <button
                 onClick={resetToSystem}
                 style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
                   background: 'transparent', border: `1px solid ${T.border}`,
                   borderRadius: 5, color: T.muted,
                   fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 10,
@@ -496,7 +498,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
                   transition: 'color 0.25s, border-color 0.25s',
                 }}
               >
-                RESET TO SYSTEM
+                <Icon name="settings_backup_restore" size={14} /> RESET TO SYSTEM
               </button>
             )}
           </Card>

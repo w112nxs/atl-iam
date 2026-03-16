@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { InviteButton } from '../components/ui/InviteButton';
+import { Icon } from '../components/ui/Icon';
 import type { MemberProfile, User, ThemeTokens } from '../types';
 
 interface MemberDirectoryProps {
@@ -286,9 +287,10 @@ export function MemberDirectory({ user, onInvite }: MemberDirectoryProps) {
                   fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
                   letterSpacing: '0.08em', color: T.muted,
                   transition: 'all 0.25s',
+                  display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center',
                 }}
               >
-                CLOSE
+                <Icon name="close" size={16} color={T.muted} /> CLOSE
               </button>
               {isAdmin && (
                 <>
@@ -300,9 +302,10 @@ export function MemberDirectory({ user, onInvite }: MemberDirectoryProps) {
                       borderRadius: 8, cursor: 'pointer',
                       fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
                       letterSpacing: '0.08em', color: '#fff',
+                      display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center',
                     }}
                   >
-                    EDIT
+                    <Icon name="edit" size={16} color="#fff" /> EDIT
                   </button>
                   <button
                     onClick={() => handleAdminDelete(selectedMember.id, selectedMember.name)}
@@ -312,9 +315,10 @@ export function MemberDirectory({ user, onInvite }: MemberDirectoryProps) {
                       borderRadius: 8, cursor: 'pointer',
                       fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
                       letterSpacing: '0.08em', color: T.red,
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
                     }}
                   >
-                    DELETE
+                    <Icon name="delete" size={16} color={T.red} /> DELETE
                   </button>
                 </>
               )}
@@ -478,12 +482,14 @@ function DirectoryEditModal({ T, member, onSave, onClose }: {
             background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6,
             padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
             fontSize: 12, fontWeight: 700, color: T.muted,
-          }}>CANCEL</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="close" size={16} color={T.muted} /> CANCEL</button>
           <button onClick={handleSave} disabled={saving} style={{
             background: T.accent, border: 'none', borderRadius: 6,
             padding: '8px 18px', cursor: saving ? 'wait' : 'pointer',
             fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff',
-          }}>{saving ? 'SAVING...' : 'SAVE'}</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name={saving ? 'progress_activity' : 'save'} size={16} color="#fff" /> {saving ? 'SAVING...' : 'SAVE'}</button>
         </div>
       </div>
     </div>

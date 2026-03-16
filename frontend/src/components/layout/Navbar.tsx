@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { Avatar } from '../ui/Avatar';
 import { Pill } from '../ui/Pill';
+import { Icon } from '../ui/Icon';
 import type { User } from '../../types';
 
 interface NavbarProps {
@@ -17,6 +18,20 @@ interface NavbarProps {
 export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onInvite }: NavbarProps) {
   const { T } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [userMenuOpen]);
 
   const tabs: { label: string; path: string; color: string; roles?: string[] }[] = [
     { label: 'Home', path: '/', color: T.accent },
@@ -34,7 +49,15 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
   const handleNav = (path: string) => {
     onNavigate(path);
     setMenuOpen(false);
+    setUserMenuOpen(false);
   };
+
+  const userMenuItems: { icon: string; label: string; action: () => void; color?: string; divider?: boolean }[] = [
+    { icon: 'account_circle', label: 'My Account', action: () => handleNav('/my-profile') },
+    { icon: 'settings', label: 'Settings', action: () => handleNav('/my-profile') },
+    ...(onInvite ? [{ icon: 'person_add', label: 'Invite Colleague', action: () => { setUserMenuOpen(false); onInvite(); } }] : []),
+    { icon: 'logout', label: 'Sign Out', action: () => { setUserMenuOpen(false); onSignOut(); }, color: T.red, divider: true },
+  ];
 
   return (
     <>
@@ -108,12 +131,22 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <ThemeToggle />
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div
-                onClick={() => handleNav('/my-profile')}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+            <div ref={userMenuRef} style={{ position: 'relative' }}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                style={{
+                  background: userMenuOpen ? T.accentDim : 'transparent',
+                  border: `1px solid ${userMenuOpen ? T.accent + '44' : 'transparent'}`,
+                  borderRadius: 8,
+                  padding: '4px 10px 4px 6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  transition: 'all 0.2s',
+                }}
               >
-                <Avatar name={user.name} size={24} role={user.role} />
+                <Avatar name={user.name} size={26} role={user.role} />
                 <span className="nav-user-name" style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 11,
@@ -123,55 +156,79 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
                 }}>
                   {user.name.split(' ')[0]}
                 </span>
-              </div>
-              <Pill label={user.role} color={roleColor} size={8} />
-              {onInvite && (
-                <button
-                  onClick={onInvite}
-                  className="nav-user-name"
-                  style={{
-                    background: T.accentDim,
-                    border: `1px solid ${T.accent}44`,
-                    borderRadius: 5,
-                    color: T.accent,
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 700,
-                    fontSize: 9,
-                    letterSpacing: '0.08em',
-                    padding: '2px 8px',
-                    cursor: 'pointer',
-                    transition: 'background 0.25s, border-color 0.25s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 3,
-                  }}
-                  title="Invite a colleague"
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" />
-                  </svg>
-                  INVITE
-                </button>
-              )}
-              <button
-                onClick={onSignOut}
-                className="nav-user-name"
-                style={{
-                  background: 'none',
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 5,
-                  color: T.muted,
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 9,
-                  letterSpacing: '0.08em',
-                  padding: '2px 6px',
-                  cursor: 'pointer',
-                  transition: 'color 0.25s, border-color 0.25s',
-                }}
-              >
-                SIGN OUT
+                <Pill label={user.role} color={roleColor} size={8} />
+                <Icon name={userMenuOpen ? 'expand_less' : 'expand_more'} size={16} color={T.muted} />
               </button>
+
+              {/* Dropdown Menu */}
+              {userMenuOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 6px)',
+                  right: 0,
+                  minWidth: 200,
+                  background: T.card,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 12,
+                  boxShadow: T.shadow,
+                  padding: '6px 0',
+                  zIndex: 200,
+                  animation: 'scaleIn 0.15s ease-out',
+                }}>
+                  {/* User header */}
+                  <div style={{
+                    padding: '10px 16px 8px',
+                    borderBottom: `1px solid ${T.border}`,
+                    marginBottom: 4,
+                  }}>
+                    <div style={{
+                      fontFamily: "'Rajdhani', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 15,
+                      color: T.text,
+                    }}>{user.name}</div>
+                    <div style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: 11,
+                      color: T.muted,
+                      marginTop: 1,
+                    }}>{user.email}</div>
+                  </div>
+
+                  {/* Menu items */}
+                  {userMenuItems.map((item, i) => (
+                    <div key={i}>
+                      {item.divider && (
+                        <div style={{ height: 1, background: T.border, margin: '4px 0' }} />
+                      )}
+                      <button
+                        onClick={item.action}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          width: '100%',
+                          padding: '9px 16px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          color: item.color || T.text,
+                          transition: 'background 0.15s',
+                          textAlign: 'left',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = T.surface)}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <Icon name={item.icon} size={18} color={item.color || T.muted} />
+                        {item.label}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <button
@@ -188,9 +245,12 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
                 padding: '4px 12px',
                 cursor: 'pointer',
                 transition: 'background 0.25s',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
               }}
             >
-              SIGN IN
+              <Icon name="login" size={14} /> SIGN IN
             </button>
           )}
           {/* Hamburger — shown only on mobile via CSS */}
@@ -250,6 +310,9 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
                   transition: 'color 0.25s, background 0.25s',
                   textAlign: 'left',
                   textTransform: 'uppercase',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
                 }}
               >
                 {tab.label}
@@ -257,26 +320,54 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
             );
           })}
           {user && (
-            <button
-              onClick={() => { onSignOut(); setMenuOpen(false); }}
-              style={{
-                background: 'none',
-                border: `1px solid ${T.border}`,
-                borderRadius: 6,
-                color: T.muted,
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                fontSize: 12,
-                letterSpacing: '0.06em',
-                padding: '10px 14px',
-                cursor: 'pointer',
-                transition: 'color 0.25s, border-color 0.25s',
-                textAlign: 'left',
-                marginTop: 4,
-              }}
-            >
-              SIGN OUT
-            </button>
+            <>
+              <div style={{ height: 1, background: T.border, margin: '4px 0' }} />
+              <button
+                onClick={() => handleNav('/my-profile')}
+                style={{
+                  background: currentPath === '/my-profile' ? T.accentDim : 'none',
+                  border: 'none',
+                  borderRadius: 6,
+                  color: T.text,
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  letterSpacing: '0.04em',
+                  padding: '10px 14px',
+                  cursor: 'pointer',
+                  transition: 'color 0.25s, background 0.25s',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Icon name="account_circle" size={18} color={T.muted} /> MY ACCOUNT
+              </button>
+              <button
+                onClick={() => { onSignOut(); setMenuOpen(false); }}
+                style={{
+                  background: 'none',
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 6,
+                  color: T.red,
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  letterSpacing: '0.06em',
+                  padding: '10px 14px',
+                  cursor: 'pointer',
+                  transition: 'color 0.25s, border-color 0.25s',
+                  textAlign: 'left',
+                  marginTop: 4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Icon name="logout" size={18} /> SIGN OUT
+              </button>
+            </>
           )}
         </div>
       )}

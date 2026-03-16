@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../api/client';
+import { Icon } from '../components/ui/Icon';
 import type { EventType } from '../types';
 import { EVENT_TYPE_LABELS } from '../types';
 
@@ -318,7 +319,8 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
           background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
           padding: '10px 20px', cursor: 'pointer',
           fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: K.muted,
-        }}>BACK</button>
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+        }}><Icon name="arrow_back" size={16} color={K.muted} /> BACK</button>
         <input
           ref={inputRef}
           value={query}
@@ -404,11 +406,7 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
                   }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={a.checkedIn ? K.text : '#fff'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 6 2 18 2 18 9" />
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                    <rect x="6" y="14" width="12" height="8" />
-                  </svg>
+                  <Icon name="print" size={14} color={a.checkedIn ? K.text : '#fff'} />
                   {a.checkedIn ? 'REPRINT' : 'PRINT'}
                 </span>
               </div>
@@ -518,7 +516,8 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
             background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
             padding: '10px 20px', cursor: 'pointer',
             fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: K.muted,
-          }}>BACK</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="arrow_back" size={16} color={K.muted} /> BACK</button>
           <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28, color: K.text, margin: 0 }}>
             Walk-In Registration {step === 2 ? '— Terms' : ''}
           </h2>
@@ -618,9 +617,10 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
                 border: 'none', borderRadius: 12, padding: '16px',
                 cursor: canProceedStep1 ? 'pointer' : 'not-allowed',
                 fontFamily: "'Rajdhani', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff',
+                display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center',
               }}
             >
-              NEXT — TERMS & CONDITIONS
+              <Icon name="arrow_forward" size={20} color="#fff" /> NEXT — TERMS & CONDITIONS
             </button>
           </>
         )}
@@ -678,9 +678,10 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
                 border: 'none', borderRadius: 12, padding: '16px',
                 cursor: termsAccepted ? 'pointer' : 'not-allowed',
                 fontFamily: "'Rajdhani', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff',
+                display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center',
               }}
             >
-              {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN + PRINT BADGE'}
+              <Icon name={submitting ? 'progress_activity' : 'how_to_reg'} size={20} color="#fff" /> {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN + PRINT BADGE'}
             </button>
           </>
         )}
@@ -840,11 +841,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 6 2 18 2 18 9" />
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-            <rect x="6" y="14" width="12" height="8" />
-          </svg>
+          <Icon name={printing ? 'progress_activity' : 'print'} size={20} color="#fff" />
           <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: '#fff' }}>
             {printing ? 'PRINTING...' : 'PRINT BADGE'}
           </span>

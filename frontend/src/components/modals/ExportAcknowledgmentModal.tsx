@@ -1,4 +1,5 @@
 import { useTheme } from '../../context/ThemeContext';
+import { Icon } from '../../components/ui/Icon';
 import type { Tier } from '../../types';
 
 interface ExportModalProps {
@@ -106,9 +107,10 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
               padding: '12px 0',
               cursor: 'pointer',
               transition: 'color 0.25s, border-color 0.25s',
+              display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center',
             }}
           >
-            CANCEL
+            <Icon name="close" size={16} color={T.muted} /> CANCEL
           </button>
           <button
             onClick={onConfirm}
@@ -125,9 +127,10 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
               padding: '12px 0',
               cursor: 'pointer',
               transition: 'background 0.25s',
+              display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center',
             }}
           >
-            I UNDERSTAND — DOWNLOAD
+            <Icon name="download" size={16} color="#000" /> I UNDERSTAND — DOWNLOAD
           </button>
         </div>
       </div>

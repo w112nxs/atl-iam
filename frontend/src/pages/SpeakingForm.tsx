@@ -4,6 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Pill } from '../components/ui/Pill';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
+import { Icon } from '../components/ui/Icon';
 import { api } from '../api/client';
 import type { User, SpeakingFormData, SpeakingSubmissionSummary, SpeakingSubmissionStatus, ThemeTokens } from '../types';
 
@@ -253,8 +254,9 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
             background: T.accent, border: 'none', borderRadius: 8, color: '#fff',
             fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 13,
             padding: '10px 24px', cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: 4,
           }}>
-            SUBMIT ANOTHER TALK
+            <Icon name="add" size={14} /> SUBMIT ANOTHER TALK
           </button>
         </Card>
       ) : (
@@ -406,8 +408,9 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
                   background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 8,
                   color: T.muted, fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 13,
                   padding: '10px 24px', cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
                 }}>
-                  BACK
+                  <Icon name="arrow_back" size={14} /> BACK
                 </button>
               )}
               {step < 4 && (
@@ -415,8 +418,9 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
                   background: T.accent, border: 'none', borderRadius: 8, color: '#fff',
                   fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 13,
                   padding: '10px 24px', cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
                 }}>
-                  NEXT
+                  NEXT <Icon name="arrow_forward" size={14} />
                 </button>
               )}
               {step === 4 && (
@@ -425,8 +429,9 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
                   fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 13,
                   padding: '10px 24px', cursor: submitting ? 'wait' : 'pointer',
                   opacity: submitting ? 0.7 : 1,
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
                 }}>
-                  {submitting ? 'SUBMITTING...' : 'SUBMIT PROPOSAL'}
+                  {submitting ? <><Icon name="progress_activity" size={14} /> SUBMITTING...</> : <><Icon name="send" size={14} /> SUBMIT PROPOSAL</>}
                 </button>
               )}
               <button onClick={saveDraft} disabled={saving} style={{
@@ -434,8 +439,9 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
                 color: T.accent, fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
                 padding: '10px 20px', cursor: saving ? 'wait' : 'pointer',
                 letterSpacing: '0.04em',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
               }}>
-                {saving ? 'SAVING...' : 'SAVE DRAFT'}
+                {saving ? <><Icon name="progress_activity" size={14} /> SAVING...</> : <><Icon name="save" size={14} /> SAVE DRAFT</>}
               </button>
             </div>
           </div>
@@ -569,8 +575,9 @@ function SubmissionRow({ T, submission: s, onResume, onDelete }: { T: ThemeToken
               background: 'transparent', border: `1px solid ${T.accent}44`, borderRadius: 5,
               color: T.accent, fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
               padding: '4px 12px', cursor: 'pointer', letterSpacing: '0.06em',
+              display: 'inline-flex', alignItems: 'center', gap: 4,
             }}>
-              {s.status === 'rejected' ? 'EDIT & RESUBMIT' : 'RESUME'}
+              {s.status === 'rejected' ? <><Icon name="edit" size={14} /> EDIT &amp; RESUBMIT</> : <><Icon name="play_arrow" size={14} /> RESUME</>}
             </button>
           )}
           {onDelete && (
@@ -578,8 +585,9 @@ function SubmissionRow({ T, submission: s, onResume, onDelete }: { T: ThemeToken
               background: 'transparent', border: `1px solid ${T.red}44`, borderRadius: 5,
               color: T.red, fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
               padding: '4px 12px', cursor: 'pointer', letterSpacing: '0.06em',
+              display: 'inline-flex', alignItems: 'center', gap: 4,
             }}>
-              DELETE
+              <Icon name="delete" size={14} /> DELETE
             </button>
           )}
         </div>
@@ -599,8 +607,9 @@ function ReviewRow({ T, label, value, onEdit }: { T: ThemeTokens; label: string;
         background: 'transparent', border: 'none', color: T.accent,
         fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
         cursor: 'pointer', flexShrink: 0, padding: '2px 6px',
+        display: 'inline-flex', alignItems: 'center', gap: 4,
       }}>
-        EDIT
+        <Icon name="edit" size={12} /> EDIT
       </button>
     </div>
   );

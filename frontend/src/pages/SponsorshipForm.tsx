@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from '../components/ui/Card';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
+import { Icon } from '../components/ui/Icon';
 import { api } from '../api/client';
 import type { User, Tier } from '../types';
 
@@ -138,9 +139,10 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
               padding: '12px 32px',
               cursor: 'pointer',
               transition: 'background 0.25s',
+              display: 'inline-flex', alignItems: 'center', gap: 4,
             }}
           >
-            {submitting ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
+            <Icon name={submitting ? 'progress_activity' : 'send'} size={16} color={tier === 'Gold' ? '#000' : '#fff'} /> {submitting ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
           </button>
         </Card>
 

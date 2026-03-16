@@ -9,6 +9,7 @@ import { api } from '../api/client';
 import type { User, Event, ThemeTokens, SpeakingSubmissionStatus } from '../types';
 import { EVENT_TYPE_LABELS } from '../types';
 import { InviteButton } from '../components/ui/InviteButton';
+import { Icon } from '../components/ui/Icon';
 
 type AdminTab = 'events' | 'members' | 'sponsors' | 'speaking';
 
@@ -274,7 +275,8 @@ function EventsTab() {
           background: T.purple, border: 'none', borderRadius: 20,
           padding: '6px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
           fontSize: 11, fontWeight: 700, color: '#fff', letterSpacing: '0.06em',
-        }}>+ NEW EVENT</button>
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+        }}><Icon name="add" size={14} /> NEW EVENT</button>
       </div>
 
       {selectedEvent && (
@@ -297,12 +299,14 @@ function EventsTab() {
               background: 'transparent', border: `1px solid ${T.accent}44`, borderRadius: 4,
               padding: '4px 10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
               fontSize: 10, fontWeight: 700, color: T.accent, letterSpacing: '0.06em',
-            }}>EDIT</button>
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+            }}><Icon name="edit" size={14} /> EDIT</button>
             <button onClick={() => handleDeleteEvent(selectedEvent.id, selectedEvent.name)} style={{
               background: 'transparent', border: `1px solid ${T.red}44`, borderRadius: 4,
               padding: '4px 10px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
               fontSize: 10, fontWeight: 700, color: T.red, letterSpacing: '0.06em',
-            }}>DELETE</button>
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+            }}><Icon name="delete" size={14} /> DELETE</button>
           </div>
 
           {/* Stats — clickable for drill-down */}
@@ -382,7 +386,8 @@ function EventsTab() {
                 background: T.accent, border: 'none', borderRadius: 6,
                 padding: '5px 12px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                 fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: '0.06em',
-              }}>+ ADD SESSION</button>
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}><Icon name="add" size={14} /> ADD SESSION</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {selectedEvent.sessions.map(s => (
@@ -400,12 +405,14 @@ function EventsTab() {
                       background: 'transparent', border: `1px solid ${T.accent}44`, borderRadius: 4,
                       padding: '3px 8px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                       fontSize: 10, fontWeight: 700, color: T.accent,
-                    }}>EDIT</button>
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                    }}><Icon name="edit" size={14} /> EDIT</button>
                     <button onClick={() => handleDeleteSession(s.id, s.title)} style={{
                       background: 'transparent', border: `1px solid ${T.red}44`, borderRadius: 4,
                       padding: '3px 8px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                       fontSize: 10, fontWeight: 700, color: T.red,
-                    }}>DEL</button>
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                    }}><Icon name="delete" size={14} /> DEL</button>
                   </div>
                 </div>
               ))}
@@ -539,12 +546,13 @@ function AddEventModal({ T, onAdd, onClose }: {
           <textarea style={{ ...inputStyle(T), minHeight: 60, resize: 'vertical' as const }} value={form.description} onChange={e => set('description', e.target.value)} placeholder="Brief event description..." />
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 6 }}>
-          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted }}>CANCEL</button>
+          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="close" size={14} /> CANCEL</button>
           <button onClick={() => { if (form.name && form.date) onAdd(form); }} style={{
             background: T.purple, border: 'none', borderRadius: 6, padding: '8px 18px', cursor: 'pointer',
             fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff',
             opacity: form.name && form.date ? 1 : 0.5,
-          }}>CREATE</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="add" size={14} /> CREATE</button>
         </div>
       </div>
     </div>
@@ -590,11 +598,12 @@ function EditEventModal({ T, event, onSave, onClose }: {
           <textarea style={{ ...inputStyle(T), minHeight: 60, resize: 'vertical' as const }} value={form.description} onChange={e => set('description', e.target.value)} />
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 6 }}>
-          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted }}>CANCEL</button>
+          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="close" size={14} /> CANCEL</button>
           <button onClick={() => onSave(event.id, form)} style={{
             background: T.purple, border: 'none', borderRadius: 6, padding: '8px 18px', cursor: 'pointer',
             fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff',
-          }}>SAVE</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="save" size={14} /> SAVE</button>
         </div>
       </div>
     </div>
@@ -629,12 +638,13 @@ function AddSessionModal({ T, onAdd, onClose }: {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted }}>CANCEL</button>
+          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="close" size={14} /> CANCEL</button>
           <button onClick={() => { if (form.title) onAdd({ title: form.title, speaker: form.speaker, time: form.time, cpe: Number(form.cpe) || 1 }); }} style={{
             background: T.accent, border: 'none', borderRadius: 6, padding: '8px 18px', cursor: 'pointer',
             fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff',
             opacity: form.title ? 1 : 0.5,
-          }}>ADD</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="add" size={14} /> ADD</button>
         </div>
       </div>
     </div>
@@ -670,11 +680,12 @@ function EditSessionModal({ T, session, onSave, onClose }: {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted }}>CANCEL</button>
+          <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="close" size={14} /> CANCEL</button>
           <button onClick={() => onSave(session.id, { title: form.title, speaker: form.speaker, time: form.time, cpe: Number(form.cpe) || 1 })} style={{
             background: T.accent, border: 'none', borderRadius: 6, padding: '8px 18px', cursor: 'pointer',
             fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff',
-          }}>SAVE</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="save" size={14} /> SAVE</button>
         </div>
       </div>
     </div>
@@ -803,12 +814,14 @@ function MembersTab() {
                   background: 'transparent', border: `1px solid ${T.accent}44`, borderRadius: 4,
                   padding: '3px 8px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                   fontSize: 10, fontWeight: 700, color: T.accent, letterSpacing: '0.06em',
-                }}>EDIT</button>
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                }}><Icon name="edit" size={14} /> EDIT</button>
                 <button onClick={() => handleDelete(m.id, m.name)} style={{
                   background: 'transparent', border: `1px solid ${T.red}44`, borderRadius: 4,
                   padding: '3px 8px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                   fontSize: 10, fontWeight: 700, color: T.red, letterSpacing: '0.06em',
-                }}>DEL</button>
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                }}><Icon name="delete" size={14} /> DEL</button>
               </div>
             </div>
           ))}
@@ -902,7 +915,8 @@ function EditMemberModal({ T, member, saving, onSave, onClose }: {
             background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6,
             padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
             fontSize: 12, fontWeight: 700, color: T.muted, letterSpacing: '0.06em',
-          }}>CANCEL</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="close" size={14} /> CANCEL</button>
           <button
             onClick={() => onSave(member.id, {
               ...form,
@@ -914,8 +928,9 @@ function EditMemberModal({ T, member, saving, onSave, onClose }: {
               padding: '8px 18px', cursor: saving ? 'wait' : 'pointer',
               fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700,
               color: '#fff', letterSpacing: '0.06em',
+              display: 'inline-flex', alignItems: 'center', gap: 4,
             }}
-          >{saving ? 'SAVING...' : 'SAVE'}</button>
+          >{saving ? <><Icon name="progress_activity" size={14} /> SAVING...</> : <><Icon name="save" size={14} /> SAVE</>}</button>
         </div>
       </div>
     </div>
@@ -989,7 +1004,8 @@ function SponsorsTab() {
           background: T.gold, border: 'none', borderRadius: 6,
           padding: '7px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
           fontSize: 11, fontWeight: 700, color: '#fff', letterSpacing: '0.06em',
-        }}>+ ADD SPONSOR</button>
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+        }}><Icon name="add" size={14} /> ADD SPONSOR</button>
       </div>
 
       {toast && (
@@ -1027,12 +1043,14 @@ function SponsorsTab() {
                   background: 'transparent', border: `1px solid ${T.accent}44`, borderRadius: 4,
                   padding: '3px 8px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                   fontSize: 10, fontWeight: 700, color: T.accent, letterSpacing: '0.06em',
-                }}>EDIT</button>
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                }}><Icon name="edit" size={14} /> EDIT</button>
                 <button onClick={() => handleDelete(s.eventId, s.sponsorId, s.sponsorName)} style={{
                   background: 'transparent', border: `1px solid ${T.red}44`, borderRadius: 4,
                   padding: '3px 8px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                   fontSize: 10, fontWeight: 700, color: T.red, letterSpacing: '0.06em',
-                }}>DEL</button>
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                }}><Icon name="delete" size={14} /> DEL</button>
               </div>
             </div>
           ))}
@@ -1078,12 +1096,14 @@ function EditSponsorModal({ T, sponsor, onSave, onClose }: {
             background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6,
             padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
             fontSize: 12, fontWeight: 700, color: T.muted,
-          }}>CANCEL</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="close" size={14} /> CANCEL</button>
           <button onClick={() => onSave(sponsor.eventId, sponsor.sponsorId, { sponsorName: name, tier })} style={{
             background: T.gold, border: 'none', borderRadius: 6,
             padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
             fontSize: 12, fontWeight: 700, color: '#fff',
-          }}>SAVE</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="save" size={14} /> SAVE</button>
         </div>
       </div>
     </div>
@@ -1130,7 +1150,8 @@ function AddSponsorModal({ T, events, onAdd, onClose }: {
             background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6,
             padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
             fontSize: 12, fontWeight: 700, color: T.muted,
-          }}>CANCEL</button>
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}><Icon name="close" size={14} /> CANCEL</button>
           <button
             onClick={() => { if (form.sponsorId && form.sponsorName) onAdd(form); }}
             style={{
@@ -1138,8 +1159,9 @@ function AddSponsorModal({ T, events, onAdd, onClose }: {
               padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
               fontSize: 12, fontWeight: 700, color: '#fff',
               opacity: form.sponsorId && form.sponsorName ? 1 : 0.5,
+              display: 'inline-flex', alignItems: 'center', gap: 4,
             }}
-          >ADD</button>
+          ><Icon name="add" size={14} /> ADD</button>
         </div>
       </div>
     </div>
@@ -1319,7 +1341,8 @@ function SpeakingTab() {
                 background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6,
                 padding: '8px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                 fontSize: 12, fontWeight: 700, color: T.muted,
-              }}>CANCEL</button>
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}><Icon name="close" size={14} /> CANCEL</button>
               {selected.status === 'pending' && (
                 <>
                   <button
@@ -1329,8 +1352,9 @@ function SpeakingTab() {
                       background: T.red, border: 'none', borderRadius: 6,
                       padding: '8px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                       fontSize: 12, fontWeight: 700, color: '#fff', opacity: saving ? 0.5 : 1,
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
                     }}
-                  >REJECT</button>
+                  ><Icon name="block" size={14} /> REJECT</button>
                   <button
                     disabled={saving}
                     onClick={() => handleReview('approved')}
@@ -1338,8 +1362,9 @@ function SpeakingTab() {
                       background: T.green, border: 'none', borderRadius: 6,
                       padding: '8px 16px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
                       fontSize: 12, fontWeight: 700, color: '#fff', opacity: saving ? 0.5 : 1,
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
                     }}
-                  >APPROVE</button>
+                  ><Icon name="check_circle" size={14} /> APPROVE</button>
                 </>
               )}
             </div>
