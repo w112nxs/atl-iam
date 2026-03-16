@@ -3,17 +3,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { api } from '../../api/client';
 
 interface AuthModalProps {
-  onLogin: (key: string) => void | Promise<void>;
   onPasskeyLogin: (token: string, user: import('../../types').User) => void;
   onClose: () => void;
 }
-
-const demoAccounts = [
-  { key: 'admin', label: 'Admin — Nishad', sub: 'Full access', color: 'red' as const },
-  { key: 'saviynt', label: 'Sponsor — Saviynt Gold', sub: 'Sponsor portal access', color: 'gold' as const },
-  { key: 'cyberark', label: 'Sponsor — CyberArk Gold', sub: 'Terms pending', color: 'gold' as const },
-  { key: 'member', label: 'Member — Marcus Webb', sub: 'Terms pending', color: 'accent' as const },
-];
 
 const socialProviders = [
   {
@@ -57,9 +49,8 @@ const socialProviders = [
   },
 ];
 
-export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) {
+export function AuthModal({ onPasskeyLogin, onClose }: AuthModalProps) {
   const { T } = useTheme();
-  const [showDemo, setShowDemo] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -109,92 +100,151 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
     >
       <div
         onClick={e => e.stopPropagation()}
+        className="auth-modal-container"
         style={{
           background: T.card,
           border: `1px solid ${T.border}`,
           borderRadius: 20,
-          padding: 0,
-          width: 420,
-          maxWidth: '92vw',
           overflow: 'hidden',
+          width: 720,
+          maxWidth: '95vw',
+          display: 'flex',
           transition: 'background 0.25s, border-color 0.25s',
           boxShadow: T.shadow,
+          position: 'relative',
         }}
       >
-        {/* Header with branding */}
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 14,
+            background: 'rgba(255,255,255,0.15)',
+            border: 'none',
+            borderRadius: '50%',
+            width: 28,
+            height: 28,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: 'rgba(255,255,255,0.8)',
+            fontSize: 16,
+            fontWeight: 700,
+            lineHeight: 1,
+            zIndex: 2,
+          }}
+        >
+          &times;
+        </button>
+
+        {/* ── Left Column: Branding ── */}
+        <div
+          className="auth-modal-left"
+          style={{
+            width: 280,
+            flexShrink: 0,
+            background: `linear-gradient(135deg, ${T.accent}, ${T.purple})`,
+            padding: '40px 28px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Subtle background pattern */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(255,255,255,0.05) 0%, transparent 50%)',
+          }} />
+
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <img
+              src="/badge.png"
+              alt="Atlanta IAM"
+              width="72"
+              height="72"
+              style={{
+                borderRadius: '50%',
+                border: '3px solid rgba(255,255,255,0.25)',
+                marginBottom: 16,
+              }}
+            />
+            <h2 style={{
+              fontFamily: "'Rajdhani', sans-serif",
+              fontWeight: 700,
+              fontSize: 26,
+              color: '#fff',
+              margin: '0 0 6px',
+              letterSpacing: '0.03em',
+            }}>
+              Atlanta IAM
+            </h2>
+            <p style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.75)',
+              margin: '0 0 24px',
+              lineHeight: 1.5,
+              letterSpacing: '0.02em',
+            }}>
+              Identity & Access Management<br />User Group
+            </p>
+
+            {/* Feature highlights */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'left' }}>
+              {[
+                { icon: '🎤', text: 'Exclusive speaking events' },
+                { icon: '🤝', text: 'Member directory & networking' },
+                { icon: '🔐', text: 'IAM community resources' },
+                { icon: '📜', text: 'CPE-eligible sessions' },
+              ].map(f => (
+                <div key={f.text} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  fontFamily: "'Inter', sans-serif", fontSize: 11,
+                  color: 'rgba(255,255,255,0.85)', letterSpacing: '0.01em',
+                }}>
+                  <span style={{ fontSize: 14 }}>{f.icon}</span>
+                  {f.text}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Right Column: Sign In ── */}
         <div style={{
-          background: `linear-gradient(135deg, ${T.accent}, ${T.purple})`,
-          padding: '28px 32px 24px',
-          textAlign: 'center',
-          position: 'relative',
+          flex: 1,
+          padding: '32px 28px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          minHeight: 0,
         }}>
-          <img
-            src="/badge.png"
-            alt="Atlanta IAM"
-            width="56"
-            height="56"
-            style={{
-              borderRadius: '50%',
-              border: '3px solid rgba(255,255,255,0.2)',
-              marginBottom: 12,
-            }}
-          />
-          <h2 style={{
+          <h3 style={{
             fontFamily: "'Rajdhani', sans-serif",
             fontWeight: 700,
             fontSize: 22,
-            color: '#fff',
-            margin: 0,
-            letterSpacing: '0.03em',
+            color: T.text,
+            margin: '0 0 4px',
+            transition: 'color 0.25s',
           }}>
-            Atlanta IAM
-          </h2>
+            Welcome
+          </h3>
           <p style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: 12,
-            color: 'rgba(255,255,255,0.7)',
-            margin: '4px 0 0',
-            letterSpacing: '0.04em',
-          }}>
-            Identity & Access Management User Group
-          </p>
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            style={{
-              position: 'absolute',
-              top: 12,
-              right: 14,
-              background: 'rgba(255,255,255,0.15)',
-              border: 'none',
-              borderRadius: '50%',
-              width: 28,
-              height: 28,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'rgba(255,255,255,0.8)',
-              fontSize: 16,
-              fontWeight: 700,
-              lineHeight: 1,
-            }}
-          >
-            &times;
-          </button>
-        </div>
-
-        {/* Body */}
-        <div style={{ padding: '24px 28px 20px' }}>
-          <p style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 13,
             color: T.muted,
             margin: '0 0 20px',
-            textAlign: 'center',
             transition: 'color 0.25s',
           }}>
-            Sign in to access events, member directory, and more
+            Sign in to access your account
           </p>
 
           {error && (
@@ -203,7 +253,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
               border: `1px solid ${T.red}44`,
               borderRadius: 8,
               padding: '8px 12px',
-              marginBottom: 16,
+              marginBottom: 14,
               fontFamily: "'Inter', sans-serif",
               fontSize: 12,
               color: T.red,
@@ -212,7 +262,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             </div>
           )}
 
-          {/* Social login buttons — pill style */}
+          {/* Social login buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
             {socialProviders.map(sp => (
               <button
@@ -229,14 +279,14 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
                   padding: '11px 16px',
                   cursor: 'pointer',
                   fontFamily: "'Inter', sans-serif",
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: 600,
                   color: sp.color,
                   transition: 'transform 0.15s, box-shadow 0.15s',
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.transform = 'none';
@@ -254,7 +304,7 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             display: 'flex',
             alignItems: 'center',
             gap: 12,
-            margin: '18px 0',
+            margin: '6px 0 14px',
           }}>
             <div style={{ flex: 1, height: 1, background: T.border, transition: 'background 0.25s' }} />
             <span style={{
@@ -286,11 +336,10 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
               padding: '11px 16px',
               cursor: passkeyLoading ? 'wait' : 'pointer',
               fontFamily: "'Inter', sans-serif",
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 600,
               color: T.accent,
               transition: 'all 0.2s',
-              marginBottom: 0,
             }}
             onMouseEnter={e => {
               e.currentTarget.style.background = T.accentDim;
@@ -310,92 +359,24 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
             {passkeyLoading ? 'Waiting for passkey...' : 'Sign in with Passkey'}
           </button>
 
-          {/* Demo accounts toggle */}
-          <div style={{ borderTop: `1px solid ${T.border}`, marginTop: 20, paddingTop: 12, transition: 'border-color 0.25s' }}>
-            <button
-              onClick={() => setShowDemo(!showDemo)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: T.subtle,
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                fontSize: 10,
-                letterSpacing: '0.1em',
-                cursor: 'pointer',
-                padding: 0,
-                transition: 'color 0.25s',
-                width: '100%',
-                textAlign: 'center',
-              }}
-            >
-              {showDemo ? 'HIDE' : 'SHOW'} DEMO ACCOUNTS
-            </button>
-
-            {showDemo && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
-                {demoAccounts.map(acc => {
-                  const c = T[acc.color];
-                  return (
-                    <button
-                      key={acc.key}
-                      onClick={() => onLogin(acc.key)}
-                      style={{
-                        background: 'transparent',
-                        border: `1px solid ${T.border}`,
-                        borderRadius: 8,
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        transition: 'background 0.2s, border-color 0.2s',
-                        textAlign: 'left',
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.borderColor = c + '66';
-                        e.currentTarget.style.background = c + '08';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.borderColor = T.border;
-                        e.currentTarget.style.background = 'transparent';
-                      }}
-                    >
-                      <div style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: c,
-                        boxShadow: `0 0 6px ${c}66`,
-                        flexShrink: 0,
-                      }} />
-                      <div>
-                        <div style={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 700,
-                          fontSize: 12,
-                          color: T.text,
-                          transition: 'color 0.25s',
-                        }}>
-                          {acc.label}
-                        </div>
-                        <div style={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontSize: 10,
-                          color: T.muted,
-                          transition: 'color 0.25s',
-                        }}>
-                          {acc.sub}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </div>
       </div>
+
+      {/* Responsive: stack on mobile */}
+      <style>{`
+        @media (max-width: 600px) {
+          .auth-modal-container {
+            flex-direction: column !important;
+            width: 92vw !important;
+            max-height: 90vh;
+            overflow-y: auto;
+          }
+          .auth-modal-left {
+            width: 100% !important;
+            padding: 24px 20px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

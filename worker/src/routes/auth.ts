@@ -24,13 +24,6 @@ function getRpOrigin(c: { env: { FRONTEND_URL: string } }): string {
   return c.env.FRONTEND_URL || 'https://atlantaiam.com';
 }
 
-const DEMO_KEYS: Record<string, string> = {
-  admin: 'u1',
-  member: 'u2',
-  saviynt: 'u3',
-  cyberark: 'u4',
-};
-
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // ── Helper: build user payload from DB row ──
@@ -103,23 +96,6 @@ async function createSession(
 
   return sessionId;
 }
-
-// ── Demo login (kept for development) ──
-app.post('/demo-login', async (c) => {
-  const { key } = await c.req.json<{ key: string }>();
-  const userId = DEMO_KEYS[key];
-  if (!userId) return c.json({ error: 'Invalid demo key' }, 400);
-
-  const row = await c.env.DB.prepare(
-    `SELECT ${USER_COLUMNS} FROM users WHERE id = ?`,
-  ).bind(userId).first();
-  if (!row) return c.json({ error: 'User not found' }, 404);
-
-  const user = rowToUser(row);
-  const token = await signToken(user, c.env.JWT_SECRET);
-  await createSession(c.env.DB, user.id, token, c.req.header('user-agent') || '', c.req.header('cf-connecting-ip') || '');
-  return c.json({ token, user });
-});
 
 // ━━━━━━━━━━━━━━━━━━━━━━ OAuth ━━━━━━━━━━━━━━━━━━━━━━
 

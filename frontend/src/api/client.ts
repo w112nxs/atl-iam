@@ -23,13 +23,6 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  // Auth — Demo (kept for dev)
-  demoLogin: (key: string) =>
-    request<{ token: string; user: import('../types').User }>('/auth/demo-login', {
-      method: 'POST',
-      body: JSON.stringify({ key }),
-    }),
-
   // Auth — OAuth redirect URL
   getOAuthUrl: (provider: 'google' | 'github' | 'linkedin') =>
     `${API_BASE}/auth/oauth/${provider}`,
@@ -127,5 +120,23 @@ export const api = {
 
   // Admin
   getAdminEvents: () => request<import('../types').Event[]>('/admin/events'),
+  getAdminMembers: (params?: { q?: string; limit?: number; offset?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.q) qs.set('q', params.q);
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.offset) qs.set('offset', String(params.offset));
+    return request<{ members: import('../types').User[]; total: number; limit: number; offset: number }>(
+      `/users/admin/members?${qs.toString()}`
+    );
+  },
+  getAdminMember: (id: string) => request<import('../types').User>(`/users/admin/members/${id}`),
+  updateAdminMember: (id: string, data: {
+    name?: string; email?: string; role?: string; company?: string;
+    title?: string; phone?: string; userType?: string;
+    firstName?: string; lastName?: string;
+  }) => request<{ success: boolean; user: import('../types').User }>(`/users/admin/members/${id}`, {
+    method: 'PUT', body: JSON.stringify(data),
+  }),
+  deleteAdminMember: (id: string) => request<{ success: boolean }>(`/users/admin/members/${id}`, { method: 'DELETE' }),
 };
 

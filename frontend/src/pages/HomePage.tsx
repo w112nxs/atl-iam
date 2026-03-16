@@ -9,15 +9,8 @@ interface HomePageProps {
   user: User | null;
   onNavigate: (path: string) => void;
   onSignIn: () => void;
-  onLogin: (key: string) => void | Promise<void>;
+  onLogin?: (key: string) => void | Promise<void>;
 }
-
-const demoAccounts = [
-  { key: 'admin', label: 'Admin', color: 'red' as const },
-  { key: 'saviynt', label: 'Saviynt Sponsor', color: 'gold' as const },
-  { key: 'cyberark', label: 'CyberArk Sponsor', color: 'gold' as const },
-  { key: 'member', label: 'Member', color: 'accent' as const },
-];
 
 const aboutCards = [
   {
@@ -59,7 +52,7 @@ const aboutCards = [
   },
 ];
 
-export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps) {
+export function HomePage({ user, onNavigate, onSignIn }: HomePageProps) {
   const { T } = useTheme();
   const { events } = useEvents();
   const nextEvent = events[0];
@@ -495,38 +488,6 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
               </div>
             </Card>
 
-            {/* Demo accounts */}
-            {!user && (
-              <>
-                <SectionLabel text="Demo Accounts" color={T.muted} />
-                <Card>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {demoAccounts.map(acc => (
-                      <button
-                        key={acc.key}
-                        onClick={() => onLogin(acc.key)}
-                        style={{
-                          background: T[acc.color] + '12',
-                          border: `1px solid ${T[acc.color]}33`,
-                          borderRadius: 6,
-                          color: T[acc.color],
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 700,
-                          fontSize: 12,
-                          letterSpacing: '0.04em',
-                          padding: '6px 12px',
-                          cursor: 'pointer',
-                          transition: 'background 0.25s, color 0.25s, border-color 0.25s',
-                          textAlign: 'left',
-                        }}
-                      >
-                        {acc.label}
-                      </button>
-                    ))}
-                  </div>
-                </Card>
-              </>
-            )}
           </div>
         </div>
       </section>

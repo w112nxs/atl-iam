@@ -370,4 +370,109 @@ app.get('/directory/:id', requireAuth, async (c) => {
   return c.json(rowToMemberProfile(row));
 });
 
+// ── Admin: Member Management ──
+
+// List all users (admin — unfiltered, includes all fields)
+app.get('/admin/members', requireAuth, async (c) => {
+  if (c.get('user').role !== 'admin') return c.json({ error: 'Admin access required' }, 403);
+
+  const q = c.req.query('q') || '';
+  const limit = Math.min(Number(c.req.query('limit')) || 50, 200);
+  const offset = Number(c.req.query('offset')) || 0;
+
+  let sql = `SELECT ${USER_COLUMNS} FROM users WHERE 1=1`;
+  const params: unknown[] = [];
+
+  if (q) {
+    sql += ' AND (name LIKE ? OR email LIKE ? OR company LIKE ?)';
+    const term = `%${q}%`;
+    params.push(term, term, term);
+  }
+
+  sql += ' ORDER BY name ASC LIMIT ? OFFSET ?';
+  params.push(limit, offset);
+
+  const rows = await c.env.DB.prepare(sql).bind(...params).all();
+
+  let countSql = 'SELECT COUNT(*) as total FROM users WHERE 1=1';
+  const countParams: unknown[] = [];
+  if (q) {
+    countSql += ' AND (name LIKE ? OR email LIKE ? OR company LIKE ?)';
+    const term = `%${q}%`;
+    countParams.push(term, term, term);
+  }
+  const countRow = await c.env.DB.prepare(countSql).bind(...countParams).first();
+
+  return c.json({
+    members: rows.results.map(r => rowToUser(r)),
+    total: Number(countRow?.total || 0),
+    limit,
+    offset,
+  });
+});
+
+// Get a single user (admin — full profile, no privacy filtering)
+app.get('/admin/members/:id', requireAuth, async (c) => {
+  if (c.get('user').role !== 'admin') return c.json({ error: 'Admin access required' }, 403);
+
+  const id = c.req.param('id');
+  const row = await c.env.DB.prepare(`SELECT ${USER_COLUMNS} FROM users WHERE id = ?`).bind(id).first();
+  if (!row) return c.json({ error: 'User not found' }, 404);
+  return c.json(rowToUser(row));
+});
+
+// Update a user (admin)
+app.put('/admin/members/:id', requireAuth, async (c) => {
+  if (c.get('user').role !== 'admin') return c.json({ error: 'Admin access required' }, 403);
+
+  const id = c.req.param('id');
+  const body = await c.req.json<{
+    name?: string; email?: string; role?: string; company?: string;
+    title?: string; phone?: string; userType?: string;
+    firstName?: string; lastName?: string;
+  }>();
+
+  const updates: string[] = [];
+  const values: unknown[] = [];
+
+  if (body.name !== undefined) { updates.push('name = ?'); values.push(body.name); }
+  if (body.email !== undefined) { updates.push('email = ?'); values.push(body.email.toLowerCase()); }
+  if (body.role !== undefined) { updates.push('role = ?'); values.push(body.role); }
+  if (body.company !== undefined) { updates.push('company = ?'); values.push(body.company); }
+  if (body.title !== undefined) { updates.push('title = ?'); values.push(body.title); }
+  if (body.phone !== undefined) { updates.push('phone = ?'); values.push(body.phone); }
+  if (body.userType !== undefined) { updates.push('user_type = ?'); values.push(body.userType); }
+  if (body.firstName !== undefined) { updates.push('first_name = ?'); values.push(body.firstName); }
+  if (body.lastName !== undefined) { updates.push('last_name = ?'); values.push(body.lastName); }
+
+  if (updates.length === 0) return c.json({ error: 'No fields to update' }, 400);
+
+  values.push(id);
+  await c.env.DB.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`)
+    .bind(...values).run();
+
+  const row = await c.env.DB.prepare(`SELECT ${USER_COLUMNS} FROM users WHERE id = ?`).bind(id).first();
+  if (!row) return c.json({ error: 'User not found' }, 500);
+  return c.json({ success: true, user: rowToUser(row) });
+});
+
+// Delete a user (admin)
+app.delete('/admin/members/:id', requireAuth, async (c) => {
+  if (c.get('user').role !== 'admin') return c.json({ error: 'Admin access required' }, 403);
+
+  const id = c.req.param('id');
+  const adminUser = c.get('user');
+
+  // Prevent self-deletion
+  if (id === adminUser.id) return c.json({ error: 'Cannot delete your own account' }, 400);
+
+  // Delete related data first
+  await c.env.DB.prepare('DELETE FROM user_oauth WHERE user_id = ?').bind(id).run();
+  await c.env.DB.prepare('DELETE FROM user_passkeys WHERE user_id = ?').bind(id).run();
+  await c.env.DB.prepare('DELETE FROM user_sessions WHERE user_id = ?').bind(id).run();
+  await c.env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+
+  return c.json({ success: true });
+});
+
 export default app;

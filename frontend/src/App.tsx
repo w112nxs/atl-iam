@@ -62,7 +62,7 @@ function DevBanner() {
 
 function AppInner() {
   const { T } = useTheme();
-  const { user, login, loginWithToken, logout } = useAuth();
+  const { user, loginWithToken, logout } = useAuth();
   const [path, setPath] = useState(window.location.pathname);
   const [showAuth, setShowAuth] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -78,11 +78,6 @@ function AppInner() {
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
-
-  const handleLogin = useCallback(async (key: string) => {
-    await login(key);
-    setShowAuth(false);
-  }, [login]);
 
   const showToast = useCallback((msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });
@@ -157,7 +152,7 @@ function AppInner() {
   const renderPage = () => {
     switch (path) {
       case '/':
-        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={handleLogin} />;
+        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={() => {}} />;
       case '/about':
         return <AboutPage />;
       case '/events':
@@ -177,7 +172,7 @@ function AppInner() {
       case '/admin':
         return isAdmin ? <AdminView /> : <AccessDenied onNavigate={navigate} />;
       default:
-        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={handleLogin} />;
+        return <HomePage user={user} onNavigate={navigate} onSignIn={() => setShowAuth(true)} onLogin={() => {}} />;
     }
   };
 
@@ -246,7 +241,6 @@ function AppInner() {
 
       {showAuth && (
         <AuthModal
-          onLogin={handleLogin}
           onPasskeyLogin={(token, u) => { loginWithToken(token, u); setShowAuth(false); }}
           onClose={() => setShowAuth(false)}
         />
