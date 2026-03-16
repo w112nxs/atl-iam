@@ -1,7 +1,15 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 
 const router = Router();
+
+router.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+}));
 
 router.get('/me', requireAuth, (req, res) => {
   res.json((req as AuthRequest).user);

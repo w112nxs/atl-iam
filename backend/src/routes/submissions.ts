@@ -1,7 +1,15 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
+
+router.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 50,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+}));
 
 router.post('/speaking', requireAuth, requireRole('member', 'sponsor', 'admin'), (req, res) => {
   const { title, abstract, company, type, coPresenter } = req.body;

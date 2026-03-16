@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { demoUsers, findOrCreateOAuthUser, getUserById, upsertPasskey, getPasskeysByUserId, getPasskeyByCredentialId } from '../data';
 import { signToken, requireAuth, AuthRequest } from '../middleware/auth';
 import {
@@ -10,6 +11,16 @@ import {
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
 
 const router = Router();
+
+// Rate limit auth endpoints — 20 requests per 15 minutes per IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts, please try again later' },
+});
+router.use(authLimiter);
 
 // ---------------------------------------------------------------------------
 // Config

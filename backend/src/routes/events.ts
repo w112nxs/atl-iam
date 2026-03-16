@@ -1,8 +1,16 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { events } from '../data';
 import { requireAuth, requireRole, requireSponsorAccess, AuthRequest } from '../middleware/auth';
 
 const router = Router();
+
+router.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+}));
 
 // Public
 router.get('/', (_req, res) => {
