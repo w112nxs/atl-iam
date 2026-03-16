@@ -373,12 +373,9 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
               <PrivacyToggle T={T} label="Listed in Directory" checked={privacy.privacyListed}
                 onChange={v => savePrivacy({ privacyListed: v })} />
               <div style={{ height: 1, background: T.border, margin: '2px 0', transition: 'background 0.25s' }} />
-              <PrivacyToggle T={T} label="Show Company" checked={privacy.privacyShowCompany}
-                onChange={v => savePrivacy({ privacyShowCompany: v })} disabled={!privacy.privacyListed} />
-              <PrivacyToggle T={T} label="Show Title" checked={privacy.privacyShowTitle}
-                onChange={v => savePrivacy({ privacyShowTitle: v })} disabled={!privacy.privacyListed} />
-              <PrivacyToggle T={T} label="Show User Type" checked={privacy.privacyShowType}
-                onChange={v => savePrivacy({ privacyShowType: v })} disabled={!privacy.privacyListed} />
+              <PrivacyToggle T={T} label="Show Company" checked={true} onChange={() => {}} locked />
+              <PrivacyToggle T={T} label="Show Title" checked={true} onChange={() => {}} locked />
+              <PrivacyToggle T={T} label="Show User Type" checked={true} onChange={() => {}} locked />
               <PrivacyToggle T={T} label="Show Email" checked={privacy.privacyShowEmail}
                 onChange={v => savePrivacy({ privacyShowEmail: v })} disabled={!privacy.privacyListed} />
               <PrivacyToggle T={T} label="Show Phone" checked={privacy.privacyShowPhone}
@@ -473,16 +470,16 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
 
 // ── Sub-components ──
 
-function PrivacyToggle({ T, label, checked, onChange, disabled }: {
+function PrivacyToggle({ T, label, checked, onChange, disabled, locked }: {
   T: import('../types').ThemeTokens;
   label: string; checked: boolean;
-  onChange: (v: boolean) => void; disabled?: boolean;
+  onChange: (v: boolean) => void; disabled?: boolean; locked?: boolean;
 }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '3px 0',
-      opacity: disabled ? 0.35 : 1, pointerEvents: disabled ? 'none' : 'auto',
+      opacity: disabled ? 0.35 : 1, pointerEvents: (disabled || locked) ? 'none' : 'auto',
       transition: 'opacity 0.25s',
     }}>
       <span style={{
@@ -490,12 +487,17 @@ function PrivacyToggle({ T, label, checked, onChange, disabled }: {
         transition: 'color 0.25s',
       }}>
         {label}
+        {locked && (
+          <span style={{ fontSize: 10, color: T.muted, marginLeft: 6 }}>Always visible</span>
+        )}
       </span>
       <div
         onClick={() => onChange(!checked)}
         style={{
-          width: 36, height: 20, borderRadius: 10, cursor: 'pointer',
+          width: 36, height: 20, borderRadius: 10,
+          cursor: locked ? 'default' : 'pointer',
           background: checked ? T.green : T.border,
+          opacity: locked ? 0.5 : 1,
           position: 'relative', transition: 'background 0.25s',
           flexShrink: 0,
         }}
