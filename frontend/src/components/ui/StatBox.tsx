@@ -4,7 +4,13 @@ import { Card } from './Card';
 export function StatBox({ label, value, color, sub }: { label: string; value: string | number; color: string; sub?: string }) {
   const { T } = useTheme();
   return (
-    <Card>
+    <Card style={{
+      borderLeft: `3px solid ${color}`,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      minHeight: 82,
+    }}>
       <div style={{
         fontSize: 10,
         fontFamily: "'Inter', sans-serif",
@@ -27,17 +33,16 @@ export function StatBox({ label, value, color, sub }: { label: string; value: st
       }}>
         {value}
       </div>
-      {sub && (
-        <div style={{
-          fontSize: 11,
-          fontFamily: "'Inter', sans-serif",
-          color: T.muted,
-          marginTop: 3,
-          transition: 'color 0.25s',
-        }}>
-          {sub}
-        </div>
-      )}
+      <div style={{
+        fontSize: 11,
+        fontFamily: "'Inter', sans-serif",
+        color: T.muted,
+        marginTop: 3,
+        minHeight: 16,
+        transition: 'color 0.25s',
+      }}>
+        {sub || '\u00A0'}
+      </div>
     </Card>
   );
 }
