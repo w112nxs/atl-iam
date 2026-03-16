@@ -24,6 +24,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'standards',
       title: '2. Expected Behavior',
+      accent: T.green,
       content: (
         <>
           <h2 style={S.h2}>2. Expected Behavior</h2>
@@ -93,6 +94,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'events',
       title: '5. Event-Specific Guidelines',
+      accent: T.purple,
       content: (
         <>
           <h2 style={S.h2}>5. Event-Specific Guidelines</h2>
@@ -119,6 +121,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'online',
       title: '6. Online Conduct',
+      accent: T.accent,
       content: (
         <>
           <h2 style={S.h2}>6. Online Conduct</h2>
@@ -139,6 +142,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'data-ethics',
       title: '7. Data Ethics',
+      accent: T.purple,
       content: (
         <>
           <h2 style={S.h2}>7. Data Ethics</h2>
@@ -190,6 +194,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'enforcement',
       title: '9. Enforcement',
+      accent: T.gold,
       content: (
         <>
           <h2 style={S.h2}>9. Enforcement Actions</h2>
@@ -225,6 +230,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'speakers',
       title: '10. Speaker Responsibilities',
+      accent: T.muted,
       content: (
         <>
           <h2 style={S.h2}>10. Speaker Responsibilities</h2>
@@ -246,6 +252,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'scope',
       title: '11. Scope',
+      accent: T.muted,
       content: (
         <>
           <h2 style={S.h2}>11. Scope</h2>

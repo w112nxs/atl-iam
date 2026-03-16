@@ -8,6 +8,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'agreement',
       title: '1. Agreement to Terms',
+      accent: T.accent,
       content: (
         <>
           <h2 style={S.h2}>1. Agreement to Terms</h2>
@@ -23,6 +24,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'whoweare',
       title: '2. Who We Are',
+      accent: T.accent,
       content: (
         <>
           <h2 style={S.h2}>2. Who We Are</h2>
@@ -38,6 +40,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'accounts',
       title: '3. User Accounts',
+      accent: T.purple,
       content: (
         <>
           <h2 style={S.h2}>3. User Accounts</h2>
@@ -91,6 +94,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'events',
       title: '5. Events & Attendance',
+      accent: T.green,
       content: (
         <>
           <h2 style={S.h2}>5. Events & Attendance</h2>
@@ -141,6 +145,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'data-privacy',
       title: '7. Data & Privacy',
+      accent: T.green,
       content: (
         <>
           <h2 style={S.h2}>7. Data & Privacy</h2>
@@ -167,6 +172,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'ip',
       title: '8. Intellectual Property',
+      accent: T.purple,
       content: (
         <>
           <h2 style={S.h2}>8. Intellectual Property</h2>
@@ -188,6 +194,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'conduct',
       title: '9. Acceptable Use',
+      accent: T.red,
       content: (
         <>
           <h2 style={S.h2}>9. Acceptable Use</h2>
@@ -210,6 +217,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'termination',
       title: '10. Termination',
+      accent: T.muted,
       content: (
         <>
           <h2 style={S.h2}>10. Termination</h2>
@@ -227,6 +235,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'liability',
       title: '11. Disclaimers & Liability',
+      accent: T.gold,
       content: (
         <>
           <h2 style={S.h2}>11. Disclaimers & Liability</h2>
@@ -248,6 +257,7 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
     {
       id: 'governing',
       title: '12. Governing Law',
+      accent: T.muted,
       content: (
         <>
           <h2 style={S.h2}>12. Governing Law & Disputes</h2>
