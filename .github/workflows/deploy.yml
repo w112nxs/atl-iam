@@ -68,6 +68,14 @@ jobs:
         working-directory: worker
         run: npm ci
 
+      - name: Run D1 migrations
+        uses: cloudflare/wrangler-action@v3.14
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: d1 execute atlanta-iam-db --remote --file=src/db/migration-010-invites.sql
+
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3.14
         with:
