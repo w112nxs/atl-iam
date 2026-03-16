@@ -68,6 +68,8 @@ export const api = {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
+  getPasskeys: () => request<{ credentialId: string; createdAt: string }[]>('/users/me/passkeys'),
+  deletePasskey: (credentialId: string) => request<{ success: boolean }>(`/users/me/passkeys/${encodeURIComponent(credentialId)}`, { method: 'DELETE' }),
   getProviders: () => request<{ provider: string; connectedAt: string }[]>('/users/me/providers'),
   updatePrivacy: (data: {
     privacyShowEmail?: boolean; privacyShowPhone?: boolean;

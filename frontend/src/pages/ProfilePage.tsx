@@ -18,6 +18,8 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
   const { T, isDark, isAuto, resetToSystem } = useTheme();
   const [passkeyStatus, setPasskeyStatus] = useState<'idle' | 'registering' | 'done' | 'error'>('idle');
   const [passkeyError, setPasskeyError] = useState('');
+  const [passkeys, setPasskeys] = useState<{ credentialId: string; createdAt: string }[]>([]);
+  const [passkeysLoading, setPasskeysLoading] = useState(true);
   const [privacySaving, setPrivacySaving] = useState(false);
   const [providers, setProviders] = useState<{ provider: string; connectedAt: string }[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -36,6 +38,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
   useEffect(() => {
     api.getProviders().then(setProviders).catch(() => {});
     api.getSessions().then(s => { setSessions(s); setSessionsLoading(false); }).catch(() => setSessionsLoading(false));
+    api.getPasskeys().then(p => { setPasskeys(p); setPasskeysLoading(false); }).catch(() => setPasskeysLoading(false));
   }, []);
 
   const revokeSession = async (id: string) => {
@@ -77,8 +80,14 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
       payload._challengeId = challengeId;
 
       const result = await api.passkeyRegisterVerify(payload);
-      setPasskeyStatus(result.verified ? 'done' : 'error');
-      if (!result.verified) setPasskeyError('Verification returned false');
+      if (result.verified) {
+        setPasskeyStatus('done');
+        // Refresh passkey list
+        api.getPasskeys().then(setPasskeys).catch(() => {});
+      } else {
+        setPasskeyStatus('error');
+        setPasskeyError('Verification returned false');
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       if (msg.includes('NotAllowedError') || msg.includes('abort')) {
@@ -314,17 +323,73 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
             )}
           </Card>
 
-          {/* Passkey */}
-          <SectionLabel text="Passkey" color={T.accent} />
+          {/* Passkeys */}
+          <SectionLabel text="Passkeys" color={T.accent} />
           <Card>
             <div style={{
               fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text,
               marginBottom: 10, transition: 'color 0.25s',
             }}>
-              Register a passkey for passwordless sign-in using Touch ID, Face ID, or Windows Hello.
+              Passwordless sign-in using Touch ID, Face ID, or Windows Hello.
             </div>
+
+            {/* Registered passkeys list */}
+            {passkeysLoading ? (
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, marginBottom: 10 }}>
+                Loading...
+              </div>
+            ) : passkeys.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+                {passkeys.map((pk, i) => (
+                  <div key={pk.credentialId} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '8px 10px',
+                    background: T.greenDim,
+                    border: `1px solid ${T.green}33`,
+                    borderRadius: 8, transition: 'all 0.25s',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"/>
+                        <circle cx="16.5" cy="7.5" r=".5" fill={T.green}/>
+                      </svg>
+                      <div>
+                        <div style={{
+                          fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600,
+                          color: T.text, transition: 'color 0.25s',
+                        }}>
+                          Passkey {passkeys.length > 1 ? i + 1 : ''}
+                        </div>
+                        <div style={{
+                          fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.muted,
+                        }}>
+                          Registered {new Date(pk.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        await api.deletePasskey(pk.credentialId);
+                        setPasskeys(prev => prev.filter(p => p.credentialId !== pk.credentialId));
+                      }}
+                      style={{
+                        background: 'transparent', border: `1px solid ${T.red}44`,
+                        borderRadius: 5, padding: '3px 10px', cursor: 'pointer',
+                        fontFamily: "'Inter', sans-serif", fontSize: 9, fontWeight: 700,
+                        color: T.red, letterSpacing: '0.06em', flexShrink: 0,
+                        transition: 'all 0.25s',
+                      }}
+                    >
+                      REMOVE
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Register new passkey button */}
             <button
-              onClick={registerPasskey}
+              onClick={() => { setPasskeyStatus('idle'); registerPasskey(); }}
               disabled={passkeyStatus === 'registering'}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
@@ -341,7 +406,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
                 <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"/>
                 <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>
               </svg>
-              {passkeyStatus === 'idle' && 'REGISTER PASSKEY'}
+              {passkeyStatus === 'idle' && (passkeys.length > 0 ? 'ADD ANOTHER PASSKEY' : 'REGISTER PASSKEY')}
               {passkeyStatus === 'registering' && 'WAITING FOR BIOMETRIC...'}
               {passkeyStatus === 'done' && 'PASSKEY REGISTERED'}
               {passkeyStatus === 'error' && 'FAILED — TAP TO RETRY'}

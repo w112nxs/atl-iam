@@ -205,6 +205,28 @@ app.put('/me/profile', requireAuth, async (c) => {
   return c.json({ success: true, user: rowToUser(row) });
 });
 
+// Get registered passkeys
+app.get('/me/passkeys', requireAuth, async (c) => {
+  const user = c.get('user');
+  const rows = await c.env.DB.prepare(
+    'SELECT credential_id, created_at FROM user_passkeys WHERE user_id = ?',
+  ).bind(user.id).all();
+  return c.json(rows.results.map(r => ({
+    credentialId: r.credential_id,
+    createdAt: r.created_at,
+  })));
+});
+
+// Delete a passkey
+app.delete('/me/passkeys/:credentialId', requireAuth, async (c) => {
+  const user = c.get('user');
+  const credentialId = c.req.param('credentialId');
+  await c.env.DB.prepare(
+    'DELETE FROM user_passkeys WHERE credential_id = ? AND user_id = ?',
+  ).bind(credentialId, user.id).run();
+  return c.json({ success: true });
+});
+
 // Get connected identity providers
 app.get('/me/providers', requireAuth, async (c) => {
   const user = c.get('user');
