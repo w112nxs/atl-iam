@@ -50,7 +50,7 @@ export function TermsModal({ onAccept, onDecline }: TermsModalProps) {
         border: `1px solid ${T.border}`,
         borderRadius: 16,
         width: 520,
-        maxWidth: '95vw',
+        maxWidth: '92vw',
         maxHeight: '85vh',
         display: 'flex',
         flexDirection: 'column',

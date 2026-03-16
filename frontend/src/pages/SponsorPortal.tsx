@@ -95,7 +95,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 24 }}>◆</span>
         <h1 style={{
           fontFamily: "'Inter', sans-serif",
@@ -245,7 +245,8 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
                 fontSize: 13,
                 outline: 'none',
                 width: '100%',
-                maxWidth: 300,
+                maxWidth: 340,
+                minWidth: 0,
                 transition: 'background 0.25s, color 0.25s, border-color 0.25s',
               }}
             />
@@ -296,7 +297,7 @@ export function SponsorPortal({ user, onToast }: SponsorPortalProps) {
 
           {/* Table */}
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
               <thead>
                 <tr>
                   {(() => {

@@ -18,8 +18,8 @@ export function StatBox({ label, value, color, sub }: { label: string; value: st
         {label}
       </div>
       <div style={{
-        fontSize: 26,
-        fontFamily: "'Inter', sans-serif",
+        fontSize: 'clamp(20px, 3vw, 26px)',
+        fontFamily: "'Rajdhani', sans-serif",
         fontWeight: 700,
         color,
         lineHeight: 1,

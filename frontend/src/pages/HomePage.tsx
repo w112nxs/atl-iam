@@ -93,7 +93,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
           pointerEvents: 'none',
         }} />
 
-        <div className="grid-sidebar" style={{
+        <div className="grid-sidebar hero-gap" style={{
           display: 'grid',
           gridTemplateColumns: '1fr auto',
           gap: 60,
@@ -541,7 +541,7 @@ export function HomePage({ user, onNavigate, onSignIn, onLogin }: HomePageProps)
 
       {/* ─── SIDEBAR CONTENT ─── */}
       <section style={{ padding: '0 0 48px', width: '90%', margin: '0 auto' }}>
-        <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16, alignItems: 'start' }}>
+        <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr minmax(0, 340px)', gap: 16, alignItems: 'start' }}>
 
           {/* Left: Community rules + quick actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

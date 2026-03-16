@@ -88,7 +88,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
           }}>
             PRESENTER TYPE
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {[
               { val: 'enterprise' as const, label: 'Enterprise Leader' },
               { val: 'copresenter' as const, label: 'Co-Presenter (Vendor + Enterprise)' },
@@ -154,7 +154,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Abstract</label>
-          <textarea value={abstract} onChange={e => setAbstract(e.target.value)} rows={5} style={{ ...inputStyle, resize: 'vertical' }} />
+          <textarea value={abstract} onChange={e => setAbstract(e.target.value)} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
         </div>
 
         <button

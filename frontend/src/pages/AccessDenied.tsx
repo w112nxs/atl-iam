@@ -6,7 +6,7 @@ export function AccessDenied({ onNavigate }: { onNavigate: (path: string) => voi
     <div style={{
       width: '90%',
       maxWidth: 500,
-      margin: '80px auto',
+      margin: 'clamp(40px, 10vw, 80px) auto',
       textAlign: 'center',
     }}>
       <h1 style={{

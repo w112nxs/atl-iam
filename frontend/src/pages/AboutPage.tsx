@@ -14,7 +14,7 @@ export function AboutPage() {
 
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
-      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
+      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr minmax(0, 320px)', gap: 24, alignItems: 'start' }}>
         {/* Main content */}
         <div>
           <h1 style={{

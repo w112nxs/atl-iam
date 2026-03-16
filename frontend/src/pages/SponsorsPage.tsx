@@ -46,7 +46,7 @@ export function SponsorsPage() {
         Sponsors
       </h1>
 
-      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
+      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr minmax(0, 320px)', gap: 24, alignItems: 'start' }}>
         {/* Main: Sponsor cards */}
         <div>
           {tiers.filter(t => t.items.length > 0).map(tier => (

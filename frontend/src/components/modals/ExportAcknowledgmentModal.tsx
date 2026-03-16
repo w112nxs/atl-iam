@@ -34,9 +34,9 @@ export function ExportAcknowledgmentModal({ tier, attendeeCount, onConfirm, onCl
           background: T.card,
           border: `1px solid ${T.amber}44`,
           borderRadius: 16,
-          padding: 28,
+          padding: 'clamp(20px, 5vw, 28px)',
           width: 420,
-          maxWidth: '90vw',
+          maxWidth: '92vw',
           transition: 'background 0.25s, border-color 0.25s',
         }}
       >

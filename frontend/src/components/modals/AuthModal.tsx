@@ -112,9 +112,9 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
           background: T.card,
           border: `1px solid ${T.border}`,
           borderRadius: 16,
-          padding: 32,
+          padding: 'clamp(20px, 5vw, 32px)',
           width: 400,
-          maxWidth: '90vw',
+          maxWidth: '92vw',
           transition: 'background 0.25s, border-color 0.25s',
         }}
       >
