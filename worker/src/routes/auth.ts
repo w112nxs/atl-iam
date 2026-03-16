@@ -11,8 +11,18 @@ import type { Bindings, Variables } from '../types';
 import { requireAuth } from '../middleware/auth';
 
 const RP_NAME = 'Atlanta IAM';
-const RP_ID = 'atlantaiam.com';
-const RP_ORIGIN = 'https://atlantaiam.com';
+
+function getRpId(c: { env: { FRONTEND_URL: string } }): string {
+  try {
+    return new URL(c.env.FRONTEND_URL).hostname;
+  } catch {
+    return 'atlantaiam.com';
+  }
+}
+
+function getRpOrigin(c: { env: { FRONTEND_URL: string } }): string {
+  return c.env.FRONTEND_URL || 'https://atlantaiam.com';
+}
 
 const DEMO_KEYS: Record<string, string> = {
   admin: 'u1',
@@ -195,7 +205,7 @@ app.post('/passkey/register-options', requireAuth, async (c) => {
 
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
-    rpID: RP_ID,
+    rpID: getRpId(c),
     userName: user.email,
     userDisplayName: user.name,
     attestationType: 'none',
@@ -238,8 +248,8 @@ app.post('/passkey/register-verify', requireAuth, async (c) => {
     const verification = await verifyRegistrationResponse({
       response: credential,
       expectedChallenge,
-      expectedOrigin: RP_ORIGIN,
-      expectedRPID: RP_ID,
+      expectedOrigin: getRpOrigin(c),
+      expectedRPID: getRpId(c),
     });
 
     if (!verification.verified || !verification.registrationInfo) {
@@ -248,13 +258,19 @@ app.post('/passkey/register-verify', requireAuth, async (c) => {
 
     const { credential: cred, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
 
+    // Encode public key to base64 (works in Workers without Node Buffer)
+    const pubKeyBytes = new Uint8Array(cred.publicKey);
+    let pubKeyB64 = '';
+    for (const b of pubKeyBytes) pubKeyB64 += String.fromCharCode(b);
+    pubKeyB64 = btoa(pubKeyB64);
+
     // Store the credential
     await c.env.DB.prepare(
       'INSERT INTO user_passkeys (credential_id, user_id, public_key, counter, transports) VALUES (?, ?, ?, ?, ?)',
     ).bind(
       cred.id,
       user.id,
-      Buffer.from(cred.publicKey).toString('base64'),
+      pubKeyB64,
       cred.counter,
       JSON.stringify(credential.response?.transports || []),
     ).run();
@@ -262,6 +278,8 @@ app.post('/passkey/register-verify', requireAuth, async (c) => {
     return c.json({ verified: true, deviceType: credentialDeviceType, backedUp: credentialBackedUp });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Verification failed';
+    const stack = err instanceof Error ? err.stack : '';
+    console.error('Passkey register-verify error:', msg, stack);
     return c.json({ error: msg, verified: false }, 400);
   }
 });
@@ -269,7 +287,7 @@ app.post('/passkey/register-verify', requireAuth, async (c) => {
 // Authenticate: Generate options (no auth required — this is the login flow)
 app.post('/passkey/auth-options', async (c) => {
   const options = await generateAuthenticationOptions({
-    rpID: RP_ID,
+    rpID: getRpId(c),
     userVerification: 'preferred',
   });
 
@@ -318,11 +336,11 @@ app.post('/passkey/auth-verify', async (c) => {
     const verification = await verifyAuthenticationResponse({
       response: credential,
       expectedChallenge: challenge,
-      expectedOrigin: RP_ORIGIN,
-      expectedRPID: RP_ID,
+      expectedOrigin: getRpOrigin(c),
+      expectedRPID: getRpId(c),
       credential: {
         id: String(storedCred.credential_id),
-        publicKey: new Uint8Array(Buffer.from(String(storedCred.public_key), 'base64')),
+        publicKey: Uint8Array.from(atob(String(storedCred.public_key)), c => c.charCodeAt(0)),
         counter: Number(storedCred.counter),
         transports: JSON.parse(String(storedCred.transports || '[]')),
       },
