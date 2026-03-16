@@ -8,6 +8,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'intro',
       title: '1. Introduction',
+      accent: T.accent,
       content: (
         <>
           <h2 style={S.h2}>1. Introduction</h2>
@@ -26,6 +27,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'collection',
       title: '2. Information We Collect',
+      accent: T.purple,
       content: (
         <>
           <h2 style={S.h2}>2. Information We Collect</h2>
@@ -53,6 +55,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'usage',
       title: '3. How We Use Your Data',
+      accent: T.accent,
       content: (
         <>
           <h2 style={S.h2}>3. How We Use Your Data</h2>
@@ -125,6 +128,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'directory',
       title: '5. Directory & Privacy Controls',
+      accent: T.green,
       content: (
         <>
           <h2 style={S.h2}>5. Directory & Privacy Controls</h2>
@@ -142,6 +146,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'auth',
       title: '6. Authentication & Security',
+      accent: T.purple,
       content: (
         <>
           <h2 style={S.h2}>6. Authentication & Security</h2>
@@ -163,6 +168,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'storage',
       title: '7. Storage & Retention',
+      accent: T.accent,
       content: (
         <>
           <h2 style={S.h2}>7. Storage & Retention</h2>
@@ -194,6 +200,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'cookies',
       title: '8. Cookies & Local Storage',
+      accent: T.purple,
       content: (
         <>
           <h2 style={S.h2}>8. Cookies & Local Storage</h2>
@@ -225,6 +232,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'comms',
       title: '9. Communications',
+      accent: T.gold,
       content: (
         <>
           <h2 style={S.h2}>9. Communication Preferences</h2>
@@ -242,6 +250,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'thirdparty',
       title: '10. Third-Party Services',
+      accent: T.muted,
       content: (
         <>
           <h2 style={S.h2}>10. Third-Party Services</h2>
@@ -281,6 +290,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
     {
       id: 'misc',
       title: '12. Additional Provisions',
+      accent: T.muted,
       content: (
         <>
           <h2 style={S.h2}>12. Additional Provisions</h2>
