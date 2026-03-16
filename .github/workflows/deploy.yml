@@ -76,6 +76,16 @@ jobs:
           workingDirectory: worker
           command: d1 execute atlanta-iam-db --remote --file=src/db/migration-010-invites.sql
 
+      - name: Set LinkedIn secrets
+        working-directory: worker
+        run: |
+          echo '{"LINKEDIN_CLIENT_ID":"'"$LINKEDIN_CLIENT_ID"'","LINKEDIN_CLIENT_SECRET":"'"$LINKEDIN_CLIENT_SECRET"'"}' | npx wrangler secret bulk
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
+          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
+
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3.14
         with:
