@@ -48,6 +48,18 @@ export interface User {
   privacyShowLinkedin?: boolean;
   privacyShowType?: boolean;
   privacyListed?: boolean;
+  lastLogin?: string;
+}
+
+export interface Session {
+  id: string;
+  device: string;
+  browser: string;
+  os: string;
+  ip: string;
+  createdAt: string;
+  lastActive: string;
+  current: boolean;
 }
 
 export interface MemberProfile {

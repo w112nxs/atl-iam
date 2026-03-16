@@ -97,6 +97,11 @@ export const api = {
   },
   getMember: (id: string) => request<import('../types').MemberProfile>(`/users/directory/${id}`),
 
+  // Sessions
+  getSessions: () => request<import('../types').Session[]>('/users/me/sessions'),
+  revokeSession: (sessionId: string) => request<{ success: boolean }>(`/users/me/sessions/${sessionId}`, { method: 'DELETE' }),
+  revokeOtherSessions: () => request<{ success: boolean }>('/users/me/sessions', { method: 'DELETE' }),
+
   // Events
   getEvents: () => request<import('../types').Event[]>('/events'),
   getEventAttendees: (eventId: string) =>

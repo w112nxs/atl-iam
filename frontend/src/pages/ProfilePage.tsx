@@ -6,7 +6,7 @@ import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { api } from '../api/client';
-import type { User } from '../types';
+import type { User, Session } from '../types';
 
 interface ProfilePageProps {
   user: User;
@@ -20,6 +20,8 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
   const [passkeyError, setPasskeyError] = useState('');
   const [privacySaving, setPrivacySaving] = useState(false);
   const [providers, setProviders] = useState<{ provider: string; connectedAt: string }[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
 
   const [privacy, setPrivacy] = useState({
     privacyShowEmail: user.privacyShowEmail ?? false,
@@ -33,7 +35,18 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
 
   useEffect(() => {
     api.getProviders().then(setProviders).catch(() => {});
+    api.getSessions().then(s => { setSessions(s); setSessionsLoading(false); }).catch(() => setSessionsLoading(false));
   }, []);
+
+  const revokeSession = async (id: string) => {
+    await api.revokeSession(id);
+    setSessions(prev => prev.filter(s => s.id !== id));
+  };
+
+  const revokeOthers = async () => {
+    await api.revokeOtherSessions();
+    setSessions(prev => prev.filter(s => s.current));
+  };
 
   const savePrivacy = useCallback(async (updates: Partial<typeof privacy>) => {
     const newPrivacy = { ...privacy, ...updates };
@@ -79,12 +92,17 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
 
   const roleColor = user.role === 'admin' ? T.red : user.role === 'sponsor' ? T.gold : T.accent;
 
+  const lastLoginFormatted = user.lastLogin
+    ? new Date(user.lastLogin + 'Z').toLocaleString()
+    : '—';
+
   const accountRows = [
     { label: 'Name', value: user.name },
     { label: 'Email', value: user.email },
     { label: 'Company', value: user.company || '—' },
     { label: 'Type', value: user.userType === 'enterprise' ? 'Enterprise' : user.userType === 'vendor' ? 'Vendor' : '—' },
     { label: 'Role', value: user.role },
+    { label: 'Last Login', value: lastLoginFormatted },
   ];
 
   const allProviders: { id: 'google' | 'github' | 'linkedin'; label: string; color: string; bg: string }[] = [
@@ -210,6 +228,90 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
                 );
               })}
             </div>
+          </Card>
+
+          {/* Active Sessions */}
+          <SectionLabel text="Active Sessions" color={T.green} />
+          <Card>
+            {sessionsLoading ? (
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted }}>
+                Loading sessions...
+              </div>
+            ) : sessions.length === 0 ? (
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted }}>
+                No active sessions found.
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {sessions.map(s => (
+                    <div key={s.id} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '8px 10px',
+                      background: s.current ? T.greenDim : 'transparent',
+                      border: `1px solid ${s.current ? T.green + '33' : T.border}`,
+                      borderRadius: 8, transition: 'all 0.25s',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                        <div style={{ fontSize: 18, flexShrink: 0 }}>
+                          {s.device === 'Mobile' ? '📱' : s.device === 'Tablet' ? '📱' : '💻'}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{
+                            fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600,
+                            color: T.text, transition: 'color 0.25s',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {s.browser} on {s.os}
+                            {s.current && (
+                              <span style={{ color: T.green, marginLeft: 6, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em' }}>
+                                THIS DEVICE
+                              </span>
+                            )}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.muted,
+                            transition: 'color 0.25s',
+                          }}>
+                            {s.ip && `${s.ip} · `}
+                            {new Date(s.lastActive + 'Z').toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                      {!s.current && (
+                        <button
+                          onClick={() => revokeSession(s.id)}
+                          style={{
+                            background: 'transparent', border: `1px solid ${T.red}44`,
+                            borderRadius: 5, padding: '3px 10px', cursor: 'pointer',
+                            fontFamily: "'Inter', sans-serif", fontSize: 9, fontWeight: 700,
+                            color: T.red, letterSpacing: '0.06em', flexShrink: 0,
+                            transition: 'all 0.25s',
+                          }}
+                        >
+                          REVOKE
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {sessions.filter(s => !s.current).length > 0 && (
+                  <button
+                    onClick={revokeOthers}
+                    style={{
+                      width: '100%', marginTop: 10, padding: '8px 0',
+                      background: 'transparent', border: `1px solid ${T.red}33`,
+                      borderRadius: 6, cursor: 'pointer',
+                      fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
+                      color: T.red, letterSpacing: '0.06em',
+                      transition: 'all 0.25s',
+                    }}
+                  >
+                    REVOKE ALL OTHER SESSIONS
+                  </button>
+                )}
+              </>
+            )}
           </Card>
 
           {/* Passkey */}

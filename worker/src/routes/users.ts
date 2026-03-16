@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { requireAuth } from '../middleware/auth';
 import type { Bindings, Variables } from '../types';
 
-const USER_COLUMNS = 'id, name, email, role, company, sponsor_id, terms_accepted, avatar_url, first_name, last_name, phone, user_type, work_email, consent_email, consent_text, consent_data_sharing, linkedin_url, onboarding_complete, title, privacy_show_email, privacy_show_phone, privacy_show_company, privacy_show_title, privacy_show_linkedin, privacy_show_type, privacy_listed';
+const USER_COLUMNS = 'id, name, email, role, company, sponsor_id, terms_accepted, avatar_url, first_name, last_name, phone, user_type, work_email, consent_email, consent_text, consent_data_sharing, linkedin_url, onboarding_complete, title, privacy_show_email, privacy_show_phone, privacy_show_company, privacy_show_title, privacy_show_linkedin, privacy_show_type, privacy_listed, last_login';
 
 function rowToUser(row: Record<string, unknown>) {
   return {
@@ -32,6 +32,7 @@ function rowToUser(row: Record<string, unknown>) {
     privacyShowLinkedin: Boolean(row.privacy_show_linkedin ?? 1),
     privacyShowType: Boolean(row.privacy_show_type ?? 1),
     privacyListed: Boolean(row.privacy_listed ?? 1),
+    lastLogin: String(row.last_login || ''),
   };
 }
 
@@ -211,6 +212,64 @@ app.get('/me/providers', requireAuth, async (c) => {
     'SELECT provider, created_at FROM user_oauth WHERE user_id = ?',
   ).bind(user.id).all();
   return c.json(rows.results.map(r => ({ provider: r.provider, connectedAt: r.created_at })));
+});
+
+// ── Sessions ──
+
+// List active sessions
+app.get('/me/sessions', requireAuth, async (c) => {
+  const user = c.get('user');
+
+  // Hash current token to identify which session is "this one"
+  const currentToken = c.req.header('authorization')?.replace('Bearer ', '') || '';
+  const encoder = new TextEncoder();
+  const hashBuf = await crypto.subtle.digest('SHA-256', encoder.encode(currentToken));
+  const hashArr = new Uint8Array(hashBuf);
+  let currentHash = '';
+  for (const b of hashArr) currentHash += b.toString(16).padStart(2, '0');
+
+  const rows = await c.env.DB.prepare(
+    'SELECT id, device, browser, os, ip, created_at, last_active, token_hash FROM user_sessions WHERE user_id = ? ORDER BY last_active DESC',
+  ).bind(user.id).all();
+
+  return c.json(rows.results.map(r => ({
+    id: r.id,
+    device: r.device,
+    browser: r.browser,
+    os: r.os,
+    ip: r.ip,
+    createdAt: r.created_at,
+    lastActive: r.last_active,
+    current: r.token_hash === currentHash,
+  })));
+});
+
+// Revoke a session
+app.delete('/me/sessions/:sessionId', requireAuth, async (c) => {
+  const user = c.get('user');
+  const sessionId = c.req.param('sessionId');
+  await c.env.DB.prepare(
+    'DELETE FROM user_sessions WHERE id = ? AND user_id = ?',
+  ).bind(sessionId, user.id).run();
+  return c.json({ success: true });
+});
+
+// Revoke all other sessions
+app.delete('/me/sessions', requireAuth, async (c) => {
+  const user = c.get('user');
+
+  // Hash current token to keep this session
+  const currentToken = c.req.header('authorization')?.replace('Bearer ', '') || '';
+  const encoder = new TextEncoder();
+  const hashBuf = await crypto.subtle.digest('SHA-256', encoder.encode(currentToken));
+  const hashArr = new Uint8Array(hashBuf);
+  let currentHash = '';
+  for (const b of hashArr) currentHash += b.toString(16).padStart(2, '0');
+
+  await c.env.DB.prepare(
+    'DELETE FROM user_sessions WHERE user_id = ? AND token_hash != ?',
+  ).bind(user.id, currentHash).run();
+  return c.json({ success: true });
 });
 
 // ── Member Directory ──

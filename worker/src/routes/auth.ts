@@ -59,6 +59,51 @@ function rowToUser(row: Record<string, unknown>) {
   };
 }
 
+// Parse User-Agent into device/browser/os
+function parseUA(ua: string): { device: string; browser: string; os: string } {
+  let browser = 'Unknown';
+  let os = 'Unknown';
+  let device = 'Desktop';
+
+  // OS
+  if (ua.includes('iPhone') || ua.includes('iPad')) { os = 'iOS'; device = ua.includes('iPad') ? 'Tablet' : 'Mobile'; }
+  else if (ua.includes('Android')) { os = 'Android'; device = ua.includes('Mobile') ? 'Mobile' : 'Tablet'; }
+  else if (ua.includes('Mac OS')) os = 'macOS';
+  else if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Linux')) os = 'Linux';
+  else if (ua.includes('CrOS')) os = 'ChromeOS';
+
+  // Browser
+  if (ua.includes('Edg/')) browser = 'Edge';
+  else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Chrome';
+  else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Safari';
+  else if (ua.includes('Firefox/')) browser = 'Firefox';
+
+  return { device, browser, os };
+}
+
+// Create a session record and update last_login
+async function createSession(
+  db: D1Database, userId: string, token: string, ua: string, ip: string,
+) {
+  const { device, browser, os } = parseUA(ua);
+  // Simple hash for token (not crypto-grade, just for lookup)
+  const encoder = new TextEncoder();
+  const hashBuf = await crypto.subtle.digest('SHA-256', encoder.encode(token));
+  const hashArr = new Uint8Array(hashBuf);
+  let tokenHash = '';
+  for (const b of hashArr) tokenHash += b.toString(16).padStart(2, '0');
+
+  const sessionId = crypto.randomUUID();
+  await db.prepare(
+    'INSERT INTO user_sessions (id, user_id, token_hash, device, browser, os, ip) VALUES (?, ?, ?, ?, ?, ?, ?)',
+  ).bind(sessionId, userId, tokenHash, device, browser, os, ip).run();
+
+  await db.prepare("UPDATE users SET last_login = datetime('now') WHERE id = ?").bind(userId).run();
+
+  return sessionId;
+}
+
 // ── Demo login (kept for development) ──
 app.post('/demo-login', async (c) => {
   const { key } = await c.req.json<{ key: string }>();
@@ -72,6 +117,7 @@ app.post('/demo-login', async (c) => {
 
   const user = rowToUser(row);
   const token = await signToken(user, c.env.JWT_SECRET);
+  await createSession(c.env.DB, user.id, token, c.req.header('user-agent') || '', c.req.header('cf-connecting-ip') || '');
   return c.json({ token, user });
 });
 
@@ -177,6 +223,7 @@ app.get('/oauth/:provider/callback', async (c) => {
 
     const user = rowToUser(row);
     const token = await signToken(user, c.env.JWT_SECRET);
+    await createSession(c.env.DB, user.id, token, c.req.header('user-agent') || '', c.req.header('cf-connecting-ip') || '');
 
     // Redirect to frontend with token in URL hash (not visible to server)
     return c.redirect(`${c.env.FRONTEND_URL}/#token=${token}`);
@@ -364,6 +411,7 @@ app.post('/passkey/auth-verify', async (c) => {
 
     const user = rowToUser(row);
     const token = await signToken(user, c.env.JWT_SECRET);
+    await createSession(c.env.DB, user.id, token, c.req.header('user-agent') || '', c.req.header('cf-connecting-ip') || '');
 
     return c.json({ verified: true, token, user });
   } catch (err) {
