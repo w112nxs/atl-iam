@@ -49,6 +49,7 @@ export interface User {
   privacyShowType?: boolean;
   privacyListed?: boolean;
   lastLogin?: string;
+  profileUpdatedAt?: string;
 }
 
 export interface Session {

@@ -112,6 +112,9 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
     { label: 'Type', value: user.userType === 'enterprise' ? 'Enterprise' : user.userType === 'vendor' ? 'Vendor' : '—' },
     { label: 'Role', value: user.role },
     { label: 'Last Login', value: lastLoginFormatted },
+    { label: 'Profile Updated', value: user.profileUpdatedAt
+      ? new Date(user.profileUpdatedAt + 'Z').toLocaleDateString()
+      : '—' },
   ];
 
   const allProviders: { id: 'google' | 'github' | 'linkedin'; label: string; color: string; bg: string }[] = [

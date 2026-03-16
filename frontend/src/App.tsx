@@ -131,6 +131,29 @@ function AppInner() {
   const isSponsor = user && ['sponsor', 'admin'].includes(user.role);
   const isAdmin = user?.role === 'admin';
 
+  // Profile staleness check — prompt if older than 1 year
+  const [staleConfirming, setStaleConfirming] = useState(false);
+  const [staleDismissed, setStaleDismissed] = useState(false);
+  const profileIsStale = (() => {
+    if (!user?.onboardingComplete || !user.profileUpdatedAt || staleDismissed) return false;
+    const updated = new Date(user.profileUpdatedAt + 'Z').getTime();
+    const oneYear = 365 * 24 * 60 * 60 * 1000;
+    return Date.now() - updated > oneYear;
+  })();
+
+  const handleConfirmProfile = async () => {
+    setStaleConfirming(true);
+    try {
+      const result = await api.confirmProfile();
+      loginWithToken(localStorage.getItem('atlanta-iam-token') || '', result.user);
+      setStaleDismissed(true);
+      showToast('Profile confirmed', 'success');
+    } catch {
+      showToast('Failed to confirm profile', 'error');
+    }
+    setStaleConfirming(false);
+  };
+
   const renderPage = () => {
     switch (path) {
       case '/':
@@ -176,6 +199,46 @@ function AppInner() {
         onSignOut={() => { logout(); navigate('/'); }}
       />
       <DevBanner />
+      {profileIsStale && (
+        <div style={{
+          background: T.amberDim,
+          border: `1px solid ${T.amber}44`,
+          padding: '10px 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 12, flexWrap: 'wrap',
+        }}>
+          <span style={{
+            fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.text,
+          }}>
+            Your profile hasn't been updated in over a year. Please confirm your information is still accurate.
+          </span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={handleConfirmProfile}
+              disabled={staleConfirming}
+              style={{
+                background: T.green, color: '#fff', border: 'none', borderRadius: 6,
+                padding: '6px 14px', cursor: 'pointer',
+                fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.06em',
+              }}
+            >
+              {staleConfirming ? 'CONFIRMING...' : 'MY INFO IS CORRECT'}
+            </button>
+            <button
+              onClick={() => { setStaleDismissed(true); navigate('/my-profile'); }}
+              style={{
+                background: 'transparent', color: T.accent, border: `1px solid ${T.accent}44`,
+                borderRadius: 6, padding: '6px 14px', cursor: 'pointer',
+                fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.06em',
+              }}
+            >
+              UPDATE PROFILE
+            </button>
+          </div>
+        </div>
+      )}
       <main style={{ flex: 1 }}>
         {renderPage()}
       </main>

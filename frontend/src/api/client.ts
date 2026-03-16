@@ -85,6 +85,9 @@ export const api = {
   }) => request<{ success: boolean; user: import('../types').User }>('/users/me/profile', {
     method: 'PUT', body: JSON.stringify(data),
   }),
+  confirmProfile: () => request<{ success: boolean; user: import('../types').User }>('/users/me/profile/confirm', {
+    method: 'PUT', body: JSON.stringify({}),
+  }),
 
   // Member Directory
   searchMembers: (params?: { q?: string; type?: string; limit?: number; offset?: number }) => {

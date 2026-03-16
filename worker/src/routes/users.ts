@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { requireAuth } from '../middleware/auth';
 import type { Bindings, Variables } from '../types';
 
-const USER_COLUMNS = 'id, name, email, role, company, sponsor_id, terms_accepted, avatar_url, first_name, last_name, phone, user_type, work_email, consent_email, consent_text, consent_data_sharing, linkedin_url, onboarding_complete, title, privacy_show_email, privacy_show_phone, privacy_show_company, privacy_show_title, privacy_show_linkedin, privacy_show_type, privacy_listed, last_login';
+const USER_COLUMNS = 'id, name, email, role, company, sponsor_id, terms_accepted, avatar_url, first_name, last_name, phone, user_type, work_email, consent_email, consent_text, consent_data_sharing, linkedin_url, onboarding_complete, title, privacy_show_email, privacy_show_phone, privacy_show_company, privacy_show_title, privacy_show_linkedin, privacy_show_type, privacy_listed, last_login, profile_updated_at';
 
 function rowToUser(row: Record<string, unknown>) {
   return {
@@ -33,6 +33,7 @@ function rowToUser(row: Record<string, unknown>) {
     privacyShowType: Boolean(row.privacy_show_type ?? 1),
     privacyListed: Boolean(row.privacy_listed ?? 1),
     lastLogin: String(row.last_login || ''),
+    profileUpdatedAt: String(row.profile_updated_at || ''),
   };
 }
 
@@ -111,7 +112,8 @@ app.put('/me/onboarding', requireAuth, async (c) => {
       company = ?,
       consent_email = ?, consent_text = ?, consent_data_sharing = ?,
       linkedin_url = ?,
-      terms_accepted = 1, onboarding_complete = 1
+      terms_accepted = 1, onboarding_complete = 1,
+      profile_updated_at = datetime('now')
     WHERE id = ?
   `).bind(
     body.firstName,
@@ -195,10 +197,22 @@ app.put('/me/profile', requireAuth, async (c) => {
 
   if (updates.length === 0) return c.json({ error: 'No fields to update' }, 400);
 
+  updates.push("profile_updated_at = datetime('now')");
   values.push(user.id);
   await c.env.DB.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`)
     .bind(...values).run();
 
+  const row = await c.env.DB.prepare(`SELECT ${USER_COLUMNS} FROM users WHERE id = ?`)
+    .bind(user.id).first();
+  if (!row) return c.json({ error: 'User not found' }, 500);
+  return c.json({ success: true, user: rowToUser(row) });
+});
+
+// Confirm profile is still accurate (resets the staleness timer)
+app.put('/me/profile/confirm', requireAuth, async (c) => {
+  const user = c.get('user');
+  await c.env.DB.prepare("UPDATE users SET profile_updated_at = datetime('now') WHERE id = ?")
+    .bind(user.id).run();
   const row = await c.env.DB.prepare(`SELECT ${USER_COLUMNS} FROM users WHERE id = ?`)
     .bind(user.id).first();
   if (!row) return c.json({ error: 'User not found' }, 500);
