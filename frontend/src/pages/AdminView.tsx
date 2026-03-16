@@ -12,6 +12,24 @@ import { InviteButton } from '../components/ui/InviteButton';
 
 type AdminTab = 'events' | 'members' | 'sponsors';
 
+/** Convert human-readable date ("April 15, 2026") to YYYY-MM-DD for date input */
+function toISODate(display: string): string {
+  if (!display) return '';
+  // Already in ISO format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(display)) return display;
+  const d = new Date(display);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 10);
+}
+
+/** Convert YYYY-MM-DD to human-readable display date ("April 15, 2026") */
+function toDisplayDate(iso: string): string {
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
 export function AdminView({ onInvite }: { onInvite?: () => void }) {
   const { T } = useTheme();
   const [activeTab, setActiveTab] = useState<AdminTab>('members');
@@ -500,16 +518,20 @@ function AddEventModal({ T, onAdd, onClose }: {
             ))}
           </select>
         </div>
-        {[
-          { key: 'name', label: 'EVENT NAME', placeholder: 'Atlanta IAM Meetup #2' },
-          { key: 'date', label: 'DATE', placeholder: '2025-06-15' },
-          { key: 'venue', label: 'VENUE', placeholder: 'Tech Square, Atlanta' },
-        ].map(f => (
-          <div key={f.key} style={{ marginBottom: 10 }}>
-            <label style={labelStyle(T)}>{f.label}</label>
-            <input style={inputStyle(T)} value={(form as Record<string, string>)[f.key]} onChange={e => set(f.key, e.target.value)} placeholder={f.placeholder} />
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>EVENT NAME</label>
+          <input style={inputStyle(T)} value={form.name} onChange={e => set('name', e.target.value)} placeholder="Atlanta IAM Meetup #2" />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>DATE</label>
+          <div style={{ position: 'relative' }}>
+            <input type="date" style={{ ...inputStyle(T), cursor: 'pointer' }} value={toISODate(form.date)} onChange={e => set('date', toDisplayDate(e.target.value))} />
           </div>
-        ))}
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>VENUE</label>
+          <input style={inputStyle(T)} value={form.venue} onChange={e => set('venue', e.target.value)} placeholder="Tech Square, Atlanta" />
+        </div>
         <div style={{ marginBottom: 10 }}>
           <label style={labelStyle(T)}>DESCRIPTION</label>
           <textarea style={{ ...inputStyle(T), minHeight: 60, resize: 'vertical' as const }} value={form.description} onChange={e => set('description', e.target.value)} placeholder="Brief event description..." />
@@ -547,16 +569,20 @@ function EditEventModal({ T, event, onSave, onClose }: {
             ))}
           </select>
         </div>
-        {[
-          { key: 'name', label: 'EVENT NAME' },
-          { key: 'date', label: 'DATE' },
-          { key: 'venue', label: 'VENUE' },
-        ].map(f => (
-          <div key={f.key} style={{ marginBottom: 10 }}>
-            <label style={labelStyle(T)}>{f.label}</label>
-            <input style={inputStyle(T)} value={(form as Record<string, string>)[f.key]} onChange={e => set(f.key, e.target.value)} />
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>EVENT NAME</label>
+          <input style={inputStyle(T)} value={form.name} onChange={e => set('name', e.target.value)} />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>DATE</label>
+          <div style={{ position: 'relative' }}>
+            <input type="date" style={{ ...inputStyle(T), cursor: 'pointer' }} value={toISODate(form.date)} onChange={e => set('date', toDisplayDate(e.target.value))} />
           </div>
-        ))}
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>VENUE</label>
+          <input style={inputStyle(T)} value={form.venue} onChange={e => set('venue', e.target.value)} />
+        </div>
         <div style={{ marginBottom: 10 }}>
           <label style={labelStyle(T)}>DESCRIPTION</label>
           <textarea style={{ ...inputStyle(T), minHeight: 60, resize: 'vertical' as const }} value={form.description} onChange={e => set('description', e.target.value)} />
