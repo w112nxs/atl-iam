@@ -168,8 +168,8 @@ export function AuthModal({ onPasskeyLogin, onClose }: AuthModalProps) {
             <img
               src="/badge.png"
               alt="Atlanta IAM"
-              width="72"
-              height="72"
+              width="144"
+              height="144"
               style={{
                 borderRadius: '50%',
                 border: '3px solid rgba(255,255,255,0.25)',
