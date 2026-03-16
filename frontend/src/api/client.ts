@@ -117,7 +117,11 @@ export const api = {
     request<{ id: string; title: string; count: number }[]>(`/events/${eventId}/sessions`),
 
   // Submissions
-  submitSpeaking: (data: { title: string; abstract: string; company: string; type: string; coPresenter?: string }) =>
+  submitSpeaking: (data: {
+    title: string; abstract: string; company: string; type: string; coPresenter?: string;
+    email: string; phone: string; linkedinUrl: string;
+    consentNameListed: boolean; consentLinkedinLinked: boolean; consentWebsiteListed: boolean;
+  }) =>
     request<{ success: boolean }>('/submissions/speaking', { method: 'POST', body: JSON.stringify(data) }),
 
   submitSponsor: (data: { companyName: string; contactEmail: string; tier: string; notes?: string }) =>
