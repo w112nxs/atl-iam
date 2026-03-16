@@ -93,6 +93,7 @@ export async function exchangeCode(
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/x-www-form-urlencoded',
+    'User-Agent': 'Atlanta-IAM/1.0',
   };
   // GitHub requires Accept header for JSON response
   if (providerName === 'github') {
@@ -120,7 +121,11 @@ export async function fetchUserInfo(
   accessToken: string,
 ): Promise<{ id: string; name: string; email: string; avatarUrl: string }> {
   const res = await fetch(provider.userinfoUrl, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'User-Agent': 'Atlanta-IAM/1.0',
+      Accept: 'application/json',
+    },
   });
 
   if (!res.ok) throw new Error(`Userinfo request failed: ${res.status}`);
@@ -130,7 +135,11 @@ export async function fetchUserInfo(
   // GitHub doesn't always include email in user response; fetch from emails endpoint
   if (providerName === 'github' && !data.email) {
     const emailRes = await fetch('https://api.github.com/user/emails', {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'User-Agent': 'Atlanta-IAM/1.0',
+        Accept: 'application/json',
+      },
     });
     if (emailRes.ok) {
       const emails = await emailRes.json() as Array<{ email: string; primary: boolean; verified: boolean }>;
