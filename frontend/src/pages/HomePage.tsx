@@ -3,7 +3,111 @@ import { Card } from '../components/ui/Card';
 import { Pill } from '../components/ui/Pill';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { useEvents } from '../hooks/useEvents';
-import type { User } from '../types';
+import type { User, ThemeTokens } from '../types';
+
+/* ── Atlanta Skyline SVG (simplified silhouette) ── */
+function AtlantaSkyline({ color, opacity = 0.06 }: { color: string; opacity?: number }) {
+  return (
+    <svg viewBox="0 0 1440 200" fill="none" preserveAspectRatio="none" style={{ width: '100%', height: 200, display: 'block' }}>
+      <path
+        d={
+          'M0 200 L0 160 L60 160 L60 130 L80 130 L80 110 L100 110 L100 130 L120 130 ' +
+          'L120 100 L140 100 L140 80 L150 80 L150 60 L160 60 L160 80 L170 80 L170 100 ' +
+          'L190 100 L190 120 L210 120 L210 90 L220 90 L220 70 L230 40 L240 70 L250 70 ' +
+          'L250 90 L270 90 L270 110 L290 110 L290 140 L320 140 L320 110 L340 110 L340 80 ' +
+          'L350 80 L350 50 L355 30 L360 50 L365 50 L365 80 L380 80 L380 110 L400 110 ' +
+          'L400 130 L430 130 L430 100 L450 100 L450 70 L460 70 L460 45 L465 20 L470 45 ' +
+          'L480 45 L480 70 L500 70 L500 100 L520 100 L520 120 L550 120 L550 90 L570 90 ' +
+          'L570 60 L580 60 L580 40 L590 40 L590 60 L600 60 L600 90 L620 90 L620 110 ' +
+          'L660 110 L660 130 L700 130 L700 100 L720 100 L720 75 L730 75 L730 55 L735 35 ' +
+          'L740 55 L750 55 L750 75 L770 75 L770 100 L790 100 L790 120 L830 120 L830 140 ' +
+          'L870 140 L870 110 L890 110 L890 85 L900 85 L900 65 L910 65 L910 85 L920 85 ' +
+          'L920 110 L950 110 L950 130 L990 130 L990 100 L1010 100 L1010 75 L1020 75 ' +
+          'L1020 50 L1025 25 L1030 50 L1040 50 L1040 75 L1060 75 L1060 100 L1090 100 ' +
+          'L1090 120 L1120 120 L1120 140 L1160 140 L1160 110 L1180 110 L1180 85 L1190 85 ' +
+          'L1190 65 L1200 65 L1200 85 L1220 85 L1220 110 L1250 110 L1250 130 L1300 130 ' +
+          'L1300 150 L1350 150 L1350 130 L1380 130 L1380 150 L1440 150 L1440 200 Z'
+        }
+        fill={color}
+        opacity={opacity}
+      />
+    </svg>
+  );
+}
+
+/* ── Floating identity/security circuit pattern ── */
+function SecurityPattern({ T }: { T: ThemeTokens }) {
+  const accent = T.accent;
+  return (
+    <svg
+      viewBox="0 0 400 400"
+      fill="none"
+      style={{
+        position: 'absolute',
+        width: 400,
+        height: 400,
+        opacity: T.mode === 'dark' ? 0.06 : 0.04,
+        pointerEvents: 'none',
+      }}
+    >
+      {/* Shield */}
+      <path d="M200 40 L300 90 L300 200 C300 280 200 340 200 340 C200 340 100 280 100 200 L100 90 Z" stroke={accent} strokeWidth="1.5" />
+      {/* Keyhole */}
+      <circle cx="200" cy="160" r="25" stroke={accent} strokeWidth="1.5" />
+      <path d="M200 185 L190 230 L210 230 Z" stroke={accent} strokeWidth="1.5" />
+      {/* Circuit lines */}
+      <line x1="100" y1="90" x2="50" y2="60" stroke={accent} strokeWidth="0.8" />
+      <line x1="300" y1="90" x2="350" y2="60" stroke={accent} strokeWidth="0.8" />
+      <line x1="100" y1="200" x2="40" y2="200" stroke={accent} strokeWidth="0.8" />
+      <line x1="300" y1="200" x2="360" y2="200" stroke={accent} strokeWidth="0.8" />
+      <circle cx="50" cy="60" r="4" stroke={accent} strokeWidth="1" />
+      <circle cx="350" cy="60" r="4" stroke={accent} strokeWidth="1" />
+      <circle cx="40" cy="200" r="4" stroke={accent} strokeWidth="1" />
+      <circle cx="360" cy="200" r="4" stroke={accent} strokeWidth="1" />
+      {/* Fingerprint arcs */}
+      <path d="M160 300 Q200 270 240 300" stroke={accent} strokeWidth="0.8" fill="none" />
+      <path d="M150 310 Q200 275 250 310" stroke={accent} strokeWidth="0.8" fill="none" />
+      <path d="M140 320 Q200 280 260 320" stroke={accent} strokeWidth="0.8" fill="none" />
+      {/* Nodes */}
+      <circle cx="50" cy="340" r="3" stroke={accent} strokeWidth="1" />
+      <circle cx="350" cy="340" r="3" stroke={accent} strokeWidth="1" />
+      <line x1="50" y1="340" x2="140" y2="320" stroke={accent} strokeWidth="0.5" />
+      <line x1="350" y1="340" x2="260" y2="320" stroke={accent} strokeWidth="0.5" />
+    </svg>
+  );
+}
+
+/* ── Connecting dots/nodes network pattern ── */
+function NetworkPattern({ T }: { T: ThemeTokens }) {
+  const c = T.accent;
+  const o = T.mode === 'dark' ? 0.05 : 0.035;
+  return (
+    <svg viewBox="0 0 600 120" fill="none" preserveAspectRatio="none"
+      style={{ width: '100%', height: 120, display: 'block', opacity: o }}>
+      {/* Connection lines */}
+      <line x1="60" y1="40" x2="150" y2="70" stroke={c} strokeWidth="1" />
+      <line x1="150" y1="70" x2="250" y2="30" stroke={c} strokeWidth="1" />
+      <line x1="250" y1="30" x2="350" y2="80" stroke={c} strokeWidth="1" />
+      <line x1="350" y1="80" x2="450" y2="50" stroke={c} strokeWidth="1" />
+      <line x1="450" y1="50" x2="540" y2="90" stroke={c} strokeWidth="1" />
+      <line x1="150" y1="70" x2="350" y2="80" stroke={c} strokeWidth="0.5" strokeDasharray="4 4" />
+      <line x1="60" y1="40" x2="250" y2="30" stroke={c} strokeWidth="0.5" strokeDasharray="4 4" />
+      {/* Nodes */}
+      <circle cx="60" cy="40" r="5" fill={c} opacity="0.3" />
+      <circle cx="60" cy="40" r="2" fill={c} />
+      <circle cx="150" cy="70" r="5" fill={c} opacity="0.3" />
+      <circle cx="150" cy="70" r="2" fill={c} />
+      <circle cx="250" cy="30" r="7" fill={c} opacity="0.3" />
+      <circle cx="250" cy="30" r="3" fill={c} />
+      <circle cx="350" cy="80" r="5" fill={c} opacity="0.3" />
+      <circle cx="350" cy="80" r="2" fill={c} />
+      <circle cx="450" cy="50" r="6" fill={c} opacity="0.3" />
+      <circle cx="450" cy="50" r="2.5" fill={c} />
+      <circle cx="540" cy="90" r="5" fill={c} opacity="0.3" />
+      <circle cx="540" cy="90" r="2" fill={c} />
+    </svg>
+  );
+}
 
 interface HomePageProps {
   user: User | null;
@@ -63,7 +167,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
       {/* ─── HERO ─── */}
       <section style={{
         background: T.bg,
-        padding: '80px 0 60px',
+        padding: '80px 0 0',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -75,7 +179,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
           backgroundSize: '64px 64px',
           pointerEvents: 'none',
         }} />
-        {/* Glow */}
+        {/* Glow — top left */}
         <div style={{
           position: 'absolute',
           top: -100,
@@ -86,6 +190,21 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
           background: 'radial-gradient(circle, rgba(232,86,10,.07) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
+        {/* Glow — bottom right */}
+        <div style={{
+          position: 'absolute',
+          bottom: -80,
+          right: -80,
+          width: 500,
+          height: 500,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(232,86,10,.05) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        {/* Security shield pattern — right side */}
+        <div style={{ position: 'absolute', right: '5%', top: '10%', pointerEvents: 'none' }}>
+          <SecurityPattern T={T} />
+        </div>
 
         <div className="grid-sidebar hero-gap" style={{
           display: 'grid',
@@ -220,6 +339,11 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
               }}
             />
           </div>
+        </div>
+
+        {/* Atlanta skyline silhouette at bottom of hero */}
+        <div style={{ position: 'relative', marginTop: 40, zIndex: 1 }}>
+          <AtlantaSkyline color={T.accent} opacity={T.mode === 'dark' ? 0.08 : 0.06} />
         </div>
       </section>
 
@@ -493,8 +617,11 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
         </div>
       </section>
 
+      {/* ─── Network divider ─── */}
+      <NetworkPattern T={T} />
+
       {/* ─── ABOUT ─── */}
-      <section style={{ padding: '48px 0 56px', width: '90%', margin: '0 auto' }}>
+      <section style={{ padding: '48px 0 56px', width: '90%', margin: '0 auto', position: 'relative' }}>
         <div style={{
           fontFamily: "'Space Mono', monospace",
           fontSize: 10,
@@ -753,6 +880,11 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
           )}
         </div>
       </section>
+
+      {/* ─── Footer skyline ─── */}
+      <div style={{ transform: 'scaleY(-1)', opacity: 0.5 }}>
+        <AtlantaSkyline color={T.accent} opacity={T.mode === 'dark' ? 0.06 : 0.04} />
+      </div>
     </div>
   );
 }
