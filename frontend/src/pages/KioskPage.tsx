@@ -325,41 +325,53 @@ export function KioskPage() {
         </div>
       </div>
 
-      {/* Main content */}
+      {/* Main content — Welcome is always rendered */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {screen === 'welcome' && (
-          <WelcomeScreen
-            eventName={eventInfo?.name || ''}
-            onCheckIn={() => { setScreen('search'); resetIdle(); }}
-            onWalkIn={() => { setScreen('walkin'); resetIdle(); }}
-          />
-        )}
-        {screen === 'search' && (
-          <SearchScreen
-            attendees={attendees}
-            onSelect={handleCheckIn}
-            onBack={() => setScreen('welcome')}
-            error={error}
-            onClearError={() => setError('')}
-          />
-        )}
-        {screen === 'walkin' && (
-          <WalkInScreen
-            onSubmit={handleWalkIn}
-            onBack={() => setScreen('welcome')}
-            error={error}
-            onClearError={() => setError('')}
-          />
-        )}
-        {screen === 'confirm' && confirmedAttendee && (
-          <ConfirmScreen
-            attendee={confirmedAttendee}
-            eventName={eventInfo?.name || ''}
-            autoPrint={printAfterConfirm}
-            onDone={() => { setConfirmedAttendee(null); setPrintAfterConfirm(false); setScreen('welcome'); }}
-          />
-        )}
+        <WelcomeScreen
+          eventName={eventInfo?.name || ''}
+          onCheckIn={() => { setScreen('search'); resetIdle(); }}
+          onWalkIn={() => { setScreen('walkin'); resetIdle(); }}
+        />
       </div>
+
+      {/* Modal overlays */}
+      {screen === 'search' && (
+        <div style={modalOverlayStyle}>
+          <div style={modalContentStyle}>
+            <SearchScreen
+              attendees={attendees}
+              onSelect={handleCheckIn}
+              onBack={() => setScreen('welcome')}
+              error={error}
+              onClearError={() => setError('')}
+            />
+          </div>
+        </div>
+      )}
+      {screen === 'walkin' && (
+        <div style={modalOverlayStyle}>
+          <div style={modalContentStyle}>
+            <WalkInScreen
+              onSubmit={handleWalkIn}
+              onBack={() => setScreen('welcome')}
+              error={error}
+              onClearError={() => setError('')}
+            />
+          </div>
+        </div>
+      )}
+      {screen === 'confirm' && confirmedAttendee && (
+        <div style={modalOverlayStyle}>
+          <div style={{ ...modalContentStyle, maxWidth: 600, maxHeight: '92vh' }}>
+            <ConfirmScreen
+              attendee={confirmedAttendee}
+              eventName={eventInfo?.name || ''}
+              autoPrint={printAfterConfirm}
+              onDone={() => { setConfirmedAttendee(null); setPrintAfterConfirm(false); setScreen('welcome'); }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -368,6 +380,25 @@ const fullScreen: React.CSSProperties = {
   position: 'fixed', inset: 0, background: K.bg, color: K.text,
   display: 'flex', flexDirection: 'column', overflow: 'hidden',
   userSelect: 'none', WebkitUserSelect: 'none',
+};
+
+const modalOverlayStyle: React.CSSProperties = {
+  position: 'fixed', inset: 0, zIndex: 50,
+  background: 'rgba(8,13,24,0.85)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  animation: 'scaleIn 0.2s ease-out',
+};
+
+const modalContentStyle: React.CSSProperties = {
+  background: K.card,
+  border: `1px solid ${K.border}`,
+  borderRadius: 20,
+  width: '92%', maxWidth: 800, maxHeight: '88vh',
+  display: 'flex', flexDirection: 'column',
+  overflow: 'hidden',
+  boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
 };
 
 // ── Welcome Screen ──
