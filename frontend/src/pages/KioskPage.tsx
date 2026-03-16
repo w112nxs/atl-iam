@@ -154,6 +154,44 @@ type KioskAttendee = {
 
 type Screen = 'welcome' | 'search' | 'walkin' | 'confirm' | 'printing';
 
+const kioskResponsiveCSS = `
+@media (max-width: 600px) {
+  .kiosk-stats-bar { flex-direction: column; gap: 8px; padding: 8px 12px !important; }
+  .kiosk-stats-bar .kiosk-event-info { gap: 6px !important; }
+  .kiosk-stats-bar .kiosk-event-info > span:first-child { font-size: 14px !important; }
+  .kiosk-stats-bar .kiosk-event-type { display: none !important; }
+  .kiosk-stats-row { gap: 12px !important; }
+  .kiosk-stats-row > div > div:first-child { font-size: 18px !important; }
+  .kiosk-welcome { padding: 20px !important; gap: 20px !important; }
+  .kiosk-badge { width: 90px !important; height: 90px !important; }
+  .kiosk-welcome-title { font-size: 32px !important; }
+  .kiosk-welcome-sub { font-size: 14px !important; }
+  .kiosk-welcome-btns { flex-direction: column; gap: 12px !important; margin-top: 8px !important; width: 100%; }
+  .kiosk-welcome-btns > button { min-width: 0 !important; padding: 16px 24px !important; width: 100%; }
+  .kiosk-welcome-btns .kiosk-btn-title { font-size: 22px !important; }
+  .kiosk-modal-content { width: 98% !important; max-height: 95vh !important; border-radius: 14px !important; }
+  .kiosk-search-wrap { padding: 12px 14px !important; }
+  .kiosk-search-header { gap: 8px !important; margin-bottom: 12px !important; flex-wrap: wrap; }
+  .kiosk-search-header > button { padding: 8px 12px !important; font-size: 12px !important; }
+  .kiosk-search-header > input { font-size: 16px !important; padding: 12px 14px !important; min-width: 0; }
+  .kiosk-attendee-row { flex-direction: column; align-items: stretch !important; padding: 12px !important; gap: 8px !important; }
+  .kiosk-attendee-row .kiosk-attendee-name { font-size: 17px !important; }
+  .kiosk-attendee-actions { justify-content: flex-end; }
+  .kiosk-walkin-wrap { padding: 14px 16px !important; }
+  .kiosk-walkin-inner { max-width: 100% !important; }
+  .kiosk-walkin-header { flex-direction: column; gap: 8px !important; align-items: flex-start !important; }
+  .kiosk-walkin-header h2 { font-size: 22px !important; }
+  .kiosk-walkin-name-row { flex-direction: column !important; }
+  .kiosk-walkin-input { font-size: 16px !important; padding: 12px !important; }
+  .kiosk-confirm-wrap { padding: 20px !important; gap: 16px !important; }
+  .kiosk-confirm-check { width: 70px !important; height: 70px !important; }
+  .kiosk-confirm-check svg { width: 35px !important; height: 35px !important; }
+  .kiosk-confirm-title { font-size: 28px !important; }
+  .kiosk-confirm-badge { padding: 20px !important; }
+  .kiosk-confirm-name { font-size: 24px !important; }
+}
+`;
+
 export function KioskPage() {
   // Parse URL params
   const params = new URLSearchParams(window.location.search);
@@ -289,18 +327,19 @@ export function KioskPage() {
 
   return (
     <div style={fullScreen}>
+      <style dangerouslySetInnerHTML={{ __html: kioskResponsiveCSS }} />
       {/* Stats bar */}
-      <div style={{
+      <div className="kiosk-stats-bar" style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '12px 24px', background: K.surface, borderBottom: `1px solid ${K.border}`,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="kiosk-event-info" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img src="/badge.png" alt="" width="36" height="36" style={{ borderRadius: '50%' }} />
           <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 18, color: K.text }}>
             {eventInfo?.name}
           </span>
           {eventInfo?.eventType && (
-            <span style={{
+            <span className="kiosk-event-type" style={{
               background: (EVENT_TYPE_COLORS[eventInfo.eventType] || K.accent) + '22',
               border: `1px solid ${(EVENT_TYPE_COLORS[eventInfo.eventType] || K.accent)}44`,
               borderRadius: 12, padding: '2px 10px',
@@ -311,7 +350,7 @@ export function KioskPage() {
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 20 }}>
+        <div className="kiosk-stats-row" style={{ display: 'flex', gap: 20 }}>
           {[
             { label: 'Registered', val: stats.registered, color: K.accent },
             { label: 'Checked In', val: stats.checkedIn, color: K.green },
@@ -337,7 +376,7 @@ export function KioskPage() {
       {/* Modal overlays */}
       {screen === 'search' && (
         <div style={modalOverlayStyle}>
-          <div style={modalContentStyle}>
+          <div className="kiosk-modal-content" style={modalContentStyle}>
             <SearchScreen
               attendees={attendees}
               onSelect={handleCheckIn}
@@ -350,7 +389,7 @@ export function KioskPage() {
       )}
       {screen === 'walkin' && (
         <div style={modalOverlayStyle}>
-          <div style={modalContentStyle}>
+          <div className="kiosk-modal-content" style={modalContentStyle}>
             <WalkInScreen
               onSubmit={handleWalkIn}
               onBack={() => setScreen('welcome')}
@@ -362,7 +401,7 @@ export function KioskPage() {
       )}
       {screen === 'confirm' && confirmedAttendee && (
         <div style={modalOverlayStyle}>
-          <div style={{ ...modalContentStyle, maxWidth: 600, maxHeight: '92vh' }}>
+          <div className="kiosk-modal-content" style={{ ...modalContentStyle, maxWidth: 600, maxHeight: '92vh' }}>
             <ConfirmScreen
               attendee={confirmedAttendee}
               eventName={eventInfo?.name || ''}
@@ -406,7 +445,7 @@ function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
   eventName: string; onCheckIn: () => void; onWalkIn: () => void;
 }) {
   return (
-    <div style={{
+    <div className="kiosk-welcome" style={{
       flex: 1, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 32, padding: 40,
       position: 'relative', overflow: 'hidden',
@@ -441,23 +480,23 @@ function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
         <KioskSkyline color={K.accent} opacity={0.14} />
       </div>
 
-      <img src="/badge.png" alt="Atlanta IAM" width="160" height="160" style={{ borderRadius: '50%', border: `3px solid ${K.accent}44`, position: 'relative', zIndex: 1 }} />
+      <img className="kiosk-badge" src="/badge.png" alt="Atlanta IAM" width="160" height="160" style={{ borderRadius: '50%', border: `3px solid ${K.accent}44`, position: 'relative', zIndex: 1 }} />
       <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
-        <h1 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 48, color: K.text, margin: '0 0 8px' }}>
+        <h1 className="kiosk-welcome-title" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 48, color: K.text, margin: '0 0 8px' }}>
           Welcome
         </h1>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, color: K.muted, margin: 0 }}>
+        <p className="kiosk-welcome-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, color: K.muted, margin: 0 }}>
           {eventName}
         </p>
       </div>
 
-      <div style={{ display: 'flex', gap: 20, marginTop: 16, position: 'relative', zIndex: 1 }}>
+      <div className="kiosk-welcome-btns" style={{ display: 'flex', gap: 20, marginTop: 16, position: 'relative', zIndex: 1 }}>
         <button onClick={onCheckIn} style={{
           background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
           border: 'none', borderRadius: 16, padding: '24px 48px',
           cursor: 'pointer', minWidth: 220,
         }}>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28, color: '#fff' }}>CHECK IN</div>
+          <div className="kiosk-btn-title" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28, color: '#fff' }}>CHECK IN</div>
           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>Already registered</div>
         </button>
 
@@ -465,7 +504,7 @@ function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
           background: 'transparent', border: `2px solid ${K.border}`,
           borderRadius: 16, padding: '24px 48px', cursor: 'pointer', minWidth: 220,
         }}>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28, color: K.text }}>WALK-IN</div>
+          <div className="kiosk-btn-title" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28, color: K.text }}>WALK-IN</div>
           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, marginTop: 4 }}>New registration</div>
         </button>
       </div>
@@ -491,12 +530,12 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
     : [];
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 32px', position: 'relative', overflow: 'hidden' }}>
+    <div className="kiosk-search-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 32px', position: 'relative', overflow: 'hidden' }}>
       {/* Background security icons — faded */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.3 }}>
         <SecurityIconsGrid color={K.accent} opacity={0.04} />
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, position: 'relative', zIndex: 1 }}>
+      <div className="kiosk-search-header" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <button onClick={onBack} style={{
           background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
           padding: '10px 20px', cursor: 'pointer',
@@ -537,6 +576,7 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
           filtered.map(a => (
             <div
               key={a.id}
+              className="kiosk-attendee-row"
               style={{
                 display: 'flex', alignItems: 'center', gap: 16,
                 background: a.checkedIn ? K.green + '11' : K.card,
@@ -552,14 +592,14 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
                 flexShrink: 0,
               }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 22, color: K.text }}>
+                <div className="kiosk-attendee-name" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 22, color: K.text }}>
                   {a.name}
                 </div>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted }}>
                   {[a.title, a.company].filter(Boolean).join(' — ')}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+              <div className="kiosk-attendee-actions" style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
                 {a.checkedIn && (
                   <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.green, letterSpacing: '0.08em', marginRight: 4 }}>
                     CHECKED IN
@@ -691,13 +731,13 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
   );
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 40px', overflowY: 'auto', position: 'relative' }}>
+    <div className="kiosk-walkin-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 40px', overflowY: 'auto', position: 'relative' }}>
       {/* Background security icons */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.3 }}>
         <SecurityIconsGrid color={K.accent} opacity={0.04} />
       </div>
-      <div style={{ width: '100%', maxWidth: 540, position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+      <div className="kiosk-walkin-inner" style={{ width: '100%', maxWidth: 540, position: 'relative', zIndex: 1 }}>
+        <div className="kiosk-walkin-header" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
           <button onClick={step === 1 ? onBack : () => setStep(1)} style={{
             background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
             padding: '10px 20px', cursor: 'pointer',
@@ -723,7 +763,7 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
         {step === 1 && (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div className="kiosk-walkin-name-row" style={{ display: 'flex', gap: 12 }}>
                 <div style={{ flex: 1 }}>
                   <label style={labelStyle}>FIRST NAME *</label>
                   <input style={iStyle} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="First name" autoFocus />
@@ -965,6 +1005,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
 
   return (
     <div
+      className="kiosk-confirm-wrap"
       style={{
         flex: 1, display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', gap: 24, padding: 40,
@@ -988,7 +1029,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
       }} />
 
       {/* Big checkmark */}
-      <div style={{
+      <div className="kiosk-confirm-check" style={{
         width: 100, height: 100, borderRadius: '50%',
         background: K.green + '22', border: `3px solid ${K.green}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -998,19 +1039,19 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
         </svg>
       </div>
 
-      <h1 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 42, color: K.green, margin: 0 }}>
-        You're Checked In!
+      <h1 className="kiosk-confirm-title" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 42, color: K.green, margin: 0 }}>
+        You&apos;re Checked In!
       </h1>
 
       {/* Badge preview */}
-      <div ref={badgeRef} style={{
-        background: '#fff', borderRadius: 16, padding: '24px 32px', minWidth: 360,
-        textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      <div className="kiosk-confirm-badge" ref={badgeRef} style={{
+        background: '#fff', borderRadius: 16, padding: '24px 32px', minWidth: 280,
+        textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', maxWidth: '90%',
       }}>
         <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: '#888', letterSpacing: '0.1em', marginBottom: 6 }}>
           {eventName}
         </div>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 32, color: '#111', textTransform: 'uppercase' }}>
+        <div className="kiosk-confirm-name" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 32, color: '#111', textTransform: 'uppercase' }}>
           {attendee.name}
         </div>
         {attendee.title && (
