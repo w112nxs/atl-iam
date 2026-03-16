@@ -46,6 +46,9 @@ export const api = {
       body: JSON.stringify({ ...credential as object, _options: options }),
     }),
 
+  // Company autocomplete
+  searchCompanies: (q: string) => request<string[]>(`/users/companies?q=${encodeURIComponent(q)}`),
+
   // User
   getMe: () => request<import('../types').User>('/users/me'),
   acceptTerms: () => request<{ success: boolean }>('/users/me/terms', {
@@ -138,5 +141,35 @@ export const api = {
     method: 'PUT', body: JSON.stringify(data),
   }),
   deleteAdminMember: (id: string) => request<{ success: boolean }>(`/users/admin/members/${id}`, { method: 'DELETE' }),
+
+  // Admin — Events
+  createAdminEvent: (data: { name: string; date: string; venue?: string }) =>
+    request<{ success: boolean; id: string }>('/admin/events', { method: 'POST', body: JSON.stringify(data) }),
+  updateAdminEvent: (id: string, data: {
+    name?: string; date?: string; venue?: string;
+    statsRegistered?: number; statsCheckedIn?: number;
+    statsEnterprise?: number; statsVendor?: number;
+  }) => request<{ success: boolean }>(`/admin/events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAdminEvent: (id: string) =>
+    request<{ success: boolean }>(`/admin/events/${id}`, { method: 'DELETE' }),
+
+  // Admin — Sessions
+  createAdminSession: (eventId: string, data: { title: string; speaker?: string; time?: string; cpe?: number }) =>
+    request<{ success: boolean; id: string }>(`/admin/events/${eventId}/sessions`, { method: 'POST', body: JSON.stringify(data) }),
+  updateAdminSession: (id: string, data: { title?: string; speaker?: string; time?: string; cpe?: number }) =>
+    request<{ success: boolean }>(`/admin/sessions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAdminSession: (id: string) =>
+    request<{ success: boolean }>(`/admin/sessions/${id}`, { method: 'DELETE' }),
+
+  // Admin — Sponsors
+  getAdminSponsors: () => request<{ eventId: string; eventName: string; sponsorId: string; sponsorName: string; tier: string }[]>('/admin/sponsors'),
+  getAdminSponsorContacts: (sponsorId: string) =>
+    request<{ id: string; name: string; email: string; company: string; title: string; phone: string }[]>(`/admin/sponsors/${sponsorId}/contacts`),
+  addAdminSponsor: (data: { eventId: string; sponsorId: string; sponsorName: string; tier: string }) =>
+    request<{ success: boolean }>('/admin/sponsors', { method: 'POST', body: JSON.stringify(data) }),
+  updateAdminSponsor: (eventId: string, sponsorId: string, data: { sponsorName?: string; tier?: string }) =>
+    request<{ success: boolean }>(`/admin/sponsors/${eventId}/${sponsorId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAdminSponsor: (eventId: string, sponsorId: string) =>
+    request<{ success: boolean }>(`/admin/sponsors/${eventId}/${sponsorId}`, { method: 'DELETE' }),
 };
 

@@ -5,16 +5,24 @@ import { Avatar } from '../components/ui/Avatar';
 import { Pill } from '../components/ui/Pill';
 import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
-import type { MemberProfile } from '../types';
+import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
+import type { MemberProfile, User, ThemeTokens } from '../types';
 
-export function MemberDirectory() {
+interface MemberDirectoryProps {
+  user?: User;
+}
+
+export function MemberDirectory({ user }: MemberDirectoryProps) {
   const { T } = useTheme();
+  const isAdmin = user?.role === 'admin';
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'' | 'enterprise' | 'vendor'>('');
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState<MemberProfile | null>(null);
+  const [editingMember, setEditingMember] = useState<MemberProfile | null>(null);
+  const [toast, setToast] = useState('');
 
   const search = useCallback(async (q: string, type: string) => {
     setLoading(true);
@@ -34,6 +42,32 @@ export function MemberDirectory() {
     const timer = setTimeout(() => search(query, typeFilter), 300);
     return () => clearTimeout(timer);
   }, [query, typeFilter, search]);
+
+  const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
+
+  const handleAdminSave = async (id: string, data: Record<string, string>) => {
+    try {
+      await api.updateAdminMember(id, data);
+      setEditingMember(null);
+      setSelectedMember(null);
+      search(query, typeFilter);
+      flash('Member updated');
+    } catch {
+      flash('Failed to update');
+    }
+  };
+
+  const handleAdminDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
+    try {
+      await api.deleteAdminMember(id);
+      setSelectedMember(null);
+      search(query, typeFilter);
+      flash('Member deleted');
+    } catch {
+      flash('Failed to delete');
+    }
+  };
 
   const inputStyle = {
     background: T.inputBg,
@@ -63,6 +97,14 @@ export function MemberDirectory() {
         Connect with {total} Atlanta IAM community members
       </p>
 
+      {toast && (
+        <div style={{
+          background: T.greenDim, border: `1px solid ${T.green}44`, borderRadius: 8,
+          padding: '6px 14px', marginBottom: 12, fontFamily: "'Inter', sans-serif",
+          fontSize: 12, color: T.green,
+        }}>{toast}</div>
+      )}
+
       {/* Search & Filter */}
       <div style={{
         display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap',
@@ -71,7 +113,7 @@ export function MemberDirectory() {
           style={{ ...inputStyle, flex: 1, minWidth: 200 }}
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Search by name, company, or title..."
+          placeholder={isAdmin ? 'Search by name, email, company, or title...' : 'Search by name, company, or title...'}
         />
         <div style={{ display: 'flex', gap: 6 }}>
           {[
@@ -120,7 +162,7 @@ export function MemberDirectory() {
             <div key={m.id} onClick={() => setSelectedMember(m)} style={{ cursor: 'pointer' }}>
               <Card>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <Avatar name={m.name} size={40} />
+                  <Avatar name={m.name} size={40} role={isAdmin ? m.role as 'admin' | 'member' | undefined : undefined} />
                   <div style={{ minWidth: 0 }}>
                     <div style={{
                       fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 14,
@@ -149,6 +191,14 @@ export function MemberDirectory() {
                       size={9}
                     />
                   )}
+                  {isAdmin && m.role && (
+                    <Pill label={m.role} color={m.role === 'admin' ? T.red : T.purple} size={9} />
+                  )}
+                  {isAdmin && m.email && (
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.muted, marginTop: 2 }}>
+                      {m.email}
+                    </div>
+                  )}
                 </div>
               </Card>
             </div>
@@ -157,7 +207,7 @@ export function MemberDirectory() {
       )}
 
       {/* Member Detail Modal */}
-      {selectedMember && (
+      {selectedMember && !editingMember && (
         <div
           onClick={() => setSelectedMember(null)}
           style={{
@@ -175,7 +225,7 @@ export function MemberDirectory() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-              <Avatar name={selectedMember.name} size={56} />
+              <Avatar name={selectedMember.name} size={56} role={isAdmin ? selectedMember.role as 'admin' | 'member' | undefined : undefined} />
               <div>
                 <h2 style={{
                   fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20,
@@ -191,6 +241,9 @@ export function MemberDirectory() {
                       size={9}
                     />
                   )}
+                  {isAdmin && selectedMember.role && (
+                    <Pill label={selectedMember.role} color={selectedMember.role === 'admin' ? T.red : T.purple} size={9} />
+                  )}
                 </div>
               </div>
             </div>
@@ -198,22 +251,16 @@ export function MemberDirectory() {
             <SectionLabel text="Details" color={T.accent} />
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {selectedMember.title && (
-                  <DetailRow T={T} label="Title" value={selectedMember.title} />
-                )}
-                {selectedMember.company && (
-                  <DetailRow T={T} label="Company" value={selectedMember.company} />
-                )}
-                {selectedMember.email && (
-                  <DetailRow T={T} label="Email" value={selectedMember.email} link={`mailto:${selectedMember.email}`} />
-                )}
-                {selectedMember.phone && (
-                  <DetailRow T={T} label="Phone" value={selectedMember.phone} />
-                )}
-                {selectedMember.linkedinUrl && (
-                  <DetailRow T={T} label="LinkedIn" value="View Profile" link={selectedMember.linkedinUrl} />
-                )}
-                {!selectedMember.title && !selectedMember.company && !selectedMember.email && !selectedMember.phone && !selectedMember.linkedinUrl && (
+                {selectedMember.title && <DetailRow T={T} label="Title" value={selectedMember.title} />}
+                {selectedMember.company && <DetailRow T={T} label="Company" value={selectedMember.company} />}
+                {selectedMember.email && <DetailRow T={T} label="Email" value={selectedMember.email} link={`mailto:${selectedMember.email}`} />}
+                {selectedMember.phone && <DetailRow T={T} label="Phone" value={selectedMember.phone} />}
+                {selectedMember.linkedinUrl && <DetailRow T={T} label="LinkedIn" value="View Profile" link={selectedMember.linkedinUrl} />}
+                {/* Admin-only fields */}
+                {isAdmin && selectedMember.role && <DetailRow T={T} label="Role" value={selectedMember.role} />}
+                {isAdmin && <DetailRow T={T} label="Onboarded" value={selectedMember.onboardingComplete ? 'Yes' : 'No'} />}
+                {isAdmin && <DetailRow T={T} label="Listed" value={selectedMember.privacyListed ? 'Yes' : 'No'} />}
+                {!isAdmin && !selectedMember.title && !selectedMember.company && !selectedMember.email && !selectedMember.phone && !selectedMember.linkedinUrl && (
                   <div style={{
                     fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.muted,
                     fontStyle: 'italic', transition: 'color 0.25s',
@@ -224,28 +271,68 @@ export function MemberDirectory() {
               </div>
             </Card>
 
-            <button
-              onClick={() => setSelectedMember(null)}
-              style={{
-                width: '100%', marginTop: 16, padding: '10px 0',
-                background: 'transparent', border: `1px solid ${T.border}`,
-                borderRadius: 8, cursor: 'pointer',
-                fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
-                letterSpacing: '0.08em', color: T.muted,
-                transition: 'all 0.25s',
-              }}
-            >
-              CLOSE
-            </button>
+            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <button
+                onClick={() => setSelectedMember(null)}
+                style={{
+                  flex: 1, padding: '10px 0',
+                  background: 'transparent', border: `1px solid ${T.border}`,
+                  borderRadius: 8, cursor: 'pointer',
+                  fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
+                  letterSpacing: '0.08em', color: T.muted,
+                  transition: 'all 0.25s',
+                }}
+              >
+                CLOSE
+              </button>
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setEditingMember(selectedMember)}
+                    style={{
+                      flex: 1, padding: '10px 0',
+                      background: T.accent, border: 'none',
+                      borderRadius: 8, cursor: 'pointer',
+                      fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
+                      letterSpacing: '0.08em', color: '#fff',
+                    }}
+                  >
+                    EDIT
+                  </button>
+                  <button
+                    onClick={() => handleAdminDelete(selectedMember.id, selectedMember.name)}
+                    style={{
+                      padding: '10px 16px',
+                      background: 'transparent', border: `1px solid ${T.red}44`,
+                      borderRadius: 8, cursor: 'pointer',
+                      fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12,
+                      letterSpacing: '0.08em', color: T.red,
+                    }}
+                  >
+                    DELETE
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Admin Edit Modal */}
+      {editingMember && isAdmin && (
+        <DirectoryEditModal
+          T={T}
+          member={editingMember}
+          onSave={handleAdminSave}
+          onClose={() => setEditingMember(null)}
+        />
       )}
     </div>
   );
 }
 
 function DetailRow({ T, label, value, link }: {
-  T: import('../types').ThemeTokens; label: string; value: string; link?: string;
+  T: ThemeTokens; label: string; value: string; link?: string;
 }) {
   return (
     <div style={{
@@ -273,6 +360,127 @@ function DetailRow({ T, label, value, link }: {
           {value}
         </span>
       )}
+    </div>
+  );
+}
+
+function DirectoryEditModal({ T, member, onSave, onClose }: {
+  T: ThemeTokens;
+  member: MemberProfile;
+  onSave: (id: string, data: Record<string, string>) => void;
+  onClose: () => void;
+}) {
+  const [form, setForm] = useState({
+    firstName: member.firstName || member.name?.split(' ')[0] || '',
+    lastName: member.lastName || member.name?.split(' ').slice(1).join(' ') || '',
+    email: member.email || '',
+    role: member.role || 'member',
+    company: member.company || '',
+    title: member.title || '',
+    phone: member.phone || '',
+    userType: member.userType || '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  const set = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
+
+  const iStyle: React.CSSProperties = {
+    background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 6,
+    padding: '8px 10px', fontFamily: "'Inter', sans-serif", fontSize: 13,
+    color: T.text, outline: 'none', width: '100%', transition: 'all 0.25s',
+  };
+
+  const lStyle: React.CSSProperties = {
+    fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
+    color: T.muted, letterSpacing: '0.08em', display: 'block', marginBottom: 3,
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave(member.id, {
+      ...form,
+      name: `${form.firstName} ${form.lastName}`.trim(),
+    });
+    setSaving(false);
+  };
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.6)',
+      backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: T.card, border: `1px solid ${T.border}`, borderRadius: 16,
+        padding: 24, width: 440, maxWidth: '92vw', maxHeight: '85vh', overflowY: 'auto',
+      }}>
+        <h3 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: T.text, margin: '0 0 16px' }}>
+          Edit Member
+        </h3>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+          <div>
+            <label style={lStyle}>FIRST NAME</label>
+            <input style={iStyle} value={form.firstName} onChange={e => set('firstName', e.target.value)} />
+          </div>
+          <div>
+            <label style={lStyle}>LAST NAME</label>
+            <input style={iStyle} value={form.lastName} onChange={e => set('lastName', e.target.value)} />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label style={lStyle}>EMAIL</label>
+          <input style={iStyle} value={form.email} onChange={e => set('email', e.target.value)} />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label style={lStyle}>COMPANY</label>
+          <CompanyAutocomplete style={iStyle} value={form.company} onChange={v => set('company', v)} />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label style={lStyle}>TITLE</label>
+          <input style={iStyle} value={form.title} onChange={e => set('title', e.target.value)} />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label style={lStyle}>PHONE</label>
+          <input style={iStyle} value={form.phone} onChange={e => set('phone', e.target.value)} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+          <div>
+            <label style={lStyle}>ROLE</label>
+            <select style={{ ...iStyle, cursor: 'pointer' }} value={form.role} onChange={e => set('role', e.target.value)}>
+              <option value="guest">Guest</option>
+              <option value="member">Member</option>
+              <option value="sponsor">Sponsor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label style={lStyle}>USER TYPE</label>
+            <select style={{ ...iStyle, cursor: 'pointer' }} value={form.userType} onChange={e => set('userType', e.target.value)}>
+              <option value="">—</option>
+              <option value="enterprise">Enterprise</option>
+              <option value="vendor">Vendor</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={onClose} style={{
+            background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6,
+            padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
+            fontSize: 12, fontWeight: 700, color: T.muted,
+          }}>CANCEL</button>
+          <button onClick={handleSave} disabled={saving} style={{
+            background: T.accent, border: 'none', borderRadius: 6,
+            padding: '8px 18px', cursor: saving ? 'wait' : 'pointer',
+            fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff',
+          }}>{saving ? 'SAVING...' : 'SAVE'}</button>
+        </div>
+      </div>
     </div>
   );
 }

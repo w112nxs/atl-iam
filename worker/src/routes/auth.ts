@@ -178,7 +178,7 @@ app.get('/oauth/:provider/callback', async (c) => {
         // Create new user with normalized email
         userId = crypto.randomUUID();
         await c.env.DB.prepare(
-          'INSERT INTO users (id, name, email, role, avatar_url) VALUES (?, ?, ?, ?, ?)',
+          'INSERT INTO users (id, name, email, role, avatar_url, privacy_show_email, privacy_show_phone, privacy_show_company, privacy_show_title, privacy_show_linkedin, privacy_show_type, privacy_listed) VALUES (?, ?, ?, ?, ?, 1, 1, 1, 1, 1, 1, 1)',
         ).bind(userId, profile.name, normalizedEmail, 'member', profile.avatarUrl).run();
       }
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from '../components/ui/Card';
+import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { api } from '../api/client';
 import type { User, Tier } from '../types';
 
@@ -110,7 +111,7 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
 
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company Name</label>
-          <input value={company} onChange={e => setCompany(e.target.value)} style={inputStyle} />
+          <CompanyAutocomplete value={company} onChange={setCompany} style={inputStyle} />
         </div>
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Contact Email</label>

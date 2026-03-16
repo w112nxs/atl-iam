@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from '../components/ui/Card';
+import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { api } from '../api/client';
 import type { User } from '../types';
 
@@ -123,7 +124,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
         </div>
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company</label>
-          <input value={company} onChange={e => setCompany(e.target.value)} style={inputStyle} />
+          <CompanyAutocomplete value={company} onChange={setCompany} style={inputStyle} />
         </div>
 
         {type === 'copresenter' && (

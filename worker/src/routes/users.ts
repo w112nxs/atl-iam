@@ -52,7 +52,37 @@ function rowToMemberProfile(row: Record<string, unknown>) {
   };
 }
 
+// Full member profile for admin view (no privacy filtering)
+function rowToFullMemberProfile(row: Record<string, unknown>) {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    avatarUrl: String(row.avatar_url || ''),
+    company: String(row.company || ''),
+    title: String(row.title || ''),
+    userType: String(row.user_type || ''),
+    email: String(row.email || ''),
+    phone: String(row.phone || ''),
+    linkedinUrl: String(row.linkedin_url || ''),
+    role: String(row.role || ''),
+    firstName: String(row.first_name || ''),
+    lastName: String(row.last_name || ''),
+    onboardingComplete: Boolean(row.onboarding_complete),
+    privacyListed: Boolean(row.privacy_listed),
+  };
+}
+
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+
+// Company name autocomplete (authenticated users only)
+app.get('/companies', requireAuth, async (c) => {
+  const q = (c.req.query('q') || '').trim().toLowerCase();
+  if (q.length < 2) return c.json([]);
+  const rows = await c.env.DB.prepare(
+    "SELECT DISTINCT company FROM users WHERE company != '' AND LOWER(company) LIKE ? ORDER BY company ASC LIMIT 20"
+  ).bind(`%${q}%`).all();
+  return c.json((rows.results || []).map(r => String(r.company)));
+});
 
 // Get current user (full profile)
 app.get('/me', requireAuth, async (c) => {
@@ -310,20 +340,26 @@ app.delete('/me/sessions', requireAuth, async (c) => {
 
 // ── Member Directory ──
 
-// Search/list members (privacy-filtered)
+// Search/list members (privacy-filtered; admins see all fields)
 app.get('/directory', requireAuth, async (c) => {
+  const user = c.get('user');
+  const isAdmin = user.role === 'admin';
   const q = c.req.query('q') || '';
   const type = c.req.query('type') || '';
   const limit = Math.min(Number(c.req.query('limit')) || 50, 100);
   const offset = Number(c.req.query('offset')) || 0;
 
-  let sql = `SELECT ${USER_COLUMNS} FROM users WHERE onboarding_complete = 1 AND privacy_listed = 1`;
+  // Admins see all users (including unlisted and not-onboarded); others see only listed + onboarded
+  let sql = `SELECT ${USER_COLUMNS} FROM users WHERE 1=1`;
+  if (!isAdmin) {
+    sql += ' AND onboarding_complete = 1 AND privacy_listed = 1';
+  }
   const params: unknown[] = [];
 
   if (q) {
-    sql += ' AND (name LIKE ? OR company LIKE ? OR title LIKE ?)';
+    sql += ' AND (name LIKE ? OR company LIKE ? OR title LIKE ? OR email LIKE ?)';
     const term = `%${q}%`;
-    params.push(term, term, term);
+    params.push(term, term, term, term);
   }
   if (type === 'enterprise' || type === 'vendor') {
     sql += ' AND user_type = ?';
@@ -335,13 +371,16 @@ app.get('/directory', requireAuth, async (c) => {
 
   const rows = await c.env.DB.prepare(sql).bind(...params).all();
 
-  // Count total for pagination
-  let countSql = 'SELECT COUNT(*) as total FROM users WHERE onboarding_complete = 1 AND privacy_listed = 1';
+  // Count total
+  let countSql = 'SELECT COUNT(*) as total FROM users WHERE 1=1';
+  if (!isAdmin) {
+    countSql += ' AND onboarding_complete = 1 AND privacy_listed = 1';
+  }
   const countParams: unknown[] = [];
   if (q) {
-    countSql += ' AND (name LIKE ? OR company LIKE ? OR title LIKE ?)';
+    countSql += ' AND (name LIKE ? OR company LIKE ? OR title LIKE ? OR email LIKE ?)';
     const term = `%${q}%`;
-    countParams.push(term, term, term);
+    countParams.push(term, term, term, term);
   }
   if (type === 'enterprise' || type === 'vendor') {
     countSql += ' AND user_type = ?';
@@ -351,23 +390,29 @@ app.get('/directory', requireAuth, async (c) => {
   const countRow = await c.env.DB.prepare(countSql).bind(...countParams).first();
   const total = Number(countRow?.total || 0);
 
-  return c.json({
-    members: rows.results.map(r => rowToMemberProfile(r)),
-    total,
-    limit,
-    offset,
-  });
+  // Admins get all fields; others get privacy-filtered profiles
+  const members = isAdmin
+    ? rows.results.map(r => rowToFullMemberProfile(r))
+    : rows.results.map(r => rowToMemberProfile(r));
+
+  return c.json({ members, total, limit, offset });
 });
 
-// Get a single member profile (privacy-filtered)
+// Get a single member profile (privacy-filtered; admins see all)
 app.get('/directory/:id', requireAuth, async (c) => {
+  const user = c.get('user');
+  const isAdmin = user.role === 'admin';
   const id = c.req.param('id');
+
+  const whereClause = isAdmin
+    ? 'id = ?'
+    : 'id = ? AND onboarding_complete = 1 AND privacy_listed = 1';
   const row = await c.env.DB.prepare(
-    `SELECT ${USER_COLUMNS} FROM users WHERE id = ? AND onboarding_complete = 1 AND privacy_listed = 1`,
+    `SELECT ${USER_COLUMNS} FROM users WHERE ${whereClause}`,
   ).bind(id).first();
 
   if (!row) return c.json({ error: 'Member not found' }, 404);
-  return c.json(rowToMemberProfile(row));
+  return c.json(isAdmin ? rowToFullMemberProfile(row) : rowToMemberProfile(row));
 });
 
 // ── Admin: Member Management ──

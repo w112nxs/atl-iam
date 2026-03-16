@@ -164,7 +164,7 @@ function AppInner() {
       case '/submit-sponsor':
         return isMember ? <SponsorshipForm user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
       case '/members':
-        return isMember ? <MemberDirectory /> : <AccessDenied onNavigate={navigate} />;
+        return isMember ? <MemberDirectory user={user!} /> : <AccessDenied onNavigate={navigate} />;
       case '/my-profile':
         return isMember ? <ProfilePage user={user!} onNavigate={navigate} onUserUpdate={(u) => loginWithToken(localStorage.getItem('atlanta-iam-token') || '', u)} /> : <AccessDenied onNavigate={navigate} />;
       case '/sponsor-portal':

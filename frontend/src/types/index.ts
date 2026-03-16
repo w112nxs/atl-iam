@@ -73,6 +73,12 @@ export interface MemberProfile {
   email?: string;
   phone?: string;
   linkedinUrl?: string;
+  // Admin-only fields
+  role?: string;
+  firstName?: string;
+  lastName?: string;
+  onboardingComplete?: boolean;
+  privacyListed?: boolean;
 }
 
 export type Tier = 'Gold' | 'Silver' | 'Community';

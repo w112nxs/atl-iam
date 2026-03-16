@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { api } from '../../api/client';
+import { CompanyAutocomplete } from '../ui/CompanyAutocomplete';
 import type { User } from '../../types';
 
 interface OnboardingModalProps {
@@ -199,7 +200,7 @@ export function OnboardingModal({ user, onComplete, onDecline }: OnboardingModal
 
               <div>
                 <label style={labelStyle}>Company / Organization</label>
-                <input style={inputStyle} value={company} onChange={e => setCompany(e.target.value)} placeholder="Your company" />
+                <CompanyAutocomplete style={inputStyle} value={company} onChange={setCompany} placeholder="Start typing your company name..." />
               </div>
 
               <div>
