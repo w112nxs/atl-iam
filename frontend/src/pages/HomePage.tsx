@@ -6,7 +6,7 @@ import { useEvents } from '../hooks/useEvents';
 import type { User, ThemeTokens } from '../types';
 
 /* ── Atlanta Skyline SVG (simplified silhouette) ── */
-function AtlantaSkyline({ color, opacity = 0.06 }: { color: string; opacity?: number }) {
+function AtlantaSkyline({ color, opacity = 0.08 }: { color: string; opacity?: number }) {
   return (
     <svg viewBox="0 0 1440 200" fill="none" preserveAspectRatio="none" style={{ width: '100%', height: 200, display: 'block' }}>
       <path
@@ -46,7 +46,7 @@ function SecurityPattern({ T }: { T: ThemeTokens }) {
         position: 'absolute',
         width: 400,
         height: 400,
-        opacity: T.mode === 'dark' ? 0.06 : 0.04,
+        opacity: T.mode === 'dark' ? 0.12 : 0.05,
         pointerEvents: 'none',
       }}
     >
@@ -80,7 +80,7 @@ function SecurityPattern({ T }: { T: ThemeTokens }) {
 /* ── Connecting dots/nodes network pattern ── */
 function NetworkPattern({ T }: { T: ThemeTokens }) {
   const c = T.accent;
-  const o = T.mode === 'dark' ? 0.05 : 0.035;
+  const o = T.mode === 'dark' ? 0.1 : 0.04;
   return (
     <svg viewBox="0 0 600 120" fill="none" preserveAspectRatio="none"
       style={{ width: '100%', height: 120, display: 'block', opacity: o }}>
@@ -343,7 +343,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
 
         {/* Atlanta skyline silhouette at bottom of hero */}
         <div style={{ position: 'relative', marginTop: 40, zIndex: 1 }}>
-          <AtlantaSkyline color={T.accent} opacity={T.mode === 'dark' ? 0.08 : 0.06} />
+          <AtlantaSkyline color={T.accent} opacity={T.mode === 'dark' ? 0.14 : 0.07} />
         </div>
       </section>
 
@@ -883,7 +883,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
 
       {/* ─── Footer skyline ─── */}
       <div style={{ transform: 'scaleY(-1)', opacity: 0.5 }}>
-        <AtlantaSkyline color={T.accent} opacity={T.mode === 'dark' ? 0.06 : 0.04} />
+        <AtlantaSkyline color={T.accent} opacity={T.mode === 'dark' ? 0.1 : 0.05} />
       </div>
     </div>
   );

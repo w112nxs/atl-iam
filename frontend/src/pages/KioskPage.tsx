@@ -4,6 +4,62 @@ import { Icon } from '../components/ui/Icon';
 import type { EventType } from '../types';
 import { EVENT_TYPE_LABELS } from '../types';
 
+/* ── Atlanta Skyline SVG ── */
+function KioskSkyline({ color, opacity = 0.1 }: { color: string; opacity?: number }) {
+  return (
+    <svg viewBox="0 0 1440 200" fill="none" preserveAspectRatio="none" style={{ width: '100%', height: 200, display: 'block' }}>
+      <path
+        d={
+          'M0 200 L0 160 L60 160 L60 130 L80 130 L80 110 L100 110 L100 130 L120 130 ' +
+          'L120 100 L140 100 L140 80 L150 80 L150 60 L160 60 L160 80 L170 80 L170 100 ' +
+          'L190 100 L190 120 L210 120 L210 90 L220 90 L220 70 L230 40 L240 70 L250 70 ' +
+          'L250 90 L270 90 L270 110 L290 110 L290 140 L320 140 L320 110 L340 110 L340 80 ' +
+          'L350 80 L350 50 L355 30 L360 50 L365 50 L365 80 L380 80 L380 110 L400 110 ' +
+          'L400 130 L430 130 L430 100 L450 100 L450 70 L460 70 L460 45 L465 20 L470 45 ' +
+          'L480 45 L480 70 L500 70 L500 100 L520 100 L520 120 L550 120 L550 90 L570 90 ' +
+          'L570 60 L580 60 L580 40 L590 40 L590 60 L600 60 L600 90 L620 90 L620 110 ' +
+          'L660 110 L660 130 L700 130 L700 100 L720 100 L720 75 L730 75 L730 55 L735 35 ' +
+          'L740 55 L750 55 L750 75 L770 75 L770 100 L790 100 L790 120 L830 120 L830 140 ' +
+          'L870 140 L870 110 L890 110 L890 85 L900 85 L900 65 L910 65 L910 85 L920 85 ' +
+          'L920 110 L950 110 L950 130 L990 130 L990 100 L1010 100 L1010 75 L1020 75 ' +
+          'L1020 50 L1025 25 L1030 50 L1040 50 L1040 75 L1060 75 L1060 100 L1090 100 ' +
+          'L1090 120 L1120 120 L1120 140 L1160 140 L1160 110 L1180 110 L1180 85 L1190 85 ' +
+          'L1190 65 L1200 65 L1200 85 L1220 85 L1220 110 L1250 110 L1250 130 L1300 130 ' +
+          'L1300 150 L1350 150 L1350 130 L1380 130 L1380 150 L1440 150 L1440 200 Z'
+        }
+        fill={color}
+        opacity={opacity}
+      />
+    </svg>
+  );
+}
+
+/* ── Shield/keyhole security pattern ── */
+function KioskSecurityPattern({ color, opacity = 0.08 }: { color: string; opacity?: number }) {
+  return (
+    <svg viewBox="0 0 400 400" fill="none" style={{ width: '100%', height: '100%', opacity }}>
+      <path d="M200 40 L300 90 L300 200 C300 280 200 340 200 340 C200 340 100 280 100 200 L100 90 Z" stroke={color} strokeWidth="1.5" />
+      <circle cx="200" cy="160" r="25" stroke={color} strokeWidth="1.5" />
+      <path d="M200 185 L190 230 L210 230 Z" stroke={color} strokeWidth="1.5" />
+      <line x1="100" y1="90" x2="50" y2="60" stroke={color} strokeWidth="0.8" />
+      <line x1="300" y1="90" x2="350" y2="60" stroke={color} strokeWidth="0.8" />
+      <line x1="100" y1="200" x2="40" y2="200" stroke={color} strokeWidth="0.8" />
+      <line x1="300" y1="200" x2="360" y2="200" stroke={color} strokeWidth="0.8" />
+      <circle cx="50" cy="60" r="4" stroke={color} strokeWidth="1" />
+      <circle cx="350" cy="60" r="4" stroke={color} strokeWidth="1" />
+      <circle cx="40" cy="200" r="4" stroke={color} strokeWidth="1" />
+      <circle cx="360" cy="200" r="4" stroke={color} strokeWidth="1" />
+      <path d="M160 300 Q200 270 240 300" stroke={color} strokeWidth="0.8" fill="none" />
+      <path d="M150 310 Q200 275 250 310" stroke={color} strokeWidth="0.8" fill="none" />
+      <path d="M140 320 Q200 280 260 320" stroke={color} strokeWidth="0.8" fill="none" />
+      <circle cx="50" cy="340" r="3" stroke={color} strokeWidth="1" />
+      <circle cx="350" cy="340" r="3" stroke={color} strokeWidth="1" />
+      <line x1="50" y1="340" x2="140" y2="320" stroke={color} strokeWidth="0.5" />
+      <line x1="350" y1="340" x2="260" y2="320" stroke={color} strokeWidth="0.5" />
+    </svg>
+  );
+}
+
 // Color palette (always dark mode for kiosk)
 const K = {
   bg: '#0a0a12',
@@ -262,9 +318,30 @@ function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
     <div style={{
       flex: 1, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 32, padding: 40,
+      position: 'relative', overflow: 'hidden',
     }}>
-      <img src="/badge.png" alt="Atlanta IAM" width="160" height="160" style={{ borderRadius: '50%', border: `3px solid ${K.accent}44` }} />
-      <div style={{ textAlign: 'center' }}>
+      {/* Background security pattern — left */}
+      <div style={{ position: 'absolute', left: '3%', top: '5%', width: 320, height: 320, pointerEvents: 'none' }}>
+        <KioskSecurityPattern color={K.accent} opacity={0.07} />
+      </div>
+      {/* Background security pattern — right */}
+      <div style={{ position: 'absolute', right: '3%', top: '5%', width: 320, height: 320, pointerEvents: 'none' }}>
+        <KioskSecurityPattern color={K.purple} opacity={0.05} />
+      </div>
+      {/* Radial glow */}
+      <div style={{
+        position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
+        width: 600, height: 600, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(79,140,255,.08) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+      {/* Skyline at bottom */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, pointerEvents: 'none' }}>
+        <KioskSkyline color={K.accent} opacity={0.12} />
+      </div>
+
+      <img src="/badge.png" alt="Atlanta IAM" width="160" height="160" style={{ borderRadius: '50%', border: `3px solid ${K.accent}44`, position: 'relative', zIndex: 1 }} />
+      <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <h1 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 48, color: K.text, margin: '0 0 8px' }}>
           Welcome
         </h1>
@@ -273,7 +350,7 @@ function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
         </p>
       </div>
 
-      <div style={{ display: 'flex', gap: 20, marginTop: 16 }}>
+      <div style={{ display: 'flex', gap: 20, marginTop: 16, position: 'relative', zIndex: 1 }}>
         <button onClick={onCheckIn} style={{
           background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
           border: 'none', borderRadius: 16, padding: '24px 48px',
@@ -782,8 +859,21 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
       style={{
         flex: 1, display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', gap: 24, padding: 40,
+        position: 'relative', overflow: 'hidden',
       }}
     >
+      {/* Skyline at bottom */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, pointerEvents: 'none' }}>
+        <KioskSkyline color={K.green} opacity={0.1} />
+      </div>
+      {/* Radial glow */}
+      <div style={{
+        position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
+        width: 500, height: 500, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(52,211,153,.06) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+
       {/* Big checkmark */}
       <div style={{
         width: 100, height: 100, borderRadius: '50%',
