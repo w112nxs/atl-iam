@@ -131,6 +131,9 @@ export const api = {
   updateSpeakingDraft: (id: string, data: Record<string, unknown>) =>
     request<{ success: boolean }>(`/submissions/speaking/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
+  deleteSpeakingDraft: (id: string) =>
+    request<{ success: boolean }>(`/submissions/speaking/${id}`, { method: 'DELETE' }),
+
   submitSpeakingFinal: (id: string) =>
     request<{ success: boolean }>(`/submissions/speaking/${id}/submit`, { method: 'POST' }),
 

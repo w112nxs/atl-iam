@@ -264,6 +264,34 @@ app.post('/speaking/:id/submit', requireAuth, async (c) => {
   return c.json({ success: true });
 });
 
+// Delete a draft speaking submission
+app.delete('/speaking/:id', requireAuth, async (c) => {
+  const user = c.get('user');
+  const id = c.req.param('id');
+
+  const existing = await c.env.DB.prepare(
+    'SELECT user_id, status FROM submissions_speaking WHERE id = ?',
+  )
+    .bind(id)
+    .first();
+
+  if (!existing) {
+    return c.json({ error: 'Submission not found' }, 404);
+  }
+  if (existing.user_id !== user.id) {
+    return c.json({ error: 'Forbidden' }, 403);
+  }
+  if (existing.status !== 'draft') {
+    return c.json({ error: 'Only draft submissions can be deleted' }, 400);
+  }
+
+  await c.env.DB.prepare('DELETE FROM submissions_speaking WHERE id = ?')
+    .bind(id)
+    .run();
+
+  return c.json({ success: true });
+});
+
 // Submit sponsorship request
 app.post('/sponsor', requireAuth, async (c) => {
   const user = c.get('user');

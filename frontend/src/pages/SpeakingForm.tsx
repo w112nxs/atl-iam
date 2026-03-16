@@ -186,6 +186,17 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
     setErrors({});
   };
 
+  const deleteDraft = async (id: string) => {
+    try {
+      await api.deleteSpeakingDraft(id);
+      setSubmissions(prev => prev.filter(s => s.id !== id));
+      if (submissionId === id) startNew();
+      onToast('Draft deleted', 'success');
+    } catch {
+      onToast('Failed to delete draft', 'error');
+    }
+  };
+
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '10px 14px', borderRadius: 8,
     border: `1px solid ${T.border}`, background: T.inputBg, color: T.text,
@@ -219,7 +230,7 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
           <SectionLabel text="My Submissions" color={T.accent} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
             {submissions.map(s => (
-              <SubmissionRow key={s.id} T={T} submission={s} onResume={s.status === 'draft' || s.status === 'rejected' ? () => resumeDraft(s.id) : undefined} />
+              <SubmissionRow key={s.id} T={T} submission={s} onResume={s.status === 'draft' || s.status === 'rejected' ? () => resumeDraft(s.id) : undefined} onDelete={s.status === 'draft' ? () => deleteDraft(s.id) : undefined} />
             ))}
           </div>
         </div>
@@ -533,7 +544,7 @@ function StepIndicator({ T, steps, current, onStepClick }: { T: ThemeTokens; ste
   );
 }
 
-function SubmissionRow({ T, submission: s, onResume }: { T: ThemeTokens; submission: SpeakingSubmissionSummary; onResume?: () => void }) {
+function SubmissionRow({ T, submission: s, onResume, onDelete }: { T: ThemeTokens; submission: SpeakingSubmissionSummary; onResume?: () => void; onDelete?: () => void }) {
   const statusColors: Record<SpeakingSubmissionStatus, string> = { draft: T.muted, pending: T.amber, approved: T.green, rejected: T.red };
   return (
     <Card style={{ padding: '10px 14px', borderLeft: `3px solid ${statusColors[s.status as SpeakingSubmissionStatus] || T.muted}` }}>
@@ -560,6 +571,15 @@ function SubmissionRow({ T, submission: s, onResume }: { T: ThemeTokens; submiss
               padding: '4px 12px', cursor: 'pointer', letterSpacing: '0.06em',
             }}>
               {s.status === 'rejected' ? 'EDIT & RESUBMIT' : 'RESUME'}
+            </button>
+          )}
+          {onDelete && (
+            <button onClick={(e) => { e.stopPropagation(); if (confirm('Delete this draft?')) onDelete(); }} style={{
+              background: 'transparent', border: `1px solid ${T.red}44`, borderRadius: 5,
+              color: T.red, fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700,
+              padding: '4px 12px', cursor: 'pointer', letterSpacing: '0.06em',
+            }}>
+              DELETE
             </button>
           )}
         </div>
