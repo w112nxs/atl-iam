@@ -696,12 +696,10 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
 }) {
   const [printing, setPrinting] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(autoPrint ? 30 : 10);
 
-  // Countdown timer — resets when printing changes
+  // Countdown timer — runs once on mount, no reset mid-flow
   useEffect(() => {
-    const total = printing ? 30 : 10;
-    setCountdown(total);
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) { onDone(); return 0; }
@@ -709,7 +707,8 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [onDone, printing]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-print if requested
   useEffect(() => {
@@ -721,6 +720,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
 
   const printBadge = () => {
     setPrinting(true);
+    setCountdown(30);
     const badgeEl = badgeRef.current;
     if (!badgeEl) return;
 

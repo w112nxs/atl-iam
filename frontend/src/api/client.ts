@@ -178,6 +178,20 @@ export const api = {
   deleteAdminSponsor: (eventId: string, sponsorId: string) =>
     request<{ success: boolean }>(`/admin/sponsors/${eventId}/${sponsorId}`, { method: 'DELETE' }),
 
+  // Calendar
+  getCalendarUrl: (params?: { eventType?: string; eventId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.eventType) qs.set('eventType', params.eventType);
+    if (params?.eventId) qs.set('eventId', params.eventId);
+    const query = qs.toString();
+    return `${API_BASE}/calendar/events.ics${query ? '?' + query : ''}`;
+  },
+
+  getCalendarSubscribeUrl: (params?: { eventType?: string }) => {
+    const url = api.getCalendarUrl(params);
+    return url.replace(/^https?:/, 'webcal:');
+  },
+
   // Kiosk
   kioskGetEventData: (eventId: string, kioskToken: string) =>
     request<{

@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from '../components/ui/Card';
 import { Pill } from '../components/ui/Pill';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { StatBox } from '../components/ui/StatBox';
+import { CalendarGrid } from '../components/CalendarGrid';
 import { useEvents } from '../hooks/useEvents';
 import { api } from '../api/client';
-import type { User, ThemeTokens } from '../types';
+import type { User, ThemeTokens, EventType } from '../types';
+import { EVENT_TYPE_LABELS } from '../types';
 
 interface EventsPageProps {
   user: User | null;
@@ -27,6 +29,24 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
   const { events } = useEvents();
   const isAdmin = user?.role === 'admin';
 
+  const [view, setView] = useState<'list' | 'calendar'>('list');
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+  const [typeFilter, setTypeFilter] = useState<EventType | 'all'>('all');
+  const [calMenuOpen, setCalMenuOpen] = useState(false);
+  const calMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close calendar menu on outside click
+  useEffect(() => {
+    if (!calMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (calMenuRef.current && !calMenuRef.current.contains(e.target as Node)) setCalMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [calMenuOpen]);
+
+  const filteredEvents = typeFilter === 'all' ? events : events.filter(e => e.eventType === typeFilter);
+
   const [drillOpen, setDrillOpen] = useState<{
     eventId: string; eventName: string; label: string; filter?: string;
   } | null>(null);
@@ -46,26 +66,187 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
     setDrillLoading(false);
   };
 
+  const toggleBtnStyle = (active: boolean): React.CSSProperties => ({
+    background: active ? T.accent : T.surface,
+    color: active ? '#fff' : T.muted,
+    border: `1px solid ${active ? T.accent : T.border}`,
+    borderRadius: 6, padding: '6px 14px', cursor: 'pointer',
+    fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 10,
+    letterSpacing: '0.08em', textTransform: 'uppercase',
+    transition: 'all 0.2s',
+  });
+
+  const handleDownloadIcs = () => {
+    const url = api.getCalendarUrl(typeFilter !== 'all' ? { eventType: typeFilter } : undefined);
+    window.open(url, '_blank');
+    setCalMenuOpen(false);
+  };
+
+  const handleSubscribe = () => {
+    const url = api.getCalendarSubscribeUrl(typeFilter !== 'all' ? { eventType: typeFilter } : undefined);
+    window.location.href = url;
+    setCalMenuOpen(false);
+  };
+
+  const handleGoogleCal = () => {
+    const icsUrl = api.getCalendarUrl(typeFilter !== 'all' ? { eventType: typeFilter } : undefined);
+    const webcalUrl = icsUrl.replace(/^https?:/, 'webcal:');
+    window.open(`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`, '_blank');
+    setCalMenuOpen(false);
+  };
+
+  const handleCopyUrl = async () => {
+    const url = api.getCalendarUrl(typeFilter !== 'all' ? { eventType: typeFilter } : undefined);
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch { /* ignore */ }
+    setCalMenuOpen(false);
+  };
+
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h1 style={{
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Rajdhani', sans-serif",
           fontWeight: 700,
           fontSize: 32,
           color: T.text,
           margin: 0,
+          letterSpacing: '0.04em',
           transition: 'color 0.25s',
         }}>
           Events
         </h1>
         <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, transition: 'color 0.25s' }}>
-          {events.length} events
+          {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
         </div>
       </div>
 
+      {/* Toolbar */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 20, gap: 12, flexWrap: 'wrap',
+      }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* View toggle */}
+          <div style={{ display: 'flex', gap: 0 }}>
+            <button onClick={() => setView('list')} style={{
+              ...toggleBtnStyle(view === 'list'),
+              borderRadius: '6px 0 0 6px', borderRight: 'none',
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+                LIST
+              </span>
+            </button>
+            <button onClick={() => setView('calendar')} style={{
+              ...toggleBtnStyle(view === 'calendar'),
+              borderRadius: '0 6px 6px 0',
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                CALENDAR
+              </span>
+            </button>
+          </div>
+
+          {/* Event type filter */}
+          <select
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value as EventType | 'all')}
+            style={{
+              background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 6,
+              color: T.text, fontFamily: "'Inter', sans-serif", fontSize: 12,
+              padding: '7px 12px', cursor: 'pointer', outline: 'none',
+              transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+            }}
+          >
+            <option value="all">All Types</option>
+            {(Object.entries(EVENT_TYPE_LABELS) as [EventType, string][]).map(([val, label]) => (
+              <option key={val} value={val}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Subscribe button */}
+        <div style={{ position: 'relative' }} ref={calMenuRef}>
+          <button
+            onClick={() => setCalMenuOpen(!calMenuOpen)}
+            style={{
+              background: T.accentDim, border: `1px solid ${T.accent}44`,
+              borderRadius: 6, color: T.accent, cursor: 'pointer',
+              fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 11,
+              letterSpacing: '0.06em', padding: '7px 14px',
+              display: 'flex', alignItems: 'center', gap: 6,
+              transition: 'background 0.2s, border-color 0.2s',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+              <line x1="12" y1="14" x2="12" y2="18" /><line x1="10" y1="16" x2="14" y2="16" />
+            </svg>
+            SUBSCRIBE
+          </button>
+
+          {calMenuOpen && (
+            <div style={{
+              position: 'absolute', right: 0, top: '100%', marginTop: 4,
+              background: T.card, border: `1px solid ${T.border}`, borderRadius: 10,
+              boxShadow: T.shadow, zIndex: 50, minWidth: 220, overflow: 'hidden',
+            }}>
+              {[
+                { label: 'Download .ics File', icon: '↓', action: handleDownloadIcs },
+                { label: 'Subscribe (webcal://)', icon: '🔗', action: handleSubscribe },
+                { label: 'Add to Google Calendar', icon: 'G', action: handleGoogleCal },
+                { label: 'Copy Calendar URL', icon: '⎘', action: handleCopyUrl },
+              ].map((item, i) => (
+                <button
+                  key={item.label}
+                  onClick={item.action}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                    padding: '10px 14px', background: 'none', border: 'none',
+                    borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
+                    fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.text,
+                    cursor: 'pointer', textAlign: 'left',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = T.surface}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span style={{
+                    width: 22, height: 22, borderRadius: 4, background: T.surface,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, color: T.accent, flexShrink: 0,
+                  }}>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Calendar View */}
+      {view === 'calendar' && (
+        <CalendarGrid
+          events={filteredEvents}
+          month={calendarMonth}
+          onMonthChange={setCalendarMonth}
+        />
+      )}
+
+      {/* List View */}
+      {view === 'list' && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        {events.map(evt => {
+        {filteredEvents.map(evt => {
           const userSponsor = user?.sponsorId
             ? evt.sponsors.find(s => s.id === user.sponsorId)
             : null;
@@ -226,6 +407,7 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
           );
         })}
       </div>
+      )}
 
       {/* Drill-down Modal */}
       {drillOpen && (

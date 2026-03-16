@@ -97,6 +97,17 @@ export interface MemberProfile {
   privacyListed?: boolean;
 }
 
+export const EVENT_TYPE_COLORS: Record<EventType, string> = {
+  quarterly_meetup: 'accent',
+  training: 'purple',
+  webinar: 'green',
+  vendor_demo: 'gold',
+  executive_roundtable: 'amber',
+  social: 'green',
+  study_group: 'purple',
+  hackathon: 'red',
+};
+
 export type Tier = 'Gold' | 'Silver' | 'Community';
 
 export interface ThemeTokens {
