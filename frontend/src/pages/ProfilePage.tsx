@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Avatar } from '../components/ui/Avatar';
 import { Pill } from '../components/ui/Pill';
@@ -11,11 +11,34 @@ import type { User } from '../types';
 interface ProfilePageProps {
   user: User;
   onNavigate?: (path: string) => void;
+  onUserUpdate?: (user: User) => void;
 }
 
-export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
+export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps) {
   const { T, isDark, isAuto, resetToSystem } = useTheme();
   const [passkeyStatus, setPasskeyStatus] = useState<'idle' | 'registering' | 'done' | 'error'>('idle');
+  const [privacySaving, setPrivacySaving] = useState(false);
+
+  const [privacy, setPrivacy] = useState({
+    privacyShowEmail: user.privacyShowEmail ?? false,
+    privacyShowPhone: user.privacyShowPhone ?? false,
+    privacyShowCompany: user.privacyShowCompany ?? true,
+    privacyShowTitle: user.privacyShowTitle ?? true,
+    privacyShowLinkedin: user.privacyShowLinkedin ?? true,
+    privacyShowType: user.privacyShowType ?? true,
+    privacyListed: user.privacyListed ?? true,
+  });
+
+  const savePrivacy = useCallback(async (updates: Partial<typeof privacy>) => {
+    const newPrivacy = { ...privacy, ...updates };
+    setPrivacy(newPrivacy);
+    setPrivacySaving(true);
+    try {
+      const result = await api.updatePrivacy(newPrivacy);
+      onUserUpdate?.(result.user);
+    } catch {}
+    setPrivacySaving(false);
+  }, [privacy, onUserUpdate]);
 
   const registerPasskey = async () => {
     setPasskeyStatus('registering');
@@ -192,6 +215,34 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
             </button>
           </Card>
 
+          {/* Privacy / Data Visibility */}
+          <SectionLabel text="Data Visibility" color={T.purple} />
+          <Card>
+            <div style={{
+              fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted,
+              marginBottom: 12, lineHeight: 1.5, transition: 'color 0.25s',
+            }}>
+              Control what other members can see on your profile in the Member Directory.
+              {privacySaving && <span style={{ color: T.accent, marginLeft: 8 }}>Saving...</span>}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <PrivacyToggle T={T} label="Listed in Member Directory" checked={privacy.privacyListed}
+                onChange={v => savePrivacy({ privacyListed: v })} />
+              <PrivacyToggle T={T} label="Show Company" checked={privacy.privacyShowCompany}
+                onChange={v => savePrivacy({ privacyShowCompany: v })} disabled={!privacy.privacyListed} />
+              <PrivacyToggle T={T} label="Show Title" checked={privacy.privacyShowTitle}
+                onChange={v => savePrivacy({ privacyShowTitle: v })} disabled={!privacy.privacyListed} />
+              <PrivacyToggle T={T} label="Show User Type" checked={privacy.privacyShowType}
+                onChange={v => savePrivacy({ privacyShowType: v })} disabled={!privacy.privacyListed} />
+              <PrivacyToggle T={T} label="Show Email" checked={privacy.privacyShowEmail}
+                onChange={v => savePrivacy({ privacyShowEmail: v })} disabled={!privacy.privacyListed} />
+              <PrivacyToggle T={T} label="Show Phone" checked={privacy.privacyShowPhone}
+                onChange={v => savePrivacy({ privacyShowPhone: v })} disabled={!privacy.privacyListed} />
+              <PrivacyToggle T={T} label="Show LinkedIn" checked={privacy.privacyShowLinkedin}
+                onChange={v => savePrivacy({ privacyShowLinkedin: v })} disabled={!privacy.privacyListed} />
+            </div>
+          </Card>
+
           {/* Quick links */}
           <SectionLabel text="Quick Actions" color={T.green} />
           <Card>
@@ -242,5 +293,45 @@ export function ProfilePage({ user, onNavigate }: ProfilePageProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+function PrivacyToggle({ T, label, checked, onChange, disabled }: {
+  T: import('../types').ThemeTokens;
+  label: string; checked: boolean;
+  onChange: (v: boolean) => void; disabled?: boolean;
+}) {
+  return (
+    <label style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '4px 0', cursor: disabled ? 'default' : 'pointer',
+      opacity: disabled ? 0.35 : 1,
+      pointerEvents: disabled ? 'none' : 'auto',
+      transition: 'opacity 0.25s',
+    }}>
+      <span style={{
+        fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.text,
+        transition: 'color 0.25s',
+      }}>
+        {label}
+      </span>
+      <div
+        onClick={e => { e.preventDefault(); onChange(!checked); }}
+        style={{
+          width: 36, height: 20, borderRadius: 10, cursor: 'pointer',
+          background: checked ? T.green : T.border,
+          position: 'relative', transition: 'background 0.25s',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{
+          width: 16, height: 16, borderRadius: '50%', background: '#fff',
+          position: 'absolute', top: 2,
+          left: checked ? 18 : 2,
+          transition: 'left 0.2s',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+        }} />
+      </div>
+    </label>
   );
 }

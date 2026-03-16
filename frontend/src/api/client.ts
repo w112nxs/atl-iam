@@ -69,6 +69,33 @@ export const api = {
     body: JSON.stringify(data),
   }),
   getProviders: () => request<{ provider: string; connectedAt: string }[]>('/users/me/providers'),
+  updatePrivacy: (data: {
+    privacyShowEmail?: boolean; privacyShowPhone?: boolean;
+    privacyShowCompany?: boolean; privacyShowTitle?: boolean;
+    privacyShowLinkedin?: boolean; privacyShowType?: boolean;
+    privacyListed?: boolean;
+  }) => request<{ success: boolean; user: import('../types').User }>('/users/me/privacy', {
+    method: 'PUT', body: JSON.stringify(data),
+  }),
+  updateProfile: (data: {
+    firstName?: string; lastName?: string; title?: string;
+    company?: string; phone?: string; linkedinUrl?: string;
+  }) => request<{ success: boolean; user: import('../types').User }>('/users/me/profile', {
+    method: 'PUT', body: JSON.stringify(data),
+  }),
+
+  // Member Directory
+  searchMembers: (params?: { q?: string; type?: string; limit?: number; offset?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.q) qs.set('q', params.q);
+    if (params?.type) qs.set('type', params.type);
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.offset) qs.set('offset', String(params.offset));
+    return request<{ members: import('../types').MemberProfile[]; total: number; limit: number; offset: number }>(
+      `/users/directory?${qs.toString()}`
+    );
+  },
+  getMember: (id: string) => request<import('../types').MemberProfile>(`/users/directory/${id}`),
 
   // Events
   getEvents: () => request<import('../types').Event[]>('/events'),

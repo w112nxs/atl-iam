@@ -40,6 +40,26 @@ export interface User {
   consentDataSharing?: boolean;
   linkedinUrl?: string;
   onboardingComplete?: boolean;
+  title?: string;
+  privacyShowEmail?: boolean;
+  privacyShowPhone?: boolean;
+  privacyShowCompany?: boolean;
+  privacyShowTitle?: boolean;
+  privacyShowLinkedin?: boolean;
+  privacyShowType?: boolean;
+  privacyListed?: boolean;
+}
+
+export interface MemberProfile {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  company?: string;
+  title?: string;
+  userType?: string;
+  email?: string;
+  phone?: string;
+  linkedinUrl?: string;
 }
 
 export type Tier = 'Gold' | 'Silver' | 'Community';

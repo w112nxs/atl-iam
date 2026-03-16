@@ -17,6 +17,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { SponsorPortal } from './pages/SponsorPortal';
 import { AdminView } from './pages/AdminView';
 import { AccessDenied } from './pages/AccessDenied';
+import { MemberDirectory } from './pages/MemberDirectory';
 
 function DevBanner() {
   const { T } = useTheme();
@@ -144,8 +145,10 @@ function AppInner() {
         return isMember ? <SpeakingForm user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
       case '/submit-sponsor':
         return isMember ? <SponsorshipForm user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
+      case '/members':
+        return isMember ? <MemberDirectory /> : <AccessDenied onNavigate={navigate} />;
       case '/my-profile':
-        return isMember ? <ProfilePage user={user!} onNavigate={navigate} /> : <AccessDenied onNavigate={navigate} />;
+        return isMember ? <ProfilePage user={user!} onNavigate={navigate} onUserUpdate={(u) => loginWithToken(localStorage.getItem('atlanta-iam-token') || '', u)} /> : <AccessDenied onNavigate={navigate} />;
       case '/sponsor-portal':
         return isSponsor ? <SponsorPortal user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
       case '/admin':
