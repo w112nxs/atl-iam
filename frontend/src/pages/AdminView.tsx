@@ -1230,20 +1230,22 @@ function SpeakingTab() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {filtered.map(sub => (
-            <Card key={sub.id} style={{ padding: '14px 18px', cursor: 'pointer' }} onClick={() => { setSelected(sub); setReviewComment(sub.adminComment || ''); }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16, color: T.text }}>{sub.title || '(Untitled)'}</div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, marginTop: 2 }}>
-                    {sub.speakerName} {sub.speakerCompany ? `· ${sub.speakerCompany}` : ''}
+            <div key={sub.id} onClick={() => { setSelected(sub); setReviewComment(sub.adminComment || ''); }} style={{ cursor: 'pointer' }}>
+              <Card style={{ padding: '14px 18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16, color: T.text }}>{sub.title || '(Untitled)'}</div>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, marginTop: 2 }}>
+                      {sub.speakerName} {sub.speakerCompany ? `· ${sub.speakerCompany}` : ''}
+                    </div>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.subtle, marginTop: 2 }}>
+                      Submitted by {sub.submitterName} · {sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : ''}
+                    </div>
                   </div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.subtle, marginTop: 2 }}>
-                    Submitted by {sub.submitterName} · {sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : ''}
-                  </div>
+                  <Pill label={sub.status.toUpperCase()} color={statusColor(sub.status)} />
                 </div>
-                <Pill label={sub.status.toUpperCase()} color={statusColor(sub.status)} />
-              </div>
-            </Card>
+              </Card>
+            </div>
           ))}
         </div>
       )}
