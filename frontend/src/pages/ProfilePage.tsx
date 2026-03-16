@@ -45,8 +45,9 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
     try {
       const { startRegistration } = await import('@simplewebauthn/browser');
       const options = await api.passkeyRegisterOptions();
-      const credential = await startRegistration({ optionsJSON: options });
-      const result = await api.passkeyRegisterVerify(credential);
+      const { _challengeId, ...optionsJSON } = options as typeof options & { _challengeId: string };
+      const credential = await startRegistration({ optionsJSON });
+      const result = await api.passkeyRegisterVerify({ ...credential, _challengeId });
       setPasskeyStatus(result.verified ? 'done' : 'error');
     } catch {
       setPasskeyStatus('error');

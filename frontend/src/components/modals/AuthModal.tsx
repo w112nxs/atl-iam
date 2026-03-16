@@ -73,8 +73,9 @@ export function AuthModal({ onLogin, onPasskeyLogin, onClose }: AuthModalProps) 
     try {
       const { startAuthentication } = await import('@simplewebauthn/browser');
       const options = await api.passkeyAuthOptions();
-      const credential = await startAuthentication({ optionsJSON: options });
-      const result = await api.passkeyAuthVerify(credential, { challenge: options.challenge });
+      const { _challengeId, ...optionsJSON } = options as typeof options & { _challengeId: string };
+      const credential = await startAuthentication({ optionsJSON });
+      const result = await api.passkeyAuthVerify({ ...credential, _challengeId }, { challenge: optionsJSON.challenge });
       if (result.verified) {
         onPasskeyLogin(result.token, result.user);
       } else {
