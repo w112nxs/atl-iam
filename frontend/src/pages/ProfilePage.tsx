@@ -126,7 +126,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
   ];
 
   return (
-    <div style={{ width: '90%', maxWidth: 900, margin: '0 auto', padding: 'clamp(20px, 4vw, 32px) 0' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       {/* Profile Header */}
       <Card>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

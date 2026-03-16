@@ -50,7 +50,7 @@ export function LegalPageLayout({ title, subtitle, lastUpdated, sections, relate
   };
 
   return (
-    <div style={{ width: '94%', maxWidth: 1280, margin: '0 auto', padding: '32px 0 64px' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px 64px' }}>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{
