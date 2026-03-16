@@ -4,7 +4,7 @@ ALTER TABLE users ADD COLUMN privacy_show_email INTEGER DEFAULT 0;
 ALTER TABLE users ADD COLUMN privacy_show_phone INTEGER DEFAULT 0;
 ALTER TABLE users ADD COLUMN privacy_show_company INTEGER DEFAULT 1;
 ALTER TABLE users ADD COLUMN privacy_show_title INTEGER DEFAULT 1;
-ALTER TABLE users ADD COLUMN privacy_show_linkedin INTEGER DEFAULT 1;
+ALTER TABLE users ADD COLUMN privacy_show_linkedin INTEGER DEFAULT 0;
 ALTER TABLE users ADD COLUMN privacy_show_type INTEGER DEFAULT 1;
 ALTER TABLE users ADD COLUMN privacy_listed INTEGER DEFAULT 1;
 ALTER TABLE users ADD COLUMN title TEXT DEFAULT '';

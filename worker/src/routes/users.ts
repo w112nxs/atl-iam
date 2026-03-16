@@ -29,7 +29,7 @@ function rowToUser(row: Record<string, unknown>) {
     privacyShowPhone: Boolean(row.privacy_show_phone),
     privacyShowCompany: Boolean(row.privacy_show_company ?? 1),
     privacyShowTitle: Boolean(row.privacy_show_title ?? 1),
-    privacyShowLinkedin: Boolean(row.privacy_show_linkedin ?? 1),
+    privacyShowLinkedin: Boolean(row.privacy_show_linkedin),
     privacyShowType: Boolean(row.privacy_show_type ?? 1),
     privacyListed: Boolean(row.privacy_listed ?? 1),
     lastLogin: String(row.last_login || ''),
@@ -159,11 +159,11 @@ app.put('/me/privacy', requireAuth, async (c) => {
   `).bind(
     body.privacyShowEmail ? 1 : 0,
     body.privacyShowPhone ? 1 : 0,
-    body.privacyShowCompany !== false ? 1 : 0,
-    body.privacyShowTitle !== false ? 1 : 0,
-    body.privacyShowLinkedin !== false ? 1 : 0,
-    body.privacyShowType !== false ? 1 : 0,
-    body.privacyListed !== false ? 1 : 0,
+    body.privacyShowCompany ? 1 : 0,
+    body.privacyShowTitle ? 1 : 0,
+    body.privacyShowLinkedin ? 1 : 0,
+    body.privacyShowType ? 1 : 0,
+    body.privacyListed ? 1 : 0,
     user.id,
   ).run();
 

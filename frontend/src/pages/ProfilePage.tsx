@@ -28,7 +28,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate }: ProfilePageProps
     privacyShowPhone: user.privacyShowPhone ?? false,
     privacyShowCompany: user.privacyShowCompany ?? true,
     privacyShowTitle: user.privacyShowTitle ?? true,
-    privacyShowLinkedin: user.privacyShowLinkedin ?? true,
+    privacyShowLinkedin: user.privacyShowLinkedin ?? false,
     privacyShowType: user.privacyShowType ?? true,
     privacyListed: user.privacyListed ?? true,
   });
