@@ -78,8 +78,6 @@ app.put('/events/:id', requireAuth, requireRole('admin'), async (c) => {
   const body = await c.req.json<{
     name?: string; date?: string; venue?: string; eventType?: string;
     description?: string; maxCapacity?: number;
-    statsRegistered?: number; statsCheckedIn?: number;
-    statsEnterprise?: number; statsVendor?: number;
   }>();
 
   const updates: string[] = [];
@@ -91,10 +89,6 @@ app.put('/events/:id', requireAuth, requireRole('admin'), async (c) => {
   if (body.eventType !== undefined) { updates.push('event_type = ?'); values.push(body.eventType); }
   if (body.description !== undefined) { updates.push('description = ?'); values.push(body.description); }
   if (body.maxCapacity !== undefined) { updates.push('max_capacity = ?'); values.push(body.maxCapacity); }
-  if (body.statsRegistered !== undefined) { updates.push('stats_registered = ?'); values.push(body.statsRegistered); }
-  if (body.statsCheckedIn !== undefined) { updates.push('stats_checked_in = ?'); values.push(body.statsCheckedIn); }
-  if (body.statsEnterprise !== undefined) { updates.push('stats_enterprise = ?'); values.push(body.statsEnterprise); }
-  if (body.statsVendor !== undefined) { updates.push('stats_vendor = ?'); values.push(body.statsVendor); }
 
   if (updates.length === 0) return c.json({ error: 'No fields to update' }, 400);
 

@@ -148,8 +148,6 @@ export const api = {
   updateAdminEvent: (id: string, data: {
     name?: string; date?: string; venue?: string; eventType?: string;
     description?: string; maxCapacity?: number;
-    statsRegistered?: number; statsCheckedIn?: number;
-    statsEnterprise?: number; statsVendor?: number;
   }) => request<{ success: boolean }>(`/admin/events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAdminEvent: (id: string) =>
     request<{ success: boolean }>(`/admin/events/${id}`, { method: 'DELETE' }),

@@ -27,7 +27,7 @@ export const events: Event[] = [
       { id: 'a7', name: 'Devon Price', company: 'NCR Voyix', title: 'Principal Architect', certs: ['CISSP'], type: 'enterprise', email: 'devon@ncr.com', sessions: ['s3'], sponsorConsent: true },
       { id: 'a8', name: 'Reese Patel', company: 'Equifax', title: 'IAM Program Manager', certs: ['PMP', 'CISM'], type: 'enterprise', email: 'reese@equifax.com', sessions: ['s1', 's4'], sponsorConsent: true },
     ],
-    stats: { registered: 94, checkedIn: 81, enterprise: 71, vendor: 10 },
+    stats: { registered: 21, checkedIn: 17, enterprise: 16, vendor: 5 },
   },
   {
     id: 'e2',
@@ -47,7 +47,7 @@ export const events: Event[] = [
       { id: 'b2', name: 'Sam Rivera', company: 'Delta', title: 'Security Analyst', certs: ['Security+'], type: 'enterprise', email: 'sam@delta.com', sessions: ['s5'], sponsorConsent: true },
       { id: 'b3', name: 'Morgan Lee', company: 'UPS', title: 'IAM Architect', certs: ['CISM'], type: 'enterprise', email: 'morgan@ups.com', sessions: ['s6'], sponsorConsent: false },
     ],
-    stats: { registered: 87, checkedIn: 80, enterprise: 68, vendor: 12 },
+    stats: { registered: 11, checkedIn: 9, enterprise: 8, vendor: 3 },
   },
 ];
 
