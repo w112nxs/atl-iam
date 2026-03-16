@@ -7,6 +7,7 @@ import { Avatar } from '../components/ui/Avatar';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { api } from '../api/client';
 import type { User, Event, ThemeTokens } from '../types';
+import { EVENT_TYPE_LABELS } from '../types';
 
 type AdminTab = 'events' | 'members' | 'sponsors';
 
@@ -158,7 +159,7 @@ function EventsTab() {
     } catch { flash('Failed to update event'); }
   };
 
-  const handleCreateEvent = async (data: { name: string; date: string; venue?: string }) => {
+  const handleCreateEvent = async (data: { name: string; date: string; venue?: string; eventType?: string; description?: string }) => {
     try {
       await api.createAdminEvent(data);
       setAdding(false);
@@ -243,6 +244,9 @@ function EventsTab() {
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, marginLeft: 10, fontWeight: 400 }}>
                 {selectedEvent.date} &middot; {selectedEvent.venue || 'No venue'}
               </span>
+              {selectedEvent.eventType && (
+                <Pill label={EVENT_TYPE_LABELS[selectedEvent.eventType] || selectedEvent.eventType} color={T.purple} size={9} />
+              )}
             </h2>
             <button onClick={() => setEditing(selectedEvent)} style={{
               background: 'transparent', border: `1px solid ${T.accent}44`, borderRadius: 4,
@@ -380,14 +384,22 @@ function EventsTab() {
 // ── Event Modals ──
 
 function AddEventModal({ T, onAdd, onClose }: {
-  T: ThemeTokens; onAdd: (d: { name: string; date: string; venue?: string }) => void; onClose: () => void;
+  T: ThemeTokens; onAdd: (d: { name: string; date: string; venue?: string; eventType?: string; description?: string }) => void; onClose: () => void;
 }) {
-  const [form, setForm] = useState({ name: '', date: '', venue: '' });
+  const [form, setForm] = useState({ name: '', date: '', venue: '', eventType: 'quarterly_meetup', description: '' });
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
   return (
     <div onClick={onClose} style={modalOverlay(onClose)}>
-      <div onClick={e => e.stopPropagation()} style={modalBox(T, 400)}>
+      <div onClick={e => e.stopPropagation()} style={modalBox(T, 440)}>
         <h3 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: T.text, margin: '0 0 16px' }}>New Event</h3>
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>EVENT TYPE</label>
+          <select style={{ ...inputStyle(T), cursor: 'pointer' }} value={form.eventType} onChange={e => set('eventType', e.target.value)}>
+            {Object.entries(EVENT_TYPE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
         {[
           { key: 'name', label: 'EVENT NAME', placeholder: 'Atlanta IAM Meetup #2' },
           { key: 'date', label: 'DATE', placeholder: '2025-06-15' },
@@ -398,6 +410,10 @@ function AddEventModal({ T, onAdd, onClose }: {
             <input style={inputStyle(T)} value={(form as Record<string, string>)[f.key]} onChange={e => set(f.key, e.target.value)} placeholder={f.placeholder} />
           </div>
         ))}
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>DESCRIPTION</label>
+          <textarea style={{ ...inputStyle(T), minHeight: 60, resize: 'vertical' as const }} value={form.description} onChange={e => set('description', e.target.value)} placeholder="Brief event description..." />
+        </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 6 }}>
           <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted }}>CANCEL</button>
           <button onClick={() => { if (form.name && form.date) onAdd(form); }} style={{
@@ -412,14 +428,25 @@ function AddEventModal({ T, onAdd, onClose }: {
 }
 
 function EditEventModal({ T, event, onSave, onClose }: {
-  T: ThemeTokens; event: Event; onSave: (id: string, d: { name?: string; date?: string; venue?: string }) => void; onClose: () => void;
+  T: ThemeTokens; event: Event; onSave: (id: string, d: { name?: string; date?: string; venue?: string; eventType?: string; description?: string }) => void; onClose: () => void;
 }) {
-  const [form, setForm] = useState({ name: event.name, date: event.date, venue: event.venue });
+  const [form, setForm] = useState({
+    name: event.name, date: event.date, venue: event.venue,
+    eventType: event.eventType || 'quarterly_meetup', description: event.description || '',
+  });
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
   return (
     <div onClick={onClose} style={modalOverlay(onClose)}>
-      <div onClick={e => e.stopPropagation()} style={modalBox(T, 400)}>
+      <div onClick={e => e.stopPropagation()} style={modalBox(T, 440)}>
         <h3 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: T.text, margin: '0 0 16px' }}>Edit Event</h3>
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>EVENT TYPE</label>
+          <select style={{ ...inputStyle(T), cursor: 'pointer' }} value={form.eventType} onChange={e => set('eventType', e.target.value)}>
+            {Object.entries(EVENT_TYPE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
         {[
           { key: 'name', label: 'EVENT NAME' },
           { key: 'date', label: 'DATE' },
@@ -430,6 +457,10 @@ function EditEventModal({ T, event, onSave, onClose }: {
             <input style={inputStyle(T)} value={(form as Record<string, string>)[f.key]} onChange={e => set(f.key, e.target.value)} />
           </div>
         ))}
+        <div style={{ marginBottom: 10 }}>
+          <label style={labelStyle(T)}>DESCRIPTION</label>
+          <textarea style={{ ...inputStyle(T), minHeight: 60, resize: 'vertical' as const }} value={form.description} onChange={e => set('description', e.target.value)} />
+        </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 6 }}>
           <button onClick={onClose} style={{ background: 'transparent', border: `1px solid ${T.border}`, borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: T.muted }}>CANCEL</button>
           <button onClick={() => onSave(event.id, form)} style={{

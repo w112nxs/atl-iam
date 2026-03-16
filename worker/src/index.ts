@@ -6,6 +6,7 @@ import eventRoutes from './routes/events';
 import userRoutes from './routes/users';
 import submissionRoutes from './routes/submissions';
 import adminRoutes from './routes/admin';
+import kioskRoutes from './routes/kiosk';
 import auditRoutes from './routes/audit';
 import type { Bindings, Variables } from './types';
 
@@ -31,6 +32,7 @@ app.route('/api/events', eventRoutes);
 app.route('/api/users', userRoutes);
 app.route('/api/submissions', submissionRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/kiosk', kioskRoutes);
 app.route('/api/audit', auditRoutes);
 
 app.get('/api/health', async (c) => {

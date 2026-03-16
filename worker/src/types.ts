@@ -10,6 +10,7 @@ export type Bindings = {
   LINKEDIN_CLIENT_SECRET: string;
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
+  KIOSK_SECRET: string;
 };
 
 export type UserPayload = {

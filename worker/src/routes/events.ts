@@ -17,6 +17,9 @@ app.get('/', async (c) => {
     name: e.name,
     date: e.date,
     venue: e.venue,
+    eventType: e.event_type || 'quarterly_meetup',
+    description: e.description || '',
+    maxCapacity: e.max_capacity || 0,
     sponsors: (sponsorsRes.results || [])
       .filter((s) => s.event_id === e.id)
       .map((s) => ({ id: s.sponsor_id, name: s.sponsor_name, tier: s.tier })),

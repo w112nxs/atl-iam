@@ -143,10 +143,11 @@ export const api = {
   deleteAdminMember: (id: string) => request<{ success: boolean }>(`/users/admin/members/${id}`, { method: 'DELETE' }),
 
   // Admin — Events
-  createAdminEvent: (data: { name: string; date: string; venue?: string }) =>
+  createAdminEvent: (data: { name: string; date: string; venue?: string; eventType?: string; description?: string; maxCapacity?: number }) =>
     request<{ success: boolean; id: string }>('/admin/events', { method: 'POST', body: JSON.stringify(data) }),
   updateAdminEvent: (id: string, data: {
-    name?: string; date?: string; venue?: string;
+    name?: string; date?: string; venue?: string; eventType?: string;
+    description?: string; maxCapacity?: number;
     statsRegistered?: number; statsCheckedIn?: number;
     statsEnterprise?: number; statsVendor?: number;
   }) => request<{ success: boolean }>(`/admin/events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
@@ -171,5 +172,37 @@ export const api = {
     request<{ success: boolean }>(`/admin/sponsors/${eventId}/${sponsorId}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAdminSponsor: (eventId: string, sponsorId: string) =>
     request<{ success: boolean }>(`/admin/sponsors/${eventId}/${sponsorId}`, { method: 'DELETE' }),
+
+  // Kiosk
+  kioskGetEventData: (eventId: string, kioskToken: string) =>
+    request<{
+      event: { id: string; name: string; date: string; venue: string; eventType: string };
+      attendees: { id: string; name: string; email: string; company: string; title: string; type: string; checkedIn: boolean }[];
+      stats: { registered: number; checkedIn: number; enterprise: number; vendor: number };
+    }>(`/kiosk/event/${eventId}/data`, {
+      headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+    }),
+  kioskCheckIn: (eventId: string, attendeeId: string, kioskToken: string, stationId?: string) =>
+    request<{ success: boolean; attendee: { id: string; name: string; company: string; title: string; type: string } }>(
+      `/kiosk/event/${eventId}/checkin/${attendeeId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+        body: JSON.stringify({ stationId }),
+      }
+    ),
+  kioskWalkIn: (eventId: string, data: { name: string; email: string; company?: string; title?: string; type?: string }, kioskToken: string) =>
+    request<{ success: boolean; attendee: { id: string; name: string; company: string; title: string; type: string } }>(
+      `/kiosk/event/${eventId}/walkin`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+        body: JSON.stringify(data),
+      }
+    ),
+  kioskGetStats: (eventId: string, kioskToken: string) =>
+    request<{ registered: number; checkedIn: number; enterprise: number; vendor: number }>(
+      `/kiosk/event/${eventId}/stats`, {
+        headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+      }
+    ),
 };
 

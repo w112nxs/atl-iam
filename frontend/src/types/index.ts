@@ -1,8 +1,24 @@
+export type EventType = 'quarterly_meetup' | 'training' | 'webinar' | 'vendor_demo' | 'executive_roundtable' | 'social' | 'study_group' | 'hackathon';
+
+export const EVENT_TYPE_LABELS: Record<EventType, string> = {
+  quarterly_meetup: 'Quarterly Meetup',
+  training: 'In-Person Training',
+  webinar: 'Virtual Webinar',
+  vendor_demo: 'Vendor Demo Day',
+  executive_roundtable: 'Executive Roundtable',
+  social: 'Social / Networking',
+  study_group: 'Certification Study Group',
+  hackathon: 'Hackathon / CTF',
+};
+
 export interface Event {
   id: string;
   name: string;
   date: string;
   venue: string;
+  eventType?: EventType;
+  description?: string;
+  maxCapacity?: number;
   sponsors: { id: string; name: string; tier: 'Gold' | 'Silver' | 'Community' }[];
   sessions: { id: string; title: string; speaker: string; time: string; cpe: number }[];
   attendees: Attendee[];

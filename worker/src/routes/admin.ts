@@ -19,6 +19,9 @@ app.get('/events', requireAuth, requireRole('admin'), async (c) => {
     name: e.name,
     date: e.date,
     venue: e.venue,
+    eventType: e.event_type || 'quarterly_meetup',
+    description: e.description || '',
+    maxCapacity: e.max_capacity || 0,
     sponsors: (sponsorsRes.results || [])
       .filter((s) => s.event_id === e.id)
       .map((s) => ({ id: s.sponsor_id, name: s.sponsor_name, tier: s.tier })),
@@ -40,7 +43,8 @@ app.get('/events', requireAuth, requireRole('admin'), async (c) => {
 // Create event
 app.post('/events', requireAuth, requireRole('admin'), async (c) => {
   const body = await c.req.json<{
-    name: string; date: string; venue?: string;
+    name: string; date: string; venue?: string; eventType?: string;
+    description?: string; maxCapacity?: number;
   }>();
 
   if (!body.name || !body.date) {
@@ -49,8 +53,8 @@ app.post('/events', requireAuth, requireRole('admin'), async (c) => {
 
   const id = 'e' + Date.now().toString(36);
   await c.env.DB.prepare(
-    'INSERT INTO events (id, name, date, venue) VALUES (?, ?, ?, ?)'
-  ).bind(id, body.name, body.date, body.venue || '').run();
+    'INSERT INTO events (id, name, date, venue, event_type, description, max_capacity) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).bind(id, body.name, body.date, body.venue || '', body.eventType || 'quarterly_meetup', body.description || '', body.maxCapacity || 0).run();
 
   return c.json({ success: true, id });
 });
@@ -59,7 +63,8 @@ app.post('/events', requireAuth, requireRole('admin'), async (c) => {
 app.put('/events/:id', requireAuth, requireRole('admin'), async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json<{
-    name?: string; date?: string; venue?: string;
+    name?: string; date?: string; venue?: string; eventType?: string;
+    description?: string; maxCapacity?: number;
     statsRegistered?: number; statsCheckedIn?: number;
     statsEnterprise?: number; statsVendor?: number;
   }>();
@@ -70,6 +75,9 @@ app.put('/events/:id', requireAuth, requireRole('admin'), async (c) => {
   if (body.name !== undefined) { updates.push('name = ?'); values.push(body.name); }
   if (body.date !== undefined) { updates.push('date = ?'); values.push(body.date); }
   if (body.venue !== undefined) { updates.push('venue = ?'); values.push(body.venue); }
+  if (body.eventType !== undefined) { updates.push('event_type = ?'); values.push(body.eventType); }
+  if (body.description !== undefined) { updates.push('description = ?'); values.push(body.description); }
+  if (body.maxCapacity !== undefined) { updates.push('max_capacity = ?'); values.push(body.maxCapacity); }
   if (body.statsRegistered !== undefined) { updates.push('stats_registered = ?'); values.push(body.statsRegistered); }
   if (body.statsCheckedIn !== undefined) { updates.push('stats_checked_in = ?'); values.push(body.statsCheckedIn); }
   if (body.statsEnterprise !== undefined) { updates.push('stats_enterprise = ?'); values.push(body.statsEnterprise); }

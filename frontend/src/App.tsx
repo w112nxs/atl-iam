@@ -18,6 +18,7 @@ import { SponsorPortal } from './pages/SponsorPortal';
 import { AdminView } from './pages/AdminView';
 import { AccessDenied } from './pages/AccessDenied';
 import { MemberDirectory } from './pages/MemberDirectory';
+import { KioskPage } from './pages/KioskPage';
 
 function DevBanner() {
   const { T } = useTheme();
@@ -148,6 +149,11 @@ function AppInner() {
     }
     setStaleConfirming(false);
   };
+
+  // Kiosk mode — render standalone without any app chrome
+  if (path === '/kiosk') {
+    return <KioskPage />;
+  }
 
   const renderPage = () => {
     switch (path) {
