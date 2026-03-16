@@ -60,21 +60,81 @@ function KioskSecurityPattern({ color, opacity = 0.08 }: { color: string; opacit
   );
 }
 
-// Color palette (always dark mode for kiosk)
+// Color palette — matches main site dark theme
 const K = {
-  bg: '#0a0a12',
-  surface: '#12121f',
-  card: '#1a1a2e',
-  border: '#2a2a40',
-  accent: '#4f8cff',
-  gold: '#f0b429',
-  green: '#34d399',
-  red: '#f87171',
-  purple: '#a78bfa',
-  text: '#f0f0f5',
-  muted: '#8888aa',
-  subtle: '#555570',
+  bg: '#080D18',
+  surface: '#0E1525',
+  card: '#172035',
+  border: 'rgba(255,255,255,0.07)',
+  accent: '#E8560A',
+  accentDim: 'rgba(232,86,10,0.12)',
+  gold: '#F5A623',
+  green: '#00E096',
+  red: '#FF4D6D',
+  purple: '#A78BFA',
+  text: '#DDE6F0',
+  muted: '#6B7E96',
+  subtle: '#A8B8CC',
 };
+
+/* ── Floating security icons grid pattern ── */
+function SecurityIconsGrid({ color, opacity = 0.05 }: { color: string; opacity?: number }) {
+  return (
+    <svg viewBox="0 0 800 600" fill="none" style={{ width: '100%', height: '100%', opacity }}>
+      {/* Row 1 — shields & locks */}
+      <path d="M80 60 L110 75 L110 110 C110 135 80 150 80 150 C80 150 50 135 50 110 L50 75 Z" stroke={color} strokeWidth="1" />
+      <rect x="230" y="65" width="30" height="22" rx="4" stroke={color} strokeWidth="1" />
+      <path d="M245 65 L245 55 C245 45 255 45 255 55 L255 65" stroke={color} strokeWidth="1" fill="none" />
+      <circle cx="245" cy="78" r="3" fill={color} opacity="0.5" />
+      <circle cx="400" cy="80" r="20" stroke={color} strokeWidth="1" />
+      <path d="M400 70 L400 85 M393 78 L407 78" stroke={color} strokeWidth="1.2" />
+      <path d="M540 60 L570 75 L570 110 C570 135 540 150 540 150 C540 150 510 135 510 110 L510 75 Z" stroke={color} strokeWidth="1" />
+      <path d="M530 90 L537 97 L552 82" stroke={color} strokeWidth="1.2" fill="none" />
+      <path d="M700 65 L700 55 C700 45 720 45 720 55 L720 65" stroke={color} strokeWidth="1" fill="none" />
+      <rect x="693" y="65" width="34" height="25" rx="4" stroke={color} strokeWidth="1" />
+      {/* Row 2 — fingerprints & keys */}
+      <path d="M90 220 Q90 200 110 200 Q130 200 130 220 Q130 240 110 240" stroke={color} strokeWidth="0.8" fill="none" />
+      <path d="M95 220 Q95 205 110 205 Q125 205 125 220 Q125 235 110 235" stroke={color} strokeWidth="0.8" fill="none" />
+      <path d="M100 220 Q100 210 110 210 Q120 210 120 220 Q120 230 110 230" stroke={color} strokeWidth="0.8" fill="none" />
+      <circle cx="250" cy="220" r="8" stroke={color} strokeWidth="1" />
+      <line x1="258" y1="220" x2="285" y2="220" stroke={color} strokeWidth="1" />
+      <line x1="280" y1="215" x2="280" y2="225" stroke={color} strokeWidth="1" />
+      <line x1="275" y1="215" x2="275" y2="220" stroke={color} strokeWidth="1" />
+      <rect x="380" y="200" width="40" height="40" rx="6" stroke={color} strokeWidth="1" />
+      <circle cx="400" cy="215" r="6" stroke={color} strokeWidth="0.8" />
+      <path d="M400 221 L396 235 L404 235 Z" stroke={color} strokeWidth="0.8" fill="none" />
+      <path d="M540 200 L540 240 M520 220 L560 220" stroke={color} strokeWidth="0.8" opacity="0.5" />
+      <circle cx="540" cy="220" r="15" stroke={color} strokeWidth="0.8" />
+      <circle cx="540" cy="220" r="8" stroke={color} strokeWidth="0.5" />
+      <circle cx="710" cy="220" r="12" stroke={color} strokeWidth="1" />
+      <path d="M710 210 L710 214 M710 226 L710 230 M700 220 L704 220 M716 220 L720 220" stroke={color} strokeWidth="0.8" />
+      {/* Row 3 — network & auth */}
+      <circle cx="80" cy="380" r="5" fill={color} opacity="0.4" />
+      <circle cx="160" cy="360" r="5" fill={color} opacity="0.4" />
+      <circle cx="120" cy="410" r="5" fill={color} opacity="0.4" />
+      <line x1="80" y1="380" x2="160" y2="360" stroke={color} strokeWidth="0.6" />
+      <line x1="80" y1="380" x2="120" y2="410" stroke={color} strokeWidth="0.6" />
+      <line x1="160" y1="360" x2="120" y2="410" stroke={color} strokeWidth="0.6" />
+      <circle cx="250" cy="380" r="16" stroke={color} strokeWidth="1" />
+      <path d="M244 380 L249 385 L258 376" stroke={color} strokeWidth="1.2" fill="none" />
+      <path d="M400 360 L400 400 M380 380 L420 380" stroke={color} strokeWidth="0.5" opacity="0.3" />
+      <rect x="388" y="368" width="24" height="24" rx="12" stroke={color} strokeWidth="1" />
+      <path d="M396 380 L400 384 L408 376" stroke={color} strokeWidth="1" fill="none" />
+      <path d="M530 370 C530 360 550 360 550 370 L550 375 L530 375 Z" stroke={color} strokeWidth="0.8" fill="none" />
+      <rect x="525" y="375" width="30" height="20" rx="3" stroke={color} strokeWidth="0.8" />
+      <circle cx="710" cy="380" r="18" stroke={color} strokeWidth="0.8" strokeDasharray="3 3" />
+      <circle cx="710" cy="380" r="6" fill={color} opacity="0.3" />
+      {/* Scattered dots */}
+      <circle cx="320" cy="120" r="2" fill={color} opacity="0.3" />
+      <circle cx="640" cy="140" r="2" fill={color} opacity="0.3" />
+      <circle cx="180" cy="300" r="2" fill={color} opacity="0.3" />
+      <circle cx="460" cy="300" r="2" fill={color} opacity="0.3" />
+      <circle cx="620" cy="300" r="2" fill={color} opacity="0.3" />
+      <circle cx="350" cy="460" r="2" fill={color} opacity="0.3" />
+      <circle cx="600" cy="480" r="2" fill={color} opacity="0.3" />
+    </svg>
+  );
+}
 
 const EVENT_TYPE_COLORS: Record<string, string> = {
   quarterly_meetup: K.accent,
@@ -320,24 +380,34 @@ function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
       alignItems: 'center', justifyContent: 'center', gap: 32, padding: 40,
       position: 'relative', overflow: 'hidden',
     }}>
-      {/* Background security pattern — left */}
-      <div style={{ position: 'absolute', left: '3%', top: '5%', width: 320, height: 320, pointerEvents: 'none' }}>
-        <KioskSecurityPattern color={K.accent} opacity={0.07} />
+      {/* Security icons grid — full background */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <SecurityIconsGrid color={K.accent} opacity={0.06} />
       </div>
-      {/* Background security pattern — right */}
-      <div style={{ position: 'absolute', right: '3%', top: '5%', width: 320, height: 320, pointerEvents: 'none' }}>
-        <KioskSecurityPattern color={K.purple} opacity={0.05} />
+      {/* Security shield pattern — left */}
+      <div style={{ position: 'absolute', left: '2%', top: '8%', width: 300, height: 300, pointerEvents: 'none' }}>
+        <KioskSecurityPattern color={K.accent} opacity={0.08} />
       </div>
-      {/* Radial glow */}
+      {/* Security shield pattern — right */}
+      <div style={{ position: 'absolute', right: '2%', top: '8%', width: 300, height: 300, pointerEvents: 'none' }}>
+        <KioskSecurityPattern color={K.gold} opacity={0.05} />
+      </div>
+      {/* Radial glow — center */}
       <div style={{
-        position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
-        width: 600, height: 600, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(79,140,255,.08) 0%, transparent 70%)',
+        position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
+        width: 700, height: 700, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(232,86,10,.08) 0%, transparent 70%)',
         pointerEvents: 'none',
+      }} />
+      {/* Grid overlay */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'linear-gradient(rgba(232,86,10,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(232,86,10,.03) 1px, transparent 1px)',
+        backgroundSize: '80px 80px',
       }} />
       {/* Skyline at bottom */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, pointerEvents: 'none' }}>
-        <KioskSkyline color={K.accent} opacity={0.12} />
+        <KioskSkyline color={K.accent} opacity={0.14} />
       </div>
 
       <img src="/badge.png" alt="Atlanta IAM" width="160" height="160" style={{ borderRadius: '50%', border: `3px solid ${K.accent}44`, position: 'relative', zIndex: 1 }} />
@@ -390,8 +460,12 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
     : [];
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 32px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 32px', position: 'relative', overflow: 'hidden' }}>
+      {/* Background security icons — faded */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.3 }}>
+        <SecurityIconsGrid color={K.accent} opacity={0.04} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <button onClick={onBack} style={{
           background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
           padding: '10px 20px', cursor: 'pointer',
@@ -586,8 +660,12 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
   );
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 40px', overflowY: 'auto' }}>
-      <div style={{ width: '100%', maxWidth: 540 }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 40px', overflowY: 'auto', position: 'relative' }}>
+      {/* Background security icons */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.3 }}>
+        <SecurityIconsGrid color={K.accent} opacity={0.04} />
+      </div>
+      <div style={{ width: '100%', maxWidth: 540, position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
           <button onClick={step === 1 ? onBack : () => setStep(1)} style={{
             background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
@@ -866,11 +944,15 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, pointerEvents: 'none' }}>
         <KioskSkyline color={K.green} opacity={0.1} />
       </div>
+      {/* Security icons behind */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.3 }}>
+        <SecurityIconsGrid color={K.green} opacity={0.04} />
+      </div>
       {/* Radial glow */}
       <div style={{
         position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
         width: 500, height: 500, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(52,211,153,.06) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(0,224,150,.06) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
