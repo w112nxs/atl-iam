@@ -696,11 +696,19 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
 }) {
   const [printing, setPrinting] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
+  const [countdown, setCountdown] = useState(10);
 
-  // Auto-dismiss after 10 seconds (longer if printing)
+  // Countdown timer — resets when printing changes
   useEffect(() => {
-    const t = setTimeout(onDone, printing ? 30000 : 10000);
-    return () => clearTimeout(t);
+    const total = printing ? 30 : 10;
+    setCountdown(total);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) { onDone(); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
   }, [onDone, printing]);
 
   // Auto-print if requested
@@ -855,8 +863,17 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
         </button>
       </div>
 
-      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: 0 }}>
-        Screen auto-resets in a few seconds
+      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+        Screen auto-resets in
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: 28, height: 28, borderRadius: '50%',
+          background: K.surface, border: `1.5px solid ${K.border}`,
+          fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 15, color: K.text,
+        }}>
+          {countdown}
+        </span>
+        {countdown === 1 ? 'second' : 'seconds'}
       </p>
     </div>
   );
