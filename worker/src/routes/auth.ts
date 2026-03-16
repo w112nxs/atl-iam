@@ -172,6 +172,9 @@ app.get('/oauth/:provider/callback', async (c) => {
       return c.redirect(`${c.env.FRONTEND_URL}/#auth-error=no-email`);
     }
 
+    // Normalize email to lowercase for case-insensitive matching
+    const normalizedEmail = profile.email.toLowerCase();
+
     // Check if this OAuth link already exists
     const existing = await c.env.DB.prepare(
       'SELECT user_id FROM user_oauth WHERE provider = ? AND provider_user_id = ?',
@@ -187,19 +190,20 @@ app.get('/oauth/:provider/callback', async (c) => {
         'UPDATE user_oauth SET access_token = ? WHERE provider = ? AND provider_user_id = ?',
       ).bind(accessToken, providerName, profile.id).run();
     } else {
-      // Check if a user with this email already exists (link accounts)
+      // Auto-merge: find existing user by email (case-insensitive)
       const existingUser = await c.env.DB.prepare(
-        'SELECT id FROM users WHERE email = ?',
-      ).bind(profile.email).first();
+        'SELECT id FROM users WHERE LOWER(email) = ?',
+      ).bind(normalizedEmail).first();
 
       if (existingUser) {
+        // Link this new provider to the existing account
         userId = String(existingUser.id);
       } else {
-        // Create new user
+        // Create new user with normalized email
         userId = crypto.randomUUID();
         await c.env.DB.prepare(
           'INSERT INTO users (id, name, email, role, avatar_url) VALUES (?, ?, ?, ?, ?)',
-        ).bind(userId, profile.name, profile.email, 'member', profile.avatarUrl).run();
+        ).bind(userId, profile.name, normalizedEmail, 'member', profile.avatarUrl).run();
       }
 
       // Create OAuth link
