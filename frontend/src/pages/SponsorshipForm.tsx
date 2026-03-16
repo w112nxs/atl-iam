@@ -61,9 +61,9 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Rajdhani', sans-serif",
         fontWeight: 700,
-        fontSize: 32,
+        fontSize: 28,
         color: T.text,
         margin: '0 0 20px',
         transition: 'color 0.25s',
@@ -71,76 +71,123 @@ export function SponsorshipForm({ user, onToast }: SponsorshipFormProps) {
         Become a Sponsor
       </h1>
 
-      <Card>
-        <div style={{ marginBottom: 20 }}>
-          <div style={{
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 700,
-            fontSize: 11,
-            letterSpacing: '0.15em',
-            color: T.muted,
-            marginBottom: 8,
-            transition: 'color 0.25s',
-          }}>
-            SPONSORSHIP TIER
+      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr minmax(0, 320px)', gap: 24, alignItems: 'start' }}>
+        {/* Form */}
+        <Card>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 700,
+              fontSize: 11,
+              letterSpacing: '0.15em',
+              color: T.muted,
+              marginBottom: 8,
+              transition: 'color 0.25s',
+            }}>
+              SPONSORSHIP TIER
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['Gold', 'Silver', 'Community'] as Tier[]).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTier(t)}
+                  style={{
+                    background: tier === t ? tierColors[t] + '22' : 'transparent',
+                    border: `1px solid ${tier === t ? tierColors[t] + '44' : T.border}`,
+                    borderRadius: 20,
+                    color: tier === t ? tierColors[t] : T.muted,
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 12,
+                    letterSpacing: '0.06em',
+                    padding: '6px 18px',
+                    cursor: 'pointer',
+                    transition: 'background 0.25s, color 0.25s, border-color 0.25s',
+                  }}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {(['Gold', 'Silver', 'Community'] as Tier[]).map(t => (
-              <button
-                key={t}
-                onClick={() => setTier(t)}
-                style={{
-                  background: tier === t ? tierColors[t] + '22' : 'transparent',
-                  border: `1px solid ${tier === t ? tierColors[t] + '44' : T.border}`,
-                  borderRadius: 20,
-                  color: tier === t ? tierColors[t] : T.muted,
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 12,
-                  letterSpacing: '0.06em',
-                  padding: '6px 18px',
-                  cursor: 'pointer',
-                  transition: 'background 0.25s, color 0.25s, border-color 0.25s',
-                }}
-              >
-                {t}
-              </button>
-            ))}
+
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company Name</label>
+            <CompanyAutocomplete value={company} onChange={setCompany} style={inputStyle} />
           </div>
-        </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Contact Email</label>
+            <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Notes</label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
+          </div>
 
-        <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company Name</label>
-          <CompanyAutocomplete value={company} onChange={setCompany} style={inputStyle} />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Contact Email</label>
-          <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle} />
-        </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Notes</label>
-          <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
-        </div>
+          <button
+            onClick={handleSubmit}
+            style={{
+              background: tierColors[tier],
+              border: 'none',
+              borderRadius: 8,
+              color: tier === 'Gold' ? '#000' : '#fff',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 700,
+              fontSize: 14,
+              letterSpacing: '0.06em',
+              padding: '12px 32px',
+              cursor: 'pointer',
+              transition: 'background 0.25s',
+            }}
+          >
+            {submitting ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
+          </button>
+        </Card>
 
-        <button
-          onClick={handleSubmit}
-          style={{
-            background: tierColors[tier],
-            border: 'none',
-            borderRadius: 8,
-            color: tier === 'Gold' ? '#000' : '#fff',
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 700,
-            fontSize: 14,
-            letterSpacing: '0.06em',
-            padding: '12px 32px',
-            cursor: 'pointer',
-            transition: 'background 0.25s',
-          }}
-        >
-          {submitting ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
-        </button>
-      </Card>
+        {/* Sidebar — Tier Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Card accent={T.gold}>
+            <div style={{
+              fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16,
+              color: T.text, marginBottom: 8, transition: 'color 0.25s',
+            }}>
+              Gold Sponsor
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8 }}>
+              <li>Logo on event materials and website</li>
+              <li>Access to consented attendee data</li>
+              <li>Speaking slot for co-presentation</li>
+              <li>Dedicated booth at quarterly events</li>
+            </ul>
+          </Card>
+          <Card accent={T.subtle}>
+            <div style={{
+              fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16,
+              color: T.text, marginBottom: 8, transition: 'color 0.25s',
+            }}>
+              Silver Sponsor
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8 }}>
+              <li>Logo on website</li>
+              <li>Access to consented attendee data</li>
+              <li>Table at quarterly events</li>
+            </ul>
+          </Card>
+          <Card accent={T.accent}>
+            <div style={{
+              fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16,
+              color: T.text, marginBottom: 8, transition: 'color 0.25s',
+            }}>
+              Community Sponsor
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8 }}>
+              <li>Logo on website</li>
+              <li>Mentioned at events</li>
+              <li>Community recognition</li>
+            </ul>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

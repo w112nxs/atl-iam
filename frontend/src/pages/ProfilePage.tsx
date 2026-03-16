@@ -127,17 +127,27 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
 
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
-      {/* Profile Header */}
+      {/* Page Title */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+        <h1 style={{
+          fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28,
+          color: T.text, margin: 0, transition: 'color 0.25s',
+        }}>
+          My Profile
+        </h1>
+      </div>
+
+      {/* Profile Header — full width */}
       <Card>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Avatar name={user.name} size={56} role={user.role} />
           <div style={{ flex: 1 }}>
-            <h1 style={{
-              fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 24,
+            <div style={{
+              fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 22,
               color: T.text, margin: '0 0 6px', transition: 'color 0.25s',
             }}>
               {user.name}
-            </h1>
+            </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <Pill label={user.role} color={roleColor} size={9} />
               {user.company && <Pill label={user.company} color={T.subtle} size={9} />}

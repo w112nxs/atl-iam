@@ -65,9 +65,9 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Rajdhani', sans-serif",
         fontWeight: 700,
-        fontSize: 32,
+        fontSize: 28,
         color: T.text,
         margin: '0 0 20px',
         transition: 'color 0.25s',
@@ -75,108 +75,143 @@ export function SpeakingForm({ user, onToast }: SpeakingFormProps) {
         Submit a Talk
       </h1>
 
-      <Card>
-        {/* Role selector */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 700,
-            fontSize: 11,
-            letterSpacing: '0.15em',
-            color: T.muted,
-            marginBottom: 8,
-            transition: 'color 0.25s',
-          }}>
-            PRESENTER TYPE
-          </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {[
-              { val: 'enterprise' as const, label: 'Enterprise Leader' },
-              { val: 'copresenter' as const, label: 'Co-Presenter (Vendor + Enterprise)' },
-            ].map(opt => (
-              <button
-                key={opt.val}
-                onClick={() => setType(opt.val)}
-                style={{
-                  background: type === opt.val ? T.accent + '22' : 'transparent',
-                  border: `1px solid ${type === opt.val ? T.accent + '44' : T.border}`,
-                  borderRadius: 6,
-                  color: type === opt.val ? T.accent : T.muted,
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 12,
-                  letterSpacing: '0.06em',
-                  padding: '8px 16px',
-                  cursor: 'pointer',
-                  transition: 'background 0.25s, color 0.25s, border-color 0.25s',
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Fields */}
-        <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Name</label>
-          <input value={user.name} readOnly style={{ ...inputStyle, opacity: 0.6 }} />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company</label>
-          <CompanyAutocomplete value={company} onChange={setCompany} style={inputStyle} />
-        </div>
-
-        {type === 'copresenter' && (
-          <>
+      <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr minmax(0, 320px)', gap: 24, alignItems: 'start' }}>
+        {/* Form */}
+        <Card>
+          {/* Role selector */}
+          <div style={{ marginBottom: 20 }}>
             <div style={{
-              background: T.amberDim,
-              border: `1px solid ${T.amber}44`,
-              borderRadius: 8,
-              padding: '10px 14px',
-              marginBottom: 14,
               fontFamily: "'Inter', sans-serif",
-              fontSize: 12,
-              color: T.amber,
-              transition: 'background 0.25s, color 0.25s, border-color 0.25s',
+              fontWeight: 700,
+              fontSize: 11,
+              letterSpacing: '0.15em',
+              color: T.muted,
+              marginBottom: 8,
+              transition: 'color 0.25s',
             }}>
-              Vendor representatives cannot present solo. An enterprise co-presenter is required.
+              PRESENTER TYPE
             </div>
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Enterprise Co-Presenter</label>
-              <input value={coPresenter} onChange={e => setCoPresenter(e.target.value)} placeholder="Name & company" style={inputStyle} />
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { val: 'enterprise' as const, label: 'Enterprise Leader' },
+                { val: 'copresenter' as const, label: 'Co-Presenter (Vendor + Enterprise)' },
+              ].map(opt => (
+                <button
+                  key={opt.val}
+                  onClick={() => setType(opt.val)}
+                  style={{
+                    background: type === opt.val ? T.accent + '22' : 'transparent',
+                    border: `1px solid ${type === opt.val ? T.accent + '44' : T.border}`,
+                    borderRadius: 6,
+                    color: type === opt.val ? T.accent : T.muted,
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 12,
+                    letterSpacing: '0.06em',
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    transition: 'background 0.25s, color 0.25s, border-color 0.25s',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
-          </>
-        )}
+          </div>
 
-        <div style={{ marginBottom: 14 }}>
-          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Session Title</label>
-          <input value={title} onChange={e => setTitle(e.target.value)} style={inputStyle} />
-        </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Abstract</label>
-          <textarea value={abstract} onChange={e => setAbstract(e.target.value)} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
-        </div>
+          {/* Fields */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Name</label>
+            <input value={user.name} readOnly style={{ ...inputStyle, opacity: 0.6 }} />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Company</label>
+            <CompanyAutocomplete value={company} onChange={setCompany} style={inputStyle} />
+          </div>
 
-        <button
-          onClick={handleSubmit}
-          style={{
-            background: T.accent,
-            border: 'none',
-            borderRadius: 8,
-            color: '#fff',
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 700,
-            fontSize: 14,
-            letterSpacing: '0.06em',
-            padding: '12px 32px',
-            cursor: 'pointer',
-            transition: 'background 0.25s',
-          }}
-        >
-          {submitting ? 'SUBMITTING...' : 'SUBMIT PROPOSAL'}
-        </button>
-      </Card>
+          {type === 'copresenter' && (
+            <>
+              <div style={{
+                background: T.amberDim,
+                border: `1px solid ${T.amber}44`,
+                borderRadius: 8,
+                padding: '10px 14px',
+                marginBottom: 14,
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 12,
+                color: T.amber,
+                transition: 'background 0.25s, color 0.25s, border-color 0.25s',
+              }}>
+                Vendor representatives cannot present solo. An enterprise co-presenter is required.
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Enterprise Co-Presenter</label>
+                <input value={coPresenter} onChange={e => setCoPresenter(e.target.value)} placeholder="Name & company" style={inputStyle} />
+              </div>
+            </>
+          )}
+
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Session Title</label>
+            <input value={title} onChange={e => setTitle(e.target.value)} style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, display: 'block', marginBottom: 4, transition: 'color 0.25s' }}>Abstract</label>
+            <textarea value={abstract} onChange={e => setAbstract(e.target.value)} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            style={{
+              background: T.accent,
+              border: 'none',
+              borderRadius: 8,
+              color: '#fff',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 700,
+              fontSize: 14,
+              letterSpacing: '0.06em',
+              padding: '12px 32px',
+              cursor: 'pointer',
+              transition: 'background 0.25s',
+            }}
+          >
+            {submitting ? 'SUBMITTING...' : 'SUBMIT PROPOSAL'}
+          </button>
+        </Card>
+
+        {/* Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Card accent={T.accent}>
+            <div style={{
+              fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16,
+              color: T.text, marginBottom: 8, transition: 'color 0.25s',
+            }}>
+              Submission Guidelines
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8 }}>
+              <li>Sessions are typically 30–45 minutes</li>
+              <li>Enterprise practitioners present solo or with a vendor co-presenter</li>
+              <li>Vendor-only presentations are not accepted</li>
+              <li>Focus on real-world implementation, not product demos</li>
+            </ul>
+          </Card>
+          <Card accent={T.purple}>
+            <div style={{
+              fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16,
+              color: T.text, marginBottom: 8, transition: 'color 0.25s',
+            }}>
+              What Makes a Great Talk
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8 }}>
+              <li>Lessons learned from production deployments</li>
+              <li>Architecture decisions and trade-offs</li>
+              <li>Migration stories and integration challenges</li>
+              <li>Compliance and governance strategies</li>
+            </ul>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
