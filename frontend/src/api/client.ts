@@ -195,8 +195,12 @@ export const api = {
         body: JSON.stringify({ stationId }),
       }
     ),
-  kioskWalkIn: (eventId: string, data: { name: string; email: string; company?: string; title?: string; type?: string }, kioskToken: string) =>
-    request<{ success: boolean; attendee: { id: string; name: string; company: string; title: string; type: string } }>(
+  kioskWalkIn: (eventId: string, data: {
+    firstName: string; lastName: string; email: string; phone?: string;
+    company?: string; title?: string; type?: string; linkedinUrl?: string;
+    termsAccepted: boolean; consentEmail: boolean; consentText: boolean; consentDataSharing: boolean;
+  }, kioskToken: string) =>
+    request<{ success: boolean; existing?: boolean; attendee: { id: string; name: string; company: string; title: string; type: string } }>(
       `/kiosk/event/${eventId}/walkin`, {
         method: 'POST',
         headers: { Authorization: `Bearer kiosk:${kioskToken}` },

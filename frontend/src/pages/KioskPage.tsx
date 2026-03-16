@@ -132,14 +132,22 @@ export function KioskPage() {
     }
   };
 
-  const handleWalkIn = async (data: { name: string; email: string; company?: string; title?: string; type?: string }) => {
+  const handleWalkIn = async (data: {
+    firstName: string; lastName: string; email: string; phone?: string;
+    company?: string; title?: string; type?: string; linkedinUrl?: string;
+    termsAccepted: boolean; consentEmail: boolean; consentText: boolean; consentDataSharing: boolean;
+  }) => {
     try {
       const result = await api.kioskWalkIn(eventId, data, kioskToken);
+      const fullName = `${data.firstName} ${data.lastName}`.trim();
       setConfirmedAttendee(result.attendee);
       setPrintAfterConfirm(true);
       setScreen('confirm');
       // Add to local list
-      setAttendees(prev => [...prev, { id: result.attendee.id, ...data, company: data.company || '', title: data.title || '', type: data.type || 'enterprise', checkedIn: true }]);
+      setAttendees(prev => [...prev, {
+        id: result.attendee.id, name: fullName, email: data.email,
+        company: data.company || '', title: data.title || '', type: data.type || 'enterprise', checkedIn: true,
+      }]);
       setStats(prev => ({ ...prev, registered: prev.registered + 1, checkedIn: prev.checkedIn + 1 }));
     } catch {
       setError('Registration failed. Please try again.');
@@ -414,14 +422,28 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
 
 // ── Walk-In Screen ──
 function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
-  onSubmit: (data: { name: string; email: string; company?: string; title?: string; type?: string }) => void;
+  onSubmit: (data: {
+    firstName: string; lastName: string; email: string; phone?: string;
+    company?: string; title?: string; type?: string; linkedinUrl?: string;
+    termsAccepted: boolean; consentEmail: boolean; consentText: boolean; consentDataSharing: boolean;
+  }) => void;
   onBack: () => void; error: string; onClearError: () => void;
 }) {
-  const [form, setForm] = useState({ name: '', email: '', company: '', title: '', type: 'enterprise' });
+  const [step, setStep] = useState<1 | 2>(1);
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '', phone: '',
+    company: '', title: '', type: 'enterprise', linkedinUrl: '',
+  });
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [consentEmail, setConsentEmail] = useState(false);
+  const [consentText, setConsentText] = useState(false);
+  const [consentDataSharing, setConsentDataSharing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [companySuggestions, setCompanySuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const companyDebounce = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const termsRef = useRef<HTMLDivElement>(null);
+  const [termsScrolled, setTermsScrolled] = useState(false);
   const set = (k: string, v: string) => { setForm(p => ({ ...p, [k]: v })); onClearError(); };
 
   const handleCompanyChange = (v: string) => {
@@ -441,10 +463,26 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
     }
   };
 
+  const handleTermsScroll = () => {
+    const el = termsRef.current;
+    if (!el) return;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 50) {
+      setTermsScrolled(true);
+    }
+  };
+
+  const canProceedStep1 = form.firstName.trim() && form.lastName.trim() && form.email.trim();
+
   const handleSubmit = async () => {
-    if (!form.name.trim() || !form.email.trim()) return;
+    if (!termsAccepted) return;
     setSubmitting(true);
-    await onSubmit(form);
+    await onSubmit({
+      ...form,
+      termsAccepted,
+      consentEmail,
+      consentText,
+      consentDataSharing,
+    });
     setSubmitting(false);
   };
 
@@ -454,18 +492,39 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
     fontFamily: "'Inter', sans-serif", fontSize: 18, color: K.text, outline: 'none',
   };
 
+  const labelStyle: React.CSSProperties = {
+    fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700,
+    color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block',
+  };
+
+  const checkboxRow = (checked: boolean, onChange: (v: boolean) => void, label: string) => (
+    <label style={{
+      display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer',
+      fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.text, lineHeight: 1.4,
+    }}>
+      <input
+        type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
+        style={{ marginTop: 3, width: 18, height: 18, accentColor: K.accent, flexShrink: 0 }}
+      />
+      <span>{label}</span>
+    </label>
+  );
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
-      <div style={{ width: '100%', maxWidth: 500 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-          <button onClick={onBack} style={{
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 40px', overflowY: 'auto' }}>
+      <div style={{ width: '100%', maxWidth: 540 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+          <button onClick={step === 1 ? onBack : () => setStep(1)} style={{
             background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
             padding: '10px 20px', cursor: 'pointer',
             fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: K.muted,
           }}>BACK</button>
           <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28, color: K.text, margin: 0 }}>
-            Walk-In Registration
+            Walk-In Registration {step === 2 ? '— Terms' : ''}
           </h2>
+          <div style={{ marginLeft: 'auto', fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted }}>
+            Step {step} of 2
+          </div>
         </div>
 
         {error && (
@@ -476,77 +535,155 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
           }}>{error}</div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>NAME *</label>
-            <input style={iStyle} value={form.name} onChange={e => set('name', e.target.value)} placeholder="Full name" autoFocus />
-          </div>
-          <div>
-            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>EMAIL *</label>
-            <input style={iStyle} value={form.email} onChange={e => set('email', e.target.value)} placeholder="Email address" type="email" />
-          </div>
-          <div style={{ position: 'relative' }}>
-            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>COMPANY</label>
-            <input style={iStyle} value={form.company} onChange={e => handleCompanyChange(e.target.value)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} placeholder="Company name" />
-            {showSuggestions && companySuggestions.length > 0 && (
-              <div style={{
-                position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
-                background: K.card, border: `1px solid ${K.border}`, borderRadius: 10,
-                marginTop: 4, maxHeight: 200, overflowY: 'auto',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-              }}>
-                {companySuggestions.map(c => (
-                  <div
-                    key={c}
-                    onMouseDown={() => { set('company', c); setShowSuggestions(false); }}
-                    style={{
-                      padding: '12px 16px', cursor: 'pointer',
-                      fontFamily: "'Inter', sans-serif", fontSize: 16, color: K.text,
-                      borderBottom: `1px solid ${K.border}22`,
-                    }}
-                  >
-                    {c}
-                  </div>
-                ))}
+        {step === 1 && (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>FIRST NAME *</label>
+                  <input style={iStyle} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="First name" autoFocus />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>LAST NAME *</label>
+                  <input style={iStyle} value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Last name" />
+                </div>
               </div>
-            )}
-          </div>
-          <div>
-            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>TITLE</label>
-            <input style={iStyle} value={form.title} onChange={e => set('title', e.target.value)} placeholder="Job title" />
-          </div>
-          <div>
-            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>TYPE</label>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {[{ val: 'enterprise', label: 'Enterprise' }, { val: 'vendor', label: 'Vendor' }].map(t => (
-                <button key={t.val} onClick={() => set('type', t.val)} style={{
-                  flex: 1, padding: '12px',
-                  background: form.type === t.val ? (t.val === 'enterprise' ? K.accent : K.gold) + '22' : 'transparent',
-                  border: `2px solid ${form.type === t.val ? (t.val === 'enterprise' ? K.accent : K.gold) : K.border}`,
-                  borderRadius: 10, cursor: 'pointer',
-                  fontFamily: "'Inter', sans-serif", fontSize: 16, fontWeight: 700,
-                  color: form.type === t.val ? K.text : K.muted,
-                }}>
-                  {t.label}
-                </button>
+              <div>
+                <label style={labelStyle}>EMAIL *</label>
+                <input style={iStyle} value={form.email} onChange={e => set('email', e.target.value)} placeholder="Email address" type="email" />
+              </div>
+              <div>
+                <label style={labelStyle}>PHONE</label>
+                <input style={iStyle} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="Phone number" type="tel" />
+              </div>
+              <div style={{ position: 'relative' }}>
+                <label style={labelStyle}>COMPANY</label>
+                <input style={iStyle} value={form.company} onChange={e => handleCompanyChange(e.target.value)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} placeholder="Company name" />
+                {showSuggestions && companySuggestions.length > 0 && (
+                  <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
+                    background: K.card, border: `1px solid ${K.border}`, borderRadius: 10,
+                    marginTop: 4, maxHeight: 200, overflowY: 'auto',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                  }}>
+                    {companySuggestions.map(c => (
+                      <div
+                        key={c}
+                        onMouseDown={() => { set('company', c); setShowSuggestions(false); }}
+                        style={{
+                          padding: '12px 16px', cursor: 'pointer',
+                          fontFamily: "'Inter', sans-serif", fontSize: 16, color: K.text,
+                          borderBottom: `1px solid ${K.border}22`,
+                        }}
+                      >
+                        {c}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label style={labelStyle}>TITLE</label>
+                <input style={iStyle} value={form.title} onChange={e => set('title', e.target.value)} placeholder="Job title" />
+              </div>
+              <div>
+                <label style={labelStyle}>LINKEDIN (OPTIONAL)</label>
+                <input style={iStyle} value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/in/..." />
+              </div>
+              <div>
+                <label style={labelStyle}>TYPE</label>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  {[{ val: 'enterprise', label: 'Enterprise' }, { val: 'vendor', label: 'Vendor' }].map(t => (
+                    <button key={t.val} onClick={() => set('type', t.val)} style={{
+                      flex: 1, padding: '12px',
+                      background: form.type === t.val ? (t.val === 'enterprise' ? K.accent : K.gold) + '22' : 'transparent',
+                      border: `2px solid ${form.type === t.val ? (t.val === 'enterprise' ? K.accent : K.gold) : K.border}`,
+                      borderRadius: 10, cursor: 'pointer',
+                      fontFamily: "'Inter', sans-serif", fontSize: 16, fontWeight: 700,
+                      color: form.type === t.val ? K.text : K.muted,
+                    }}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setStep(2)}
+              disabled={!canProceedStep1}
+              style={{
+                width: '100%', marginTop: 20,
+                background: canProceedStep1 ? `linear-gradient(135deg, ${K.accent}, ${K.purple})` : K.surface,
+                border: 'none', borderRadius: 12, padding: '16px',
+                cursor: canProceedStep1 ? 'pointer' : 'not-allowed',
+                fontFamily: "'Rajdhani', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff',
+              }}
+            >
+              NEXT — TERMS & CONDITIONS
+            </button>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            {/* Terms scroll area */}
+            <div
+              ref={termsRef}
+              onScroll={handleTermsScroll}
+              style={{
+                background: K.surface, border: `1px solid ${K.border}`, borderRadius: 12,
+                padding: 20, maxHeight: 220, overflowY: 'auto', marginBottom: 16,
+              }}
+            >
+              <h3 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 18, color: K.text, marginTop: 0, marginBottom: 12 }}>
+                Terms & Conditions
+              </h3>
+              {[
+                { title: '1. Who We Are', body: 'The Atlanta IAM User Group is a practitioner-first, vendor-neutral community dedicated to advancing Identity & Access Management knowledge in the Atlanta metropolitan area.' },
+                { title: '2. Community Rules', body: 'All presentations must be enterprise-led. Vendor representatives may co-present only alongside an enterprise practitioner.' },
+                { title: '3. Data We Collect', body: 'We collect your name, email address, company affiliation, professional title, and relevant certifications upon registration.' },
+                { title: '4. How We Use Your Data', body: 'Your data is used to manage event logistics, issue CPE certificates, communicate about upcoming events, and improve our programming.' },
+                { title: '5. Sponsor Data Sharing', body: 'Event sponsors may receive access to attendee data based on their sponsorship tier. You may opt in or out of sponsor data sharing at any time.' },
+                { title: '6. Your Rights', body: 'You may request access to, correction of, or deletion of your personal data at any time by contacting privacy@atlantaiam.com.' },
+                { title: '7. Limitation of Liability', body: 'The Atlanta IAM User Group provides this platform and events on an "as is" basis.' },
+                { title: '8. Governing Law', body: 'These terms are governed by the laws of the State of Georgia.' },
+              ].map(s => (
+                <div key={s.title} style={{ marginBottom: 10 }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: K.text }}>{s.title}</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted, lineHeight: 1.5 }}>{s.body}</div>
+                </div>
               ))}
             </div>
-          </div>
-        </div>
 
-        <button
-          onClick={handleSubmit}
-          disabled={submitting || !form.name.trim() || !form.email.trim()}
-          style={{
-            width: '100%', marginTop: 20,
-            background: form.name.trim() && form.email.trim() ? `linear-gradient(135deg, ${K.accent}, ${K.purple})` : K.surface,
-            border: 'none', borderRadius: 12, padding: '16px',
-            cursor: form.name.trim() && form.email.trim() ? 'pointer' : 'not-allowed',
-            fontFamily: "'Rajdhani', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff',
-          }}
-        >
-          {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN + PRINT BADGE'}
-        </button>
+            {!termsScrolled && (
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.gold, marginBottom: 8, textAlign: 'center' }}>
+                Please scroll to the bottom to continue
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              {checkboxRow(termsAccepted, setTermsAccepted, 'I accept the Terms & Conditions and Code of Conduct *')}
+              {checkboxRow(consentEmail, setConsentEmail, 'I agree to receive email updates about upcoming events')}
+              {checkboxRow(consentText, setConsentText, 'I agree to receive SMS/text notifications')}
+              {checkboxRow(consentDataSharing, setConsentDataSharing, 'I consent to sharing my data with event sponsors')}
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || !termsAccepted}
+              style={{
+                width: '100%',
+                background: termsAccepted ? `linear-gradient(135deg, ${K.accent}, ${K.purple})` : K.surface,
+                border: 'none', borderRadius: 12, padding: '16px',
+                cursor: termsAccepted ? 'pointer' : 'not-allowed',
+                fontFamily: "'Rajdhani', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff',
+              }}
+            >
+              {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN + PRINT BADGE'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

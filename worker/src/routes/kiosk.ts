@@ -101,32 +101,45 @@ app.post('/event/:eventId/checkin/:attendeeId', async (c) => {
   });
 });
 
-// Walk-in: register + check in a new attendee
+// Walk-in: register + check in a new attendee (also creates user account)
 app.post('/event/:eventId/walkin', async (c) => {
   const eventId = c.req.param('eventId');
   const body = await c.req.json<{
-    name: string; email: string; company?: string; title?: string; type?: string;
+    firstName: string; lastName: string; email: string;
+    company?: string; title?: string; phone?: string;
+    type?: string; linkedinUrl?: string;
+    termsAccepted: boolean;
+    consentEmail: boolean; consentText: boolean; consentDataSharing: boolean;
   }>();
 
-  if (!body.name || !body.email) {
+  const fullName = `${body.firstName || ''} ${body.lastName || ''}`.trim();
+  if (!fullName || !body.email) {
     return c.json({ error: 'Name and email are required' }, 400);
   }
+  if (!body.termsAccepted) {
+    return c.json({ error: 'Terms must be accepted' }, 400);
+  }
 
-  // Check if already registered by email
-  const existing = await c.env.DB.prepare(
+  const email = body.email.toLowerCase();
+  const attendeeType = body.type === 'vendor' ? 'vendor' : 'enterprise';
+  const now = new Date().toISOString();
+
+  // Check if already registered as attendee for this event
+  const existingAttendee = await c.env.DB.prepare(
     'SELECT id, checked_in FROM attendees WHERE event_id = ? AND LOWER(email) = ?'
-  ).bind(eventId, body.email.toLowerCase()).first();
+  ).bind(eventId, email).first();
 
-  if (existing) {
-    // Already registered — just check them in
-    if (!existing.checked_in) {
+  if (existingAttendee) {
+    // Already registered for event — just check them in
+    if (!existingAttendee.checked_in) {
       await c.env.DB.prepare(
         'UPDATE attendees SET checked_in = 1, checked_in_at = ?, checked_in_by = ? WHERE id = ?'
-      ).bind(new Date().toISOString(), 'kiosk-walkin', String(existing.id)).run();
+      ).bind(now, 'kiosk-walkin', String(existingAttendee.id)).run();
     }
-    const row = await c.env.DB.prepare('SELECT * FROM attendees WHERE id = ?').bind(String(existing.id)).first();
+    const row = await c.env.DB.prepare('SELECT * FROM attendees WHERE id = ?').bind(String(existingAttendee.id)).first();
     return c.json({
       success: true,
+      existing: true,
       attendee: {
         id: String(row!.id),
         name: String(row!.name),
@@ -137,20 +150,46 @@ app.post('/event/:eventId/walkin', async (c) => {
     });
   }
 
-  // New walk-in
-  const id = 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const now = new Date().toISOString();
-  const attendeeType = body.type === 'vendor' ? 'vendor' : 'enterprise';
+  // Check if user account already exists (registered on web but not for this event)
+  const existingUser = await c.env.DB.prepare(
+    'SELECT id FROM users WHERE LOWER(email) = ?'
+  ).bind(email).first();
 
-  await c.env.DB.prepare(
-    'INSERT INTO attendees (id, event_id, name, email, company, title, type, checked_in, checked_in_at, checked_in_by) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)'
-  ).bind(id, eventId, body.name, body.email.toLowerCase(), body.company || '', body.title || '', attendeeType, now, 'kiosk-walkin').run();
+  const attendeeId = 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  if (existingUser) {
+    // User exists — just add attendee record for this event
+    await c.env.DB.prepare(
+      'INSERT INTO attendees (id, event_id, name, email, company, title, type, checked_in, checked_in_at, checked_in_by, sponsor_consent) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)'
+    ).bind(attendeeId, eventId, fullName, email, body.company || '', body.title || '', attendeeType, now, 'kiosk-walkin', body.consentDataSharing ? 1 : 0).run();
+  } else {
+    // New user — create user account + attendee record in a batch
+    const userId = crypto.randomUUID();
+    await c.env.DB.batch([
+      c.env.DB.prepare(
+        `INSERT INTO users (id, name, email, role, first_name, last_name, phone, company, title, user_type,
+          terms_accepted, onboarding_complete, consent_email, consent_text, consent_data_sharing,
+          linkedin_url, privacy_show_email, privacy_show_phone, privacy_show_company, privacy_show_title,
+          privacy_show_linkedin, privacy_show_type, privacy_listed, profile_updated_at)
+        VALUES (?, ?, ?, 'member', ?, ?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?, 1, 1, 1, 1, 1, 1, 1, datetime('now'))`
+      ).bind(
+        userId, fullName, email,
+        body.firstName, body.lastName, body.phone || '', body.company || '', body.title || '', attendeeType,
+        body.consentEmail ? 1 : 0, body.consentText ? 1 : 0, body.consentDataSharing ? 1 : 0,
+        body.linkedinUrl || '',
+      ),
+      c.env.DB.prepare(
+        'INSERT INTO attendees (id, event_id, name, email, company, title, type, checked_in, checked_in_at, checked_in_by, sponsor_consent) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)'
+      ).bind(attendeeId, eventId, fullName, email, body.company || '', body.title || '', attendeeType, now, 'kiosk-walkin', body.consentDataSharing ? 1 : 0),
+    ]);
+  }
 
   return c.json({
     success: true,
+    existing: false,
     attendee: {
-      id,
-      name: body.name,
+      id: attendeeId,
+      name: fullName,
       company: body.company || '',
       title: body.title || '',
       type: attendeeType,
