@@ -110,12 +110,12 @@ export function CookieConsent() {
               color: T.muted, margin: '0 0 20px',
             }}>
               We use essential cookies to make our site work. With your consent, we may also use non-essential cookies to improve your experience and analyze usage. Learn more in our{' '}
-              <span
-                style={{ color: T.accent, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}
-                onClick={() => {/* could navigate to privacy policy */}}
+              <a
+                href="/privacy"
+                style={{ color: T.accent, textDecoration: 'underline', textUnderlineOffset: 2 }}
               >
                 privacy policy
-              </span>.
+              </a>.
             </p>
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>

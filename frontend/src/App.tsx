@@ -20,6 +20,7 @@ import { AdminView } from './pages/AdminView';
 import { AccessDenied } from './pages/AccessDenied';
 import { MemberDirectory } from './pages/MemberDirectory';
 import { KioskPage } from './pages/KioskPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 
 function DevBanner() {
   const { T } = useTheme();
@@ -176,6 +177,8 @@ function AppInner() {
         return isMember ? <ProfilePage user={user!} onNavigate={navigate} onUserUpdate={(u) => loginWithToken(localStorage.getItem('atlanta-iam-token') || '', u)} /> : <AccessDenied onNavigate={navigate} />;
       case '/sponsor-portal':
         return isSponsor ? <SponsorPortal user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
+      case '/privacy':
+        return <PrivacyPolicyPage />;
       case '/admin':
         return isAdmin ? <AdminView /> : <AccessDenied onNavigate={navigate} />;
       default:

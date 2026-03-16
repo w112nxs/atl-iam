@@ -284,7 +284,7 @@ export function OnboardingModal({ user, onComplete, onDecline }: OnboardingModal
                   fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.muted,
                   fontStyle: 'italic',
                 }}>
-                  Full legal docs at atlantaiam.com/legal
+                  Full privacy policy at atlantaiam.com/privacy
                 </p>
               </div>
 
