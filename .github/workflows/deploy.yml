@@ -71,18 +71,15 @@ jobs:
       - name: Run D1 migrations
         working-directory: worker
         run: |
-          # Create migrations tracking table and seed already-applied migrations
+          # Create migrations tracking table and seed all previously-applied migrations
           npx wrangler d1 execute atlanta-iam-db --remote --command="CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TEXT DEFAULT (datetime('now')))"
-          npx wrangler d1 execute atlanta-iam-db --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('migration-010-invites.sql'),('migration-011-speaking-fields.sql')"
+          npx wrangler d1 execute atlanta-iam-db --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('migration-001-auth.sql'),('migration-002-onboarding.sql'),('migration-003-privacy.sql'),('migration-004-sessions.sql'),('migration-005-profile-updated.sql'),('migration-006-rate-limits.sql'),('migration-007-normalize-emails.sql'),('migration-008-privacy-defaults.sql'),('migration-009-event-types-checkin.sql'),('migration-010-invites.sql'),('migration-011-speaking-fields.sql')"
 
-          # Run each migration only if not already applied
-          for migration in src/db/migration-0*.sql; do
+          # Run each migration only if not already tracked
+          for migration in src/db/migration-*.sql; do
             name=$(basename "$migration")
-            applied=$(npx wrangler d1 execute atlanta-iam-db --remote --command="SELECT name FROM _migrations WHERE name = '$name'" --json 2>/dev/null | node -e "
-              const d = JSON.parse(require('fs').readFileSync(0,'utf8'));
-              console.log(d[0]?.results?.length > 0 ? 'yes' : 'no');
-            " 2>/dev/null || echo "no")
-            if [ "$applied" = "yes" ]; then
+            result=$(npx wrangler d1 execute atlanta-iam-db --remote --command="SELECT name FROM _migrations WHERE name = '$name'" --json 2>/dev/null || echo "[]")
+            if echo "$result" | node -e "const d=JSON.parse(require('fs').readFileSync(0,'utf8')); process.exit(d[0]?.results?.length > 0 ? 0 : 1)" 2>/dev/null; then
               echo "⏭ $name (already applied)"
             else
               echo "▶ Running $name..."
