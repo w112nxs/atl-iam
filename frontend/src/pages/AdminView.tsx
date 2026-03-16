@@ -106,6 +106,27 @@ function EventsTab() {
   const [expandedSponsor, setExpandedSponsor] = useState<string | null>(null);
   const [toast, setToast] = useState('');
 
+  // Drill-down state for interactive stats
+  type DrillAttendee = {
+    id: string; name: string; email: string; company: string; title: string;
+    type: string; checkedIn: boolean; checkedInAt: string; checkedInBy: string;
+  };
+  const [drillOpen, setDrillOpen] = useState<{ eventId: string; eventName: string; label: string; filter?: string } | null>(null);
+  const [drillData, setDrillData] = useState<DrillAttendee[]>([]);
+  const [drillLoading, setDrillLoading] = useState(false);
+  const [drillSearch, setDrillSearch] = useState('');
+
+  const openAdminDrill = async (eventId: string, eventName: string, label: string, filter?: string) => {
+    setDrillOpen({ eventId, eventName, label, filter });
+    setDrillSearch('');
+    setDrillLoading(true);
+    try {
+      const data = await api.getAdminEventAttendees(eventId, filter);
+      setDrillData(data);
+    } catch { setDrillData([]); }
+    setDrillLoading(false);
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -260,12 +281,18 @@ function EventsTab() {
             }}>DELETE</button>
           </div>
 
-          {/* Stats */}
+          {/* Stats — clickable for drill-down */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
-            <StatBox label="Registered" value={selectedEvent.stats.registered} color={T.accent} />
-            <StatBox label="Checked In" value={selectedEvent.stats.checkedIn} color={T.green}
-              sub={selectedEvent.stats.registered > 0 ? `${Math.round((selectedEvent.stats.checkedIn / selectedEvent.stats.registered) * 100)}% of registered` : '—'} />
-            <StatBox label="Enterprise" value={selectedEvent.stats.enterprise} color={T.purple} />
+            <div onClick={() => openAdminDrill(selectedEvent.id, selectedEvent.name, 'Registered')} style={{ cursor: 'pointer' }} title="Click to view all registered">
+              <StatBox label="Registered" value={selectedEvent.stats.registered} color={T.accent} />
+            </div>
+            <div onClick={() => openAdminDrill(selectedEvent.id, selectedEvent.name, 'Checked In', 'checked_in')} style={{ cursor: 'pointer' }} title="Click to view checked-in">
+              <StatBox label="Checked In" value={selectedEvent.stats.checkedIn} color={T.green}
+                sub={selectedEvent.stats.registered > 0 ? `${Math.round((selectedEvent.stats.checkedIn / selectedEvent.stats.registered) * 100)}% of registered` : '—'} />
+            </div>
+            <div onClick={() => openAdminDrill(selectedEvent.id, selectedEvent.name, 'Enterprise', 'enterprise')} style={{ cursor: 'pointer' }} title="Click to view enterprise">
+              <StatBox label="Enterprise" value={selectedEvent.stats.enterprise} color={T.purple} />
+            </div>
             <StatBox label="Sponsors" value={selectedEvent.sponsors.length} color={T.gold} />
           </div>
 
@@ -377,6 +404,75 @@ function EventsTab() {
       {editing && <EditEventModal T={T} event={editing} onSave={handleSaveEvent} onClose={() => setEditing(null)} />}
       {addingSession && <AddSessionModal T={T} onAdd={handleCreateSession} onClose={() => setAddingSession(false)} />}
       {editingSession && <EditSessionModal T={T} session={editingSession} onSave={handleSaveSession} onClose={() => setEditingSession(null)} />}
+
+      {/* Attendee drill-down modal */}
+      {drillOpen && (() => {
+        const filtered = drillSearch.length >= 2
+          ? drillData.filter(a => {
+              const q = drillSearch.toLowerCase();
+              return a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.company.toLowerCase().includes(q);
+            })
+          : drillData;
+        return (
+          <div onClick={() => { setDrillOpen(null); setDrillData([]); }} style={modalOverlay()}>
+            <div onClick={e => e.stopPropagation()} style={{ ...modalBox(T, 720), padding: 0, display: 'flex', flexDirection: 'column', maxHeight: '80vh' }}>
+              <div style={{ padding: '16px 20px', borderBottom: `1px solid ${T.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 22, color: T.text, margin: 0 }}>{drillOpen.label}</h3>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted, marginTop: 2 }}>{drillOpen.eventName} — {filtered.length} attendee{filtered.length !== 1 ? 's' : ''}</div>
+                </div>
+                <button onClick={() => { setDrillOpen(null); setDrillData([]); }} style={{ background: 'none', border: 'none', color: T.muted, fontSize: 24, cursor: 'pointer', fontWeight: 700 }}>x</button>
+              </div>
+              <div style={{ padding: '12px 20px', borderBottom: `1px solid ${T.border}` }}>
+                <input value={drillSearch} onChange={e => setDrillSearch(e.target.value)} placeholder="Search by name, email, or company..."
+                  style={{ ...inputStyle(T), width: '100%' }} />
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px 16px' }}>
+                {drillLoading ? (
+                  <div style={{ textAlign: 'center', padding: 40, fontFamily: "'Inter', sans-serif", color: T.muted }}>Loading...</div>
+                ) : filtered.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: 40, fontFamily: "'Inter', sans-serif", color: T.muted }}>No attendees found</div>
+                ) : (
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        {['Name', 'Company', 'Title', 'Type', 'Status', 'Checked In At'].map(h => (
+                          <th key={h} style={{ textAlign: 'left', padding: '8px 6px', fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map(a => (
+                        <tr key={a.id} style={{ borderBottom: `1px solid ${T.border}22` }}>
+                          <td style={{ padding: '8px 6px' }}>
+                            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.text }}>{a.name}</div>
+                            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.muted }}>{a.email}</div>
+                          </td>
+                          <td style={{ padding: '8px 6px', fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.text }}>{a.company}</td>
+                          <td style={{ padding: '8px 6px', fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted }}>{a.title}</td>
+                          <td style={{ padding: '8px 6px' }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 10, background: (a.type === 'enterprise' ? T.accent : T.gold) + '22', fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: a.type === 'enterprise' ? T.accent : T.gold, letterSpacing: '0.06em' }}>
+                              {a.type === 'enterprise' ? 'ENT' : 'VND'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 6px' }}>
+                            {a.checkedIn ? (
+                              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 10, background: T.green + '22', fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: T.green, letterSpacing: '0.06em' }}>IN</span>
+                            ) : (
+                              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 10, background: T.muted + '22', fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: T.muted, letterSpacing: '0.06em' }}>--</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '8px 6px', fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.muted }}>{a.checkedInAt ? new Date(a.checkedInAt).toLocaleString() : ''}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }

@@ -109,6 +109,16 @@ export function KioskPage() {
   const [printAfterConfirm, setPrintAfterConfirm] = useState(false);
 
   const handleCheckIn = async (attendee: KioskAttendee, print = false) => {
+    if (attendee.checkedIn && print) {
+      // Already checked in — just reprint badge
+      setConfirmedAttendee({
+        name: attendee.name, company: attendee.company,
+        title: attendee.title, type: attendee.type,
+      });
+      setPrintAfterConfirm(true);
+      setScreen('confirm');
+      return;
+    }
     try {
       const result = await api.kioskCheckIn(eventId, attendee.id, kioskToken, stationId);
       setConfirmedAttendee(result.attendee);
@@ -341,7 +351,6 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
                 border: `1px solid ${a.checkedIn ? K.green + '33' : K.border}`,
                 borderRadius: 12, padding: '16px 20px',
                 textAlign: 'left', width: '100%',
-                opacity: a.checkedIn ? 0.6 : 1,
               }}
             >
               {/* Type indicator */}
@@ -358,12 +367,13 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
                   {[a.title, a.company].filter(Boolean).join(' — ')}
                 </div>
               </div>
-              {a.checkedIn ? (
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.green, letterSpacing: '0.08em' }}>
-                  CHECKED IN
-                </span>
-              ) : (
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+                {a.checkedIn && (
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.green, letterSpacing: '0.08em', marginRight: 4 }}>
+                    CHECKED IN
+                  </span>
+                )}
+                {!a.checkedIn && (
                   <span
                     onClick={(e) => { e.stopPropagation(); onSelect(a, false); }}
                     style={{
@@ -374,24 +384,26 @@ function SearchScreen({ attendees, onSelect, onBack, error, onClearError }: {
                   >
                     CHECK IN
                   </span>
-                  <span
-                    onClick={(e) => { e.stopPropagation(); onSelect(a, true); }}
-                    style={{
-                      background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
-                      borderRadius: 8, padding: '8px 16px',
-                      fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: '#fff',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 6 2 18 2 18 9" />
-                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                      <rect x="6" y="14" width="12" height="8" />
-                    </svg>
-                    PRINT
-                  </span>
-                </div>
-              )}
+                )}
+                <span
+                  onClick={(e) => { e.stopPropagation(); onSelect(a, true); }}
+                  style={{
+                    background: a.checkedIn ? K.surface : `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
+                    border: a.checkedIn ? `1px solid ${K.border}` : 'none',
+                    borderRadius: 8, padding: '8px 16px',
+                    fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700,
+                    color: a.checkedIn ? K.text : '#fff',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={a.checkedIn ? K.text : '#fff'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9" />
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                    <rect x="6" y="14" width="12" height="8" />
+                  </svg>
+                  {a.checkedIn ? 'REPRINT' : 'PRINT'}
+                </span>
+              </div>
             </div>
           ))
         )}
@@ -407,7 +419,27 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
 }) {
   const [form, setForm] = useState({ name: '', email: '', company: '', title: '', type: 'enterprise' });
   const [submitting, setSubmitting] = useState(false);
+  const [companySuggestions, setCompanySuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const companyDebounce = useRef<ReturnType<typeof setTimeout>>(undefined);
   const set = (k: string, v: string) => { setForm(p => ({ ...p, [k]: v })); onClearError(); };
+
+  const handleCompanyChange = (v: string) => {
+    set('company', v);
+    clearTimeout(companyDebounce.current);
+    if (v.length >= 2) {
+      companyDebounce.current = setTimeout(async () => {
+        try {
+          const results = await api.searchCompanies(v);
+          setCompanySuggestions(results);
+          setShowSuggestions(results.length > 0);
+        } catch { setCompanySuggestions([]); }
+      }, 250);
+    } else {
+      setCompanySuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!form.name.trim() || !form.email.trim()) return;
@@ -453,9 +485,31 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
             <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>EMAIL *</label>
             <input style={iStyle} value={form.email} onChange={e => set('email', e.target.value)} placeholder="Email address" type="email" />
           </div>
-          <div>
+          <div style={{ position: 'relative' }}>
             <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>COMPANY</label>
-            <input style={iStyle} value={form.company} onChange={e => set('company', e.target.value)} placeholder="Company name" />
+            <input style={iStyle} value={form.company} onChange={e => handleCompanyChange(e.target.value)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} placeholder="Company name" />
+            {showSuggestions && companySuggestions.length > 0 && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
+                background: K.card, border: `1px solid ${K.border}`, borderRadius: 10,
+                marginTop: 4, maxHeight: 200, overflowY: 'auto',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              }}>
+                {companySuggestions.map(c => (
+                  <div
+                    key={c}
+                    onMouseDown={() => { set('company', c); setShowSuggestions(false); }}
+                    style={{
+                      padding: '12px 16px', cursor: 'pointer',
+                      fontFamily: "'Inter', sans-serif", fontSize: 16, color: K.text,
+                      borderBottom: `1px solid ${K.border}22`,
+                    }}
+                  >
+                    {c}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted, letterSpacing: '0.08em', marginBottom: 4, display: 'block' }}>TITLE</label>
