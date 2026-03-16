@@ -5,9 +5,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: read
   security-events: read
+  vulnerability-alerts: read
 
 jobs:
   security-check:
@@ -15,6 +19,7 @@ jobs:
     permissions:
       contents: read
       security-events: read
+      vulnerability-alerts: read
     steps:
       - uses: actions/checkout@v5
 
