@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { signToken, verifyToken } from '../lib/jwt';
+import { hashToken } from '../lib/hash';
 import { getProvider, getClientId, getClientSecret, exchangeCode, fetchUserInfo } from '../lib/oauth';
 import {
   generateRegistrationOptions,
@@ -75,17 +76,18 @@ function parseUA(ua: string): { device: string; browser: string; os: string } {
   return { device, browser, os };
 }
 
-// Create a session record and update last_login
+// Create a session record and update last_login.
+// Deduplicates: replaces any existing session from the same device/browser/os for this user.
 async function createSession(
   db: D1Database, userId: string, token: string, ua: string, ip: string,
 ) {
   const { device, browser, os } = parseUA(ua);
-  // Simple hash for token (not crypto-grade, just for lookup)
-  const encoder = new TextEncoder();
-  const hashBuf = await crypto.subtle.digest('SHA-256', encoder.encode(token));
-  const hashArr = new Uint8Array(hashBuf);
-  let tokenHash = '';
-  for (const b of hashArr) tokenHash += b.toString(16).padStart(2, '0');
+  const tokenHash = await hashToken(token);
+
+  // Remove any existing session from the same device/browser/os to prevent duplicates
+  await db.prepare(
+    'DELETE FROM user_sessions WHERE user_id = ? AND device = ? AND browser = ? AND os = ?',
+  ).bind(userId, device, browser, os).run();
 
   const sessionId = crypto.randomUUID();
   await db.prepare(

@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { requireAuth } from '../middleware/auth';
+import { hashToken } from '../lib/hash';
 import type { Bindings, Variables } from '../types';
 
 const USER_COLUMNS = 'id, name, email, role, company, sponsor_id, terms_accepted, avatar_url, first_name, last_name, phone, user_type, work_email, consent_email, consent_text, consent_data_sharing, linkedin_url, onboarding_complete, title, privacy_show_email, privacy_show_phone, privacy_show_company, privacy_show_title, privacy_show_linkedin, privacy_show_type, privacy_listed, last_login, profile_updated_at';
@@ -285,14 +286,8 @@ app.get('/me/providers', requireAuth, async (c) => {
 // List active sessions
 app.get('/me/sessions', requireAuth, async (c) => {
   const user = c.get('user');
-
-  // Hash current token to identify which session is "this one"
   const currentToken = c.req.header('authorization')?.replace('Bearer ', '') || '';
-  const encoder = new TextEncoder();
-  const hashBuf = await crypto.subtle.digest('SHA-256', encoder.encode(currentToken));
-  const hashArr = new Uint8Array(hashBuf);
-  let currentHash = '';
-  for (const b of hashArr) currentHash += b.toString(16).padStart(2, '0');
+  const currentHash = await hashToken(currentToken);
 
   const rows = await c.env.DB.prepare(
     'SELECT id, device, browser, os, ip, created_at, last_active, token_hash FROM user_sessions WHERE user_id = ? ORDER BY last_active DESC',
@@ -323,14 +318,8 @@ app.delete('/me/sessions/:sessionId', requireAuth, async (c) => {
 // Revoke all other sessions
 app.delete('/me/sessions', requireAuth, async (c) => {
   const user = c.get('user');
-
-  // Hash current token to keep this session
   const currentToken = c.req.header('authorization')?.replace('Bearer ', '') || '';
-  const encoder = new TextEncoder();
-  const hashBuf = await crypto.subtle.digest('SHA-256', encoder.encode(currentToken));
-  const hashArr = new Uint8Array(hashBuf);
-  let currentHash = '';
-  for (const b of hashArr) currentHash += b.toString(16).padStart(2, '0');
+  const currentHash = await hashToken(currentToken);
 
   await c.env.DB.prepare(
     'DELETE FROM user_sessions WHERE user_id = ? AND token_hash != ?',

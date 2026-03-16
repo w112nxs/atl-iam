@@ -16,6 +16,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
+    // If session was revoked or token is invalid, force logout
+    if (res.status === 401 && token) {
+      localStorage.removeItem('atlanta-iam-token');
+      localStorage.removeItem('atlanta-iam-user');
+      window.location.href = '/';
+    }
     throw new Error(body.error || `Request failed: ${res.status}`);
   }
 
