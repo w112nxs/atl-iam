@@ -208,6 +208,7 @@ export function KioskPage() {
   const [error, setError] = useState('');
   const [confirmedAttendee, setConfirmedAttendee] = useState<{ name: string; company: string; title: string; type: string; linkedinUrl?: string } | null>(null);
   const [pendingEmail, setPendingEmail] = useState('');
+  const [showPrinterSettings, setShowPrinterSettings] = useState(false);
   const idleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Load event data
@@ -373,7 +374,7 @@ export function KioskPage() {
             </span>
           )}
         </div>
-        <div className="kiosk-stats-row" style={{ display: 'flex', gap: 20 }}>
+        <div className="kiosk-stats-row" style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           {[
             { label: 'Registered', val: stats.registered, color: K.accent },
             { label: 'Checked In', val: stats.checkedIn, color: K.green },
@@ -384,6 +385,17 @@ export function KioskPage() {
               <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: K.muted, letterSpacing: '0.08em' }}>{s.label}</div>
             </div>
           ))}
+          <button
+            onClick={() => setShowPrinterSettings(true)}
+            title="Printer Settings"
+            style={{
+              background: K.surface, border: `1px solid ${K.border}`, borderRadius: 8,
+              padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center',
+              marginLeft: 8,
+            }}
+          >
+            <Icon name="print" size={18} color={K.muted} />
+          </button>
         </div>
       </div>
 
@@ -453,6 +465,124 @@ export function KioskPage() {
               autoPrint={printAfterConfirm}
               onDone={() => { setConfirmedAttendee(null); setPrintAfterConfirm(false); setScreen('welcome'); }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Printer Settings Modal */}
+      {showPrinterSettings && (
+        <div style={modalOverlayStyle} onClick={() => setShowPrinterSettings(false)}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: K.card, border: `1px solid ${K.border}`, borderRadius: 16,
+              width: '92%', maxWidth: 480, padding: '28px 32px',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <Icon name="print" size={24} color={K.accent} />
+              <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 24, color: K.text, margin: 0 }}>
+                Printer Settings
+              </h2>
+            </div>
+
+            {/* Printer status */}
+            <div style={{
+              background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
+              padding: '14px 16px', marginBottom: 16,
+            }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 8 }}>
+                LABEL PRINTER
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name="check_circle" size={16} color={K.green} filled />
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.text }}>
+                  Brother QL-800
+                </span>
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted, marginTop: 4 }}>
+                Label: DK-2251 (62mm continuous, red/black)
+              </div>
+            </div>
+
+            {/* Setup instructions */}
+            <div style={{
+              background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
+              padding: '14px 16px', marginBottom: 16,
+            }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 8 }}>
+                SETUP INSTRUCTIONS
+              </div>
+              {[
+                { step: '1', text: 'Connect Brother QL-800 via USB to this computer' },
+                { step: '2', text: 'Install Brother P-touch Editor or printer driver' },
+                { step: '3', text: 'Load DK-2251 label roll (62mm red/black)' },
+                { step: '4', text: 'Set QL-800 as default printer in system settings' },
+                { step: '5', text: 'In print dialog, set paper size to "62mm" or "DK-2251"' },
+              ].map(item => (
+                <div key={item.step} style={{ display: 'flex', gap: 10, marginBottom: 6 }}>
+                  <span style={{
+                    width: 20, height: 20, borderRadius: '50%', background: K.accent + '22',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.accent,
+                  }}>{item.step}</span>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.text }}>
+                    {item.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Test print */}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => {
+                  const w = window.open('', '_blank', 'width=300,height=400');
+                  if (!w) return;
+                  w.document.write(
+`<!DOCTYPE html><html><head><style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
+@page{size:62mm auto;margin:0;}
+@media print{html,body{width:62mm;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+.test{width:62mm;padding:4mm;border:2px solid #111;border-radius:2px;text-align:center;}
+.t1{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20pt;color:#000;text-transform:uppercase;}
+.t2{font-family:'Inter',sans-serif;font-size:8pt;color:#666;margin-top:2mm;}
+.t3{font-family:'Inter',sans-serif;font-size:7pt;color:#999;margin-top:3mm;border-top:0.5px solid #ccc;padding-top:2mm;}
+</style></head><body>
+<div class="test">
+<div class="t1">TEST PRINT</div>
+<div class="t2">Brother QL-800 — DK-2251</div>
+<div class="t3">If this prints correctly on a single label,<br/>your printer is properly configured.</div>
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print();window.close();},600);};</script>
+</body></html>`
+                  );
+                  w.document.close();
+                }}
+                style={{
+                  flex: 1,
+                  background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
+                  border: 'none', borderRadius: 10, padding: '12px',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700, color: '#fff',
+                }}
+              >
+                <Icon name="print" size={18} color="#fff" /> TEST PRINT
+              </button>
+              <button
+                onClick={() => setShowPrinterSettings(false)}
+                style={{
+                  background: 'transparent', border: `2px solid ${K.border}`,
+                  borderRadius: 10, padding: '12px 24px', cursor: 'pointer',
+                  fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700, color: K.muted,
+                }}
+              >
+                CLOSE
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1065,42 +1195,66 @@ function LinkedInPrompt({ attendeeName, attendeeEmail, kioskToken, onDone, onSki
           </div>
 
           {/* Suggestions */}
+          {suggestions.length > 0 && !searching && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0',
+              fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.muted,
+            }}>
+              <Icon name="touch_app" size={14} color={K.muted} />
+              Tap a result below to select it as your LinkedIn profile
+            </div>
+          )}
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {searching && (
               <div style={{ padding: 12, textAlign: 'center', fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted }}>
                 <Icon name="progress_activity" size={16} color={K.muted} /> Searching...
               </div>
             )}
-            {!searching && suggestions.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => selectSuggestion(s)}
-                style={{
-                  background: url === s.url ? K.accent + '22' : K.card,
-                  border: `1px solid ${url === s.url ? K.accent + '66' : K.border}`,
-                  borderRadius: 10, padding: '12px 14px',
-                  cursor: 'pointer', textAlign: 'left', width: '100%',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16, color: K.text }}>
-                  {s.name}
-                </div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.accent, wordBreak: 'break-all' }}>
-                  {s.url}
-                </div>
-                {s.headline && s.headline !== 'Suggested profile URL' && (
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.muted, marginTop: 2 }}>
-                    {s.headline}
+            {!searching && suggestions.map((s, i) => {
+              const selected = url === s.url;
+              return (
+                <button
+                  key={i}
+                  onClick={() => selectSuggestion(s)}
+                  title="Click to select this LinkedIn profile"
+                  style={{
+                    background: selected ? K.accent + '22' : K.card,
+                    border: `1.5px solid ${selected ? K.accent : K.border}`,
+                    borderRadius: 10, padding: '12px 14px',
+                    cursor: 'pointer', textAlign: 'left', width: '100%',
+                    transition: 'all 0.15s',
+                    position: 'relative',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Icon
+                      name={selected ? 'check_circle' : 'radio_button_unchecked'}
+                      size={18}
+                      color={selected ? K.accent : K.muted}
+                      filled={selected}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16, color: K.text }}>
+                        {s.name}
+                      </div>
+                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.accent, wordBreak: 'break-all' }}>
+                        {s.url}
+                      </div>
+                      {s.headline && s.headline !== 'Suggested profile URL' && (
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.muted, marginTop: 2 }}>
+                          {s.headline}
+                        </div>
+                      )}
+                      {s.headline === 'Suggested profile URL' && (
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: K.muted, marginTop: 2, fontStyle: 'italic' }}>
+                          Auto-suggested — verify this is your profile
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-                {s.headline === 'Suggested profile URL' && (
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: K.muted, marginTop: 2, fontStyle: 'italic' }}>
-                    Auto-suggested — verify this is correct
-                  </div>
-                )}
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
 
           {/* Direct URL input */}
@@ -1250,100 +1404,60 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
       }
     }
 
-    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    const printWindow = window.open('', '_blank', 'width=300,height=500');
     if (!printWindow) {
       setPrinting(false);
       return;
     }
 
-    const typeLabel = attendee.type === 'enterprise' ? 'ENTERPRISE' : 'VENDOR';
     const borderColor = isVendorOrSponsor ? '#D32F2F' : '#111111';
     const hasQR = !!printQrDataUrl;
-    // DK-2251: 62mm wide continuous roll, auto-cut height
-    // Shorter label when no QR code
-    const labelHeight = hasQR ? '90mm' : '54mm';
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Nametag — ${attendee.name}</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;600;700&display=swap');
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 62mm ${labelHeight}; margin: 0; }
-          @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-          body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fff; }
-          .nametag {
-            width: 62mm; height: ${labelHeight}; padding: 2.5mm 3mm;
-            display: flex; flex-direction: column; align-items: center;
-            text-align: center; overflow: hidden;
-            border: 2.5px solid ${borderColor}; border-radius: 3px;
-          }
-          .event-name {
-            font-family: 'Inter', sans-serif; font-size: 6.5px; font-weight: 700;
-            color: #888; letter-spacing: 0.08em; text-transform: uppercase;
-            width: 100%; padding-bottom: 1.5mm; margin-bottom: 1mm;
-            border-bottom: 0.5px solid #ccc;
-          }
-          .name {
-            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 28px;
-            color: #000; text-transform: uppercase; line-height: 1.05;
-            word-break: break-word; max-width: 100%; margin: 1mm 0;
-          }
-          .title {
-            font-family: 'Inter', sans-serif; font-size: 9px; color: #444;
-            word-break: break-word; max-width: 100%; margin-top: 0.5mm;
-          }
-          .company {
-            font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 700;
-            color: #333; word-break: break-word; max-width: 100%; margin-top: 0.5mm;
-          }
-          .type-bar {
-            margin-top: 1.5mm; padding: 1.5px 10px; border-radius: 2px;
-            background: ${borderColor}; color: #fff;
-            font-family: 'Inter', sans-serif; font-size: 7px; font-weight: 700;
-            letter-spacing: 0.1em;
-          }
-          .qr-section {
-            margin-top: auto; padding-top: 1.5mm;
-            display: flex; flex-direction: column; align-items: center;
-          }
-          .qr-wrap {
-            padding: 1.5px; border: 2px solid ${borderColor}; border-radius: 3px;
-            display: inline-block; background: #fff;
-          }
-          .qr-wrap img { display: block; width: 20mm; height: 20mm; }
-          .qr-label {
-            font-family: 'Inter', sans-serif; font-size: 5.5px; color: #999;
-            margin-top: 0.5mm; letter-spacing: 0.05em;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="nametag">
-          <div class="event-name">${eventName}</div>
-          <div class="name">${attendee.name}</div>
-          ${attendee.title ? `<div class="title">${attendee.title}</div>` : ''}
-          ${attendee.company ? `<div class="company">${attendee.company}</div>` : ''}
-          <div class="type-bar">${typeLabel}</div>
-          ${hasQR ? `
-            <div class="qr-section">
-              <div class="qr-wrap">
-                <img src="${printQrDataUrl}" alt="LinkedIn QR" />
-              </div>
-              <div class="qr-label">SCAN FOR LINKEDIN</div>
-            </div>
-          ` : ''}
-        </div>
-        <script>
-          window.onload = function() {
-            setTimeout(function() { window.print(); window.close(); }, 600);
-          };
-        </script>
-      </body>
-      </html>
-    `);
+    // DK-2251: 62mm wide continuous roll for Brother QL-800
+    // Use mm units throughout. No fixed height — let content determine cut length.
+    printWindow.document.write(
+`<!DOCTYPE html>
+<html>
+<head>
+<title>Nametag</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
+@page{size:62mm auto;margin:0;}
+@media print{
+  html,body{width:62mm;height:auto;}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+.nametag{
+  width:62mm;padding:3mm;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+  border:2px solid ${borderColor};border-radius:2px;
+  page-break-after:avoid;page-break-inside:avoid;
+}
+.event{font-family:'Inter',sans-serif;font-size:7pt;font-weight:700;color:#888;letter-spacing:0.08em;text-transform:uppercase;width:100%;padding-bottom:2mm;margin-bottom:1.5mm;border-bottom:0.5px solid #ccc;}
+.name{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:24pt;color:#000;text-transform:uppercase;line-height:1.05;word-break:break-word;max-width:100%;margin:1mm 0;}
+.title{font-family:'Inter',sans-serif;font-size:8pt;color:#444;word-break:break-word;max-width:100%;}
+.company{font-family:'Inter',sans-serif;font-size:8.5pt;font-weight:700;color:#222;word-break:break-word;max-width:100%;margin-top:0.5mm;}
+.qr-section{margin-top:2mm;display:flex;flex-direction:column;align-items:center;}
+.qr-wrap{padding:1.5px;border:2px solid ${borderColor};border-radius:2px;display:inline-block;background:#fff;}
+.qr-wrap img{display:block;width:18mm;height:18mm;}
+.qr-label{font-family:'Inter',sans-serif;font-size:5pt;color:#999;margin-top:0.5mm;letter-spacing:0.05em;}
+</style>
+</head>
+<body>
+<div class="nametag">
+<div class="event">${eventName}</div>
+<div class="name">${attendee.name}</div>
+${attendee.title ? `<div class="title">${attendee.title}</div>` : ''}
+${attendee.company ? `<div class="company">${attendee.company}</div>` : ''}
+${hasQR ? `<div class="qr-section"><div class="qr-wrap"><img src="${printQrDataUrl}" alt="QR"/></div><div class="qr-label">SCAN FOR LINKEDIN</div></div>` : ''}
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print();window.close();},600);};</script>
+</body>
+</html>`
+    );
     printWindow.document.close();
     setTimeout(() => setPrinting(false), 2000);
   };
@@ -1412,14 +1526,6 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
             {attendee.company}
           </div>
         )}
-        <div style={{
-          marginTop: 10, padding: '5px 0', borderRadius: 4,
-          background: labelBorderColor, color: '#fff',
-          fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-        }}>
-          {attendee.type === 'enterprise' ? 'ENTERPRISE' : 'VENDOR'}
-        </div>
 
         {/* QR Code — only if LinkedIn URL exists */}
         {hasLinkedin && qrDataUrl && (
