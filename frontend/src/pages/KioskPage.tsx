@@ -1348,7 +1348,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
     setTimeout(() => setPrinting(false), 2000);
   };
 
-  const typeColor = attendee.type === 'enterprise' ? K.accent : K.gold;
+
 
   return (
     <div
