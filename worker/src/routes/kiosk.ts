@@ -213,6 +213,72 @@ app.post('/event/:eventId/walkin', async (c) => {
   });
 });
 
+// LinkedIn profile suggestions — search our users DB for matching profiles
+app.get('/linkedin-suggest', async (c) => {
+  const q = (c.req.query('q') || '').trim();
+  const email = (c.req.query('email') || '').trim().toLowerCase();
+  if (!q && !email) return c.json({ suggestions: [] });
+
+  const suggestions: { name: string; url: string; headline: string }[] = [];
+
+  // 1. Exact email match (highest priority)
+  if (email) {
+    const user = await c.env.DB.prepare(
+      'SELECT name, linkedin_url, title, company FROM users WHERE LOWER(email) = ? AND linkedin_url != \'\''
+    ).bind(email).first();
+    if (user && user.linkedin_url) {
+      suggestions.push({
+        name: String(user.name),
+        url: String(user.linkedin_url),
+        headline: [user.title, user.company].filter(Boolean).join(' at '),
+      });
+    }
+  }
+
+  // 2. Name-based search in our users DB (people who have LinkedIn URLs)
+  if (q.length >= 2) {
+    const nameResults = await c.env.DB.prepare(
+      `SELECT name, linkedin_url, title, company FROM users
+       WHERE linkedin_url != '' AND LOWER(name) LIKE ?
+       ORDER BY name ASC LIMIT 8`
+    ).bind(`%${q.toLowerCase()}%`).all();
+
+    for (const row of nameResults.results || []) {
+      const url = String(row.linkedin_url);
+      if (!suggestions.some(s => s.url === url)) {
+        suggestions.push({
+          name: String(row.name),
+          url,
+          headline: [row.title, row.company].filter(Boolean).join(' at '),
+        });
+      }
+    }
+  }
+
+  // 3. Generate slug suggestion from the query name
+  if (q) {
+    const slug = q.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+    const suggestedUrl = `https://www.linkedin.com/in/${slug}`;
+    if (!suggestions.some(s => s.url === suggestedUrl)) {
+      suggestions.push({ name: q, url: suggestedUrl, headline: 'Suggested profile URL' });
+    }
+  }
+
+  return c.json({ suggestions });
+});
+
+// Save LinkedIn URL for a checked-in attendee (kiosk flow)
+app.post('/save-linkedin', async (c) => {
+  const body = await c.req.json<{ email: string; linkedinUrl: string }>();
+  if (!body.email || !body.linkedinUrl) return c.json({ error: 'Missing fields' }, 400);
+
+  await c.env.DB.prepare(
+    'UPDATE users SET linkedin_url = ? WHERE LOWER(email) = ?'
+  ).bind(body.linkedinUrl, body.email.toLowerCase()).run();
+
+  return c.json({ success: true });
+});
+
 // Live stats — computed dynamically
 app.get('/event/:id/stats', async (c) => {
   const eventId = c.req.param('id');

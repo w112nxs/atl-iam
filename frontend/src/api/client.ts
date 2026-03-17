@@ -277,5 +277,19 @@ export const api = {
         headers: { Authorization: `Bearer kiosk:${kioskToken}` },
       }
     ),
+  kioskLinkedinSuggest: (q: string, email: string, kioskToken: string) =>
+    request<{ suggestions: { name: string; url: string; headline: string }[] }>(
+      `/kiosk/linkedin-suggest?q=${encodeURIComponent(q)}&email=${encodeURIComponent(email)}`, {
+        headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+      }
+    ),
+  kioskSaveLinkedin: (email: string, linkedinUrl: string, kioskToken: string) =>
+    request<{ success: boolean }>(
+      `/kiosk/save-linkedin`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+        body: JSON.stringify({ email, linkedinUrl }),
+      }
+    ),
 };
 

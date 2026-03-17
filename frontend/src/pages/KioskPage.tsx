@@ -153,7 +153,7 @@ type KioskAttendee = {
   title: string; type: string; checkedIn: boolean; linkedinUrl?: string;
 };
 
-type Screen = 'welcome' | 'search' | 'walkin' | 'confirm' | 'printing';
+type Screen = 'welcome' | 'search' | 'walkin' | 'linkedin' | 'confirm' | 'printing';
 
 const kioskResponsiveCSS = `
 @media (max-width: 600px) {
@@ -207,6 +207,7 @@ export function KioskPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [confirmedAttendee, setConfirmedAttendee] = useState<{ name: string; company: string; title: string; type: string; linkedinUrl?: string } | null>(null);
+  const [pendingEmail, setPendingEmail] = useState('');
   const idleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Load event data
@@ -267,23 +268,36 @@ export function KioskPage() {
   const handleCheckIn = async (attendee: KioskAttendee, print = false) => {
     if (attendee.checkedIn && print) {
       // Already checked in — just reprint badge
-      setConfirmedAttendee({
+      const att = {
         name: attendee.name, company: attendee.company,
         title: attendee.title, type: attendee.type,
         linkedinUrl: attendee.linkedinUrl,
-      });
+      };
+      setConfirmedAttendee(att);
+      setPendingEmail(attendee.email);
       setPrintAfterConfirm(true);
-      setScreen('confirm');
+      // If no LinkedIn, ask first; otherwise go straight to confirm
+      if (!attendee.linkedinUrl) {
+        setScreen('linkedin');
+      } else {
+        setScreen('confirm');
+      }
       return;
     }
     try {
       const result = await api.kioskCheckIn(eventId, attendee.id, kioskToken, stationId);
       setConfirmedAttendee(result.attendee);
+      setPendingEmail(attendee.email);
       setPrintAfterConfirm(print);
-      setScreen('confirm');
       // Mark as checked in locally
       setAttendees(prev => prev.map(a => a.id === attendee.id ? { ...a, checkedIn: true } : a));
       setStats(prev => ({ ...prev, checkedIn: prev.checkedIn + (attendee.checkedIn ? 0 : 1) }));
+      // If no LinkedIn URL, prompt for it
+      if (!result.attendee.linkedinUrl) {
+        setScreen('linkedin');
+      } else {
+        setScreen('confirm');
+      }
     } catch {
       setError('Check-in failed. Please try again.');
     }
@@ -298,14 +312,21 @@ export function KioskPage() {
       const result = await api.kioskWalkIn(eventId, data, kioskToken);
       const fullName = `${data.firstName} ${data.lastName}`.trim();
       setConfirmedAttendee(result.attendee);
+      setPendingEmail(data.email);
       setPrintAfterConfirm(true);
-      setScreen('confirm');
       // Add to local list
       setAttendees(prev => [...prev, {
         id: result.attendee.id, name: fullName, email: data.email,
-        company: data.company || '', title: data.title || '', type: data.type || 'enterprise', checkedIn: true,
+        company: data.company || '', title: data.title || '', type: data.type || 'enterprise',
+        checkedIn: true, linkedinUrl: data.linkedinUrl,
       }]);
       setStats(prev => ({ ...prev, registered: prev.registered + 1, checkedIn: prev.checkedIn + 1 }));
+      // If no LinkedIn, prompt for it; otherwise confirm
+      if (!data.linkedinUrl) {
+        setScreen('linkedin');
+      } else {
+        setScreen('confirm');
+      }
     } catch {
       setError('Registration failed. Please try again.');
     }
@@ -397,6 +418,28 @@ export function KioskPage() {
               onBack={() => setScreen('welcome')}
               error={error}
               onClearError={() => setError('')}
+            />
+          </div>
+        </div>
+      )}
+      {screen === 'linkedin' && confirmedAttendee && (
+        <div style={modalOverlayStyle}>
+          <div className="kiosk-modal-content" style={{ ...modalContentStyle, maxWidth: 700, maxHeight: '92vh' }}>
+            <LinkedInPrompt
+              attendeeName={confirmedAttendee.name}
+              attendeeEmail={pendingEmail}
+              kioskToken={kioskToken}
+              onDone={(url) => {
+                if (url) {
+                  setConfirmedAttendee(prev => prev ? { ...prev, linkedinUrl: url } : prev);
+                  // Update local attendee list too
+                  setAttendees(prev => prev.map(a =>
+                    a.email.toLowerCase() === pendingEmail.toLowerCase() ? { ...a, linkedinUrl: url } : a
+                  ));
+                }
+                setScreen('confirm');
+              }}
+              onSkip={() => setScreen('confirm')}
             />
           </div>
         </div>
@@ -918,6 +961,227 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
   );
 }
 
+// ── LinkedIn Prompt Screen ──
+function LinkedInPrompt({ attendeeName, attendeeEmail, kioskToken, onDone, onSkip }: {
+  attendeeName: string; attendeeEmail: string; kioskToken: string;
+  onDone: (url: string) => void; onSkip: () => void;
+}) {
+  const [query, setQuery] = useState(attendeeName);
+  const [url, setUrl] = useState('');
+  const [suggestions, setSuggestions] = useState<{ name: string; url: string; headline: string }[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [qrPreview, setQrPreview] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Auto-search on mount with attendee name
+  useEffect(() => {
+    searchLinkedin(attendeeName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const searchLinkedin = async (q: string) => {
+    if (q.length < 2) { setSuggestions([]); return; }
+    setSearching(true);
+    try {
+      const result = await api.kioskLinkedinSuggest(q, attendeeEmail, kioskToken);
+      setSuggestions(result.suggestions);
+    } catch { /* ignore */ }
+    setSearching(false);
+  };
+
+  // Debounced search as user types
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => searchLinkedin(val), 400);
+  };
+
+  // Generate QR preview when URL changes
+  useEffect(() => {
+    if (!url) { setQrPreview(null); return; }
+    const fullUrl = url.startsWith('http') ? url : `https://www.linkedin.com/in/${url}`;
+    QRCode.toDataURL(fullUrl, { width: 160, margin: 1, errorCorrectionLevel: 'M' })
+      .then(dataUrl => setQrPreview(dataUrl))
+      .catch(() => setQrPreview(null));
+  }, [url]);
+
+  const selectSuggestion = (s: { url: string }) => {
+    setUrl(s.url);
+    inputRef.current?.focus();
+  };
+
+  const handleConfirm = async () => {
+    if (!url) return;
+    const fullUrl = url.startsWith('http') ? url : `https://www.linkedin.com/in/${url}`;
+    setSaving(true);
+    try {
+      await api.kioskSaveLinkedin(attendeeEmail, fullUrl, kioskToken);
+    } catch { /* save failed, but still proceed with URL for print */ }
+    setSaving(false);
+    onDone(fullUrl);
+  };
+
+  const iStyle: React.CSSProperties = {
+    width: '100%', background: K.surface, border: `2px solid ${K.accent}44`,
+    borderRadius: 10, padding: '14px 16px',
+    fontFamily: "'Inter', sans-serif", fontSize: 18, color: K.text, outline: 'none',
+  };
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 32px', position: 'relative', overflow: 'hidden' }}>
+      {/* Background */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.3 }}>
+        <SecurityIconsGrid color={K.accent} opacity={0.04} />
+      </div>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, position: 'relative', zIndex: 1 }}>
+        <Icon name="link" size={28} color={K.accent} />
+        <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 28, color: K.text, margin: 0 }}>
+          Add Your LinkedIn Profile
+        </h2>
+      </div>
+
+      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.muted, margin: '0 0 16px', position: 'relative', zIndex: 1 }}>
+        Add your LinkedIn URL to include a QR code on your nametag. Other attendees can scan it to connect with you.
+      </p>
+
+      <div style={{ display: 'flex', gap: 24, flex: 1, minHeight: 0, position: 'relative', zIndex: 1 }}>
+        {/* Left: Search & Input */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+          {/* Search field */}
+          <div>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 4, display: 'block' }}>
+              SEARCH BY NAME
+            </label>
+            <input
+              value={query}
+              onChange={e => handleQueryChange(e.target.value)}
+              placeholder="Search your name..."
+              style={iStyle}
+            />
+          </div>
+
+          {/* Suggestions */}
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {searching && (
+              <div style={{ padding: 12, textAlign: 'center', fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted }}>
+                <Icon name="progress_activity" size={16} color={K.muted} /> Searching...
+              </div>
+            )}
+            {!searching && suggestions.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => selectSuggestion(s)}
+                style={{
+                  background: url === s.url ? K.accent + '22' : K.card,
+                  border: `1px solid ${url === s.url ? K.accent + '66' : K.border}`,
+                  borderRadius: 10, padding: '12px 14px',
+                  cursor: 'pointer', textAlign: 'left', width: '100%',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 16, color: K.text }}>
+                  {s.name}
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.accent, wordBreak: 'break-all' }}>
+                  {s.url}
+                </div>
+                {s.headline && s.headline !== 'Suggested profile URL' && (
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.muted, marginTop: 2 }}>
+                    {s.headline}
+                  </div>
+                )}
+                {s.headline === 'Suggested profile URL' && (
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: K.muted, marginTop: 2, fontStyle: 'italic' }}>
+                    Auto-suggested — verify this is correct
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Direct URL input */}
+          <div>
+            <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 4, display: 'block' }}>
+              OR PASTE YOUR LINKEDIN URL
+            </label>
+            <input
+              ref={inputRef}
+              value={url}
+              onChange={e => setUrl(e.target.value)}
+              placeholder="https://linkedin.com/in/your-profile"
+              style={iStyle}
+            />
+          </div>
+        </div>
+
+        {/* Right: QR Preview */}
+        <div style={{
+          width: 180, flexShrink: 0, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: 12,
+        }}>
+          {qrPreview ? (
+            <>
+              <div style={{
+                padding: 4, border: `3px solid ${K.accent}`,
+                borderRadius: 8, background: '#fff',
+              }}>
+                <img src={qrPreview} alt="QR Preview" style={{ width: 140, height: 140, display: 'block' }} />
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: K.muted, textAlign: 'center' }}>
+                QR Code Preview
+              </div>
+            </>
+          ) : (
+            <div style={{
+              width: 148, height: 148, border: `2px dashed ${K.border}`, borderRadius: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted, textAlign: 'center' }}>
+                QR preview<br />appears here
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: 12, marginTop: 16, position: 'relative', zIndex: 1 }}>
+        <button
+          onClick={handleConfirm}
+          disabled={!url || saving}
+          style={{
+            flex: 1,
+            background: url ? `linear-gradient(135deg, ${K.accent}, ${K.purple})` : K.surface,
+            border: 'none', borderRadius: 12, padding: '14px',
+            cursor: url ? 'pointer' : 'not-allowed',
+            fontFamily: "'Rajdhani', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}
+        >
+          <Icon name={saving ? 'progress_activity' : 'qr_code'} size={20} color="#fff" />
+          {saving ? 'SAVING...' : 'ADD TO NAMETAG'}
+        </button>
+        <button
+          onClick={onSkip}
+          style={{
+            background: 'transparent', border: `2px solid ${K.border}`,
+            borderRadius: 12, padding: '14px 28px',
+            cursor: 'pointer',
+            fontFamily: "'Rajdhani', sans-serif", fontSize: 20, fontWeight: 700, color: K.muted,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}
+        >
+          <Icon name="arrow_forward" size={18} color={K.muted} /> SKIP
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Confirmation Screen ──
 function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
   attendee: { name: string; company: string; title: string; type: string; linkedinUrl?: string };
@@ -961,22 +1225,29 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
   }, []);
 
   const isVendorOrSponsor = attendee.type === 'vendor';
-  const qrBorderColor = isVendorOrSponsor ? '#D32F2F' : 'transparent';
+  // Label border: red for vendor/sponsor, black for everyone else
+  const labelBorderColor = isVendorOrSponsor ? '#D32F2F' : '#111111';
+  // QR border matches label border
+  const qrBorderColor = isVendorOrSponsor ? '#D32F2F' : '#111111';
+  const hasLinkedin = !!attendee.linkedinUrl;
 
   const printBadge = async () => {
     setPrinting(true);
     setCountdown(30);
 
-    // Generate QR for print if LinkedIn URL exists
-    let printQrDataUrl = qrDataUrl;
-    if (attendee.linkedinUrl && !printQrDataUrl) {
-      try {
-        printQrDataUrl = await QRCode.toDataURL(attendee.linkedinUrl, {
-          width: 300, margin: 1,
-          color: { dark: '#000000', light: '#ffffff' },
-          errorCorrectionLevel: 'M',
-        });
-      } catch { /* no QR */ }
+    // Generate QR for print only if LinkedIn URL exists
+    let printQrDataUrl: string | null = null;
+    if (hasLinkedin) {
+      printQrDataUrl = qrDataUrl;
+      if (!printQrDataUrl) {
+        try {
+          printQrDataUrl = await QRCode.toDataURL(attendee.linkedinUrl!, {
+            width: 300, margin: 1,
+            color: { dark: '#000000', light: '#ffffff' },
+            errorCorrectionLevel: 'M',
+          });
+        } catch { /* no QR */ }
+      }
     }
 
     const printWindow = window.open('', '_blank', 'width=400,height=600');
@@ -985,13 +1256,13 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
       return;
     }
 
-    const typeColor = attendee.type === 'enterprise' ? '#E8560A' : '#D4A017';
     const typeLabel = attendee.type === 'enterprise' ? 'ENTERPRISE' : 'VENDOR';
-    const hasQR = !!printQrDataUrl && !!attendee.linkedinUrl;
-    const qrBorder = isVendorOrSponsor ? '3px solid #D32F2F' : '3px solid transparent';
+    const borderColor = isVendorOrSponsor ? '#D32F2F' : '#111111';
+    const hasQR = !!printQrDataUrl;
+    // DK-2251: 62mm wide continuous roll, auto-cut height
+    // Shorter label when no QR code
+    const labelHeight = hasQR ? '90mm' : '54mm';
 
-    // Brother QL-800: 62mm wide continuous labels (~2.4in)
-    // Design for 62mm x 100mm label (2.4in x 3.9in) at 300dpi
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -1000,47 +1271,52 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;600;700&display=swap');
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 62mm 100mm; margin: 0; }
+          @page { size: 62mm ${labelHeight}; margin: 0; }
           @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
           body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fff; }
           .nametag {
-            width: 62mm; height: 100mm; padding: 3mm 4mm;
+            width: 62mm; height: ${labelHeight}; padding: 2.5mm 3mm;
             display: flex; flex-direction: column; align-items: center;
             text-align: center; overflow: hidden;
+            border: 2.5px solid ${borderColor}; border-radius: 3px;
           }
           .event-name {
-            font-family: 'Inter', sans-serif; font-size: 7px; font-weight: 700;
+            font-family: 'Inter', sans-serif; font-size: 6.5px; font-weight: 700;
             color: #888; letter-spacing: 0.08em; text-transform: uppercase;
-            margin-bottom: 2mm; width: 100%;
-            border-bottom: 1px solid #ddd; padding-bottom: 2mm;
+            width: 100%; padding-bottom: 1.5mm; margin-bottom: 1mm;
+            border-bottom: 0.5px solid #ccc;
           }
           .name {
-            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 22px;
-            color: #111; text-transform: uppercase; line-height: 1.1; margin-top: 1mm;
-            word-break: break-word; max-width: 100%;
+            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 28px;
+            color: #000; text-transform: uppercase; line-height: 1.05;
+            word-break: break-word; max-width: 100%; margin: 1mm 0;
           }
-          .detail {
-            font-family: 'Inter', sans-serif; font-size: 10px; color: #555;
-            margin-top: 1px; word-break: break-word; max-width: 100%;
+          .title {
+            font-family: 'Inter', sans-serif; font-size: 9px; color: #444;
+            word-break: break-word; max-width: 100%; margin-top: 0.5mm;
+          }
+          .company {
+            font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 700;
+            color: #333; word-break: break-word; max-width: 100%; margin-top: 0.5mm;
           }
           .type-bar {
-            margin-top: 2mm; padding: 2px 12px; border-radius: 3px;
-            background: ${typeColor}; color: #fff;
-            font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 700;
+            margin-top: 1.5mm; padding: 1.5px 10px; border-radius: 2px;
+            background: ${borderColor}; color: #fff;
+            font-family: 'Inter', sans-serif; font-size: 7px; font-weight: 700;
             letter-spacing: 0.1em;
           }
           .qr-section {
-            margin-top: auto; padding-top: 2mm;
+            margin-top: auto; padding-top: 1.5mm;
             display: flex; flex-direction: column; align-items: center;
           }
           .qr-wrap {
-            padding: 2px; border: ${qrBorder}; border-radius: 4px;
-            display: inline-block;
+            padding: 1.5px; border: 2px solid ${borderColor}; border-radius: 3px;
+            display: inline-block; background: #fff;
           }
-          .qr-wrap img { display: block; width: 22mm; height: 22mm; }
+          .qr-wrap img { display: block; width: 20mm; height: 20mm; }
           .qr-label {
-            font-family: 'Inter', sans-serif; font-size: 6px; color: #999;
-            margin-top: 1mm; letter-spacing: 0.05em;
+            font-family: 'Inter', sans-serif; font-size: 5.5px; color: #999;
+            margin-top: 0.5mm; letter-spacing: 0.05em;
           }
         </style>
       </head>
@@ -1048,8 +1324,8 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
         <div class="nametag">
           <div class="event-name">${eventName}</div>
           <div class="name">${attendee.name}</div>
-          ${attendee.title ? `<div class="detail">${attendee.title}</div>` : ''}
-          ${attendee.company ? `<div class="detail" style="font-weight:600">${attendee.company}</div>` : ''}
+          ${attendee.title ? `<div class="title">${attendee.title}</div>` : ''}
+          ${attendee.company ? `<div class="company">${attendee.company}</div>` : ''}
           <div class="type-bar">${typeLabel}</div>
           ${hasQR ? `
             <div class="qr-section">
@@ -1058,13 +1334,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
               </div>
               <div class="qr-label">SCAN FOR LINKEDIN</div>
             </div>
-          ` : `
-            <div class="qr-section">
-              <div style="width:22mm;height:22mm;display:flex;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:4px;">
-                <span style="font-family:'Inter',sans-serif;font-size:7px;color:#bbb;">NO LINKEDIN</span>
-              </div>
-            </div>
-          `}
+          ` : ''}
         </div>
         <script>
           window.onload = function() {
@@ -1122,59 +1392,51 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
 
       {/* Badge preview */}
       <div className="kiosk-confirm-badge" ref={badgeRef} style={{
-        background: '#fff', borderRadius: 16, padding: '24px 32px', minWidth: 280,
+        background: '#fff', borderRadius: 12, padding: '24px 32px', minWidth: 280,
         textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', maxWidth: '90%',
+        border: `3px solid ${labelBorderColor}`,
       }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: '#888', letterSpacing: '0.1em', marginBottom: 6 }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: '#888', letterSpacing: '0.1em', marginBottom: 6, borderBottom: '1px solid #ddd', paddingBottom: 6 }}>
           {eventName}
         </div>
-        <div className="kiosk-confirm-name" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 32, color: '#111', textTransform: 'uppercase' }}>
+        <div className="kiosk-confirm-name" style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 38, color: '#000', textTransform: 'uppercase', lineHeight: 1.05 }}>
           {attendee.name}
         </div>
         {attendee.title && (
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: '#555', marginTop: 4 }}>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: '#444', marginTop: 4 }}>
             {attendee.title}
           </div>
         )}
         {attendee.company && (
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: '#555', fontWeight: 600 }}>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: '#333', fontWeight: 700 }}>
             {attendee.company}
           </div>
         )}
         <div style={{
-          marginTop: 12, padding: '6px 0', borderRadius: 6,
-          background: typeColor, color: '#fff',
-          fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700,
+          marginTop: 10, padding: '5px 0', borderRadius: 4,
+          background: labelBorderColor, color: '#fff',
+          fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700,
           letterSpacing: '0.12em', textTransform: 'uppercase',
         }}>
           {attendee.type === 'enterprise' ? 'ENTERPRISE' : 'VENDOR'}
         </div>
 
-        {/* QR Code preview */}
-        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {qrDataUrl && attendee.linkedinUrl ? (
-            <>
-              <div style={{
-                padding: 3,
-                border: `3px solid ${qrBorderColor}`,
-                borderRadius: 6,
-                display: 'inline-block',
-              }}>
-                <img src={qrDataUrl} alt="LinkedIn QR" style={{ width: 80, height: 80, display: 'block' }} />
-              </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: '#999', marginTop: 4, letterSpacing: '0.05em' }}>
-                SCAN FOR LINKEDIN
-              </div>
-            </>
-          ) : (
+        {/* QR Code — only if LinkedIn URL exists */}
+        {hasLinkedin && qrDataUrl && (
+          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{
-              width: 80, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '1px dashed #ccc', borderRadius: 6,
+              padding: 3,
+              border: `3px solid ${qrBorderColor}`,
+              borderRadius: 6,
+              display: 'inline-block',
             }}>
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: '#bbb' }}>NO LINKEDIN</span>
+              <img src={qrDataUrl} alt="LinkedIn QR" style={{ width: 80, height: 80, display: 'block' }} />
             </div>
-          )}
-        </div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: '#999', marginTop: 4, letterSpacing: '0.05em' }}>
+              SCAN FOR LINKEDIN
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}
