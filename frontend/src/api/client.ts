@@ -243,6 +243,14 @@ export const api = {
     request<{ success: boolean }>(`/invites/accept/${code}`, { method: 'POST' }),
 
   // Kiosk
+  kioskVerifyToken: (kioskToken: string) =>
+    request<{ valid: boolean }>(`/kiosk/verify`, {
+      headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+    }),
+  kioskListEvents: (kioskToken: string) =>
+    request<{ events: { id: string; name: string; date: string; venue: string; eventType: string; attendeeCount: number; checkedInCount: number }[] }>(`/kiosk/events`, {
+      headers: { Authorization: `Bearer kiosk:${kioskToken}` },
+    }),
   kioskGetEventData: (eventId: string, kioskToken: string) =>
     request<{
       event: { id: string; name: string; date: string; venue: string; eventType: string };

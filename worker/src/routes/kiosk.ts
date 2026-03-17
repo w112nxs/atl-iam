@@ -34,6 +34,36 @@ async function computeStats(db: D1Database, eventId: string) {
   };
 }
 
+// List all events for kiosk setup (admin selects which event to run)
+app.get('/events', async (c) => {
+  const rows = await c.env.DB.prepare(
+    `SELECT e.id, e.name, e.date, e.venue, e.event_type,
+            COUNT(a.id) as attendee_count,
+            SUM(CASE WHEN a.checked_in = 1 THEN 1 ELSE 0 END) as checked_in_count
+     FROM events e
+     LEFT JOIN attendees a ON a.event_id = e.id
+     GROUP BY e.id
+     ORDER BY e.date DESC`
+  ).all();
+
+  return c.json({
+    events: (rows.results || []).map(r => ({
+      id: String(r.id),
+      name: String(r.name),
+      date: String(r.date),
+      venue: String(r.venue || ''),
+      eventType: String(r.event_type || 'quarterly_meetup'),
+      attendeeCount: Number(r.attendee_count || 0),
+      checkedInCount: Number(r.checked_in_count || 0),
+    })),
+  });
+});
+
+// Verify kiosk token is valid (for setup screen)
+app.get('/verify', async (c) => {
+  return c.json({ valid: true });
+});
+
 // Get full event data for kiosk cache (attendees + event info)
 app.get('/event/:id/data', async (c) => {
   const eventId = c.req.param('id');

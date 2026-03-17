@@ -153,7 +153,31 @@ type KioskAttendee = {
   title: string; type: string; checkedIn: boolean; linkedinUrl?: string;
 };
 
-type Screen = 'welcome' | 'search' | 'walkin' | 'linkedin' | 'confirm' | 'printing';
+type Screen = 'setup' | 'welcome' | 'search' | 'walkin' | 'linkedin' | 'confirm' | 'printing';
+
+type KioskConfig = {
+  token: string;
+  eventId: string;
+  stationId: string;
+};
+
+function loadKioskConfig(): KioskConfig | null {
+  try {
+    const raw = localStorage.getItem('kiosk_config');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed.token && parsed.eventId) return parsed;
+    return null;
+  } catch { return null; }
+}
+
+function saveKioskConfig(config: KioskConfig) {
+  localStorage.setItem('kiosk_config', JSON.stringify(config));
+}
+
+function clearKioskConfig() {
+  localStorage.removeItem('kiosk_config');
+}
 
 const kioskResponsiveCSS = `
 @media (max-width: 600px) {
@@ -194,27 +218,45 @@ const kioskResponsiveCSS = `
 `;
 
 export function KioskPage() {
-  // Parse URL params
+  // Resolve config: URL params override → localStorage → setup screen
   const params = new URLSearchParams(window.location.search);
-  const eventId = params.get('event') || '';
-  const kioskToken = params.get('token') || '';
-  const stationId = params.get('station') || 'kiosk-1';
+  const urlEvent = params.get('event') || '';
+  const urlToken = params.get('token') || '';
+  const urlStation = params.get('station') || '';
 
-  const [screen, setScreen] = useState<Screen>('welcome');
+  const savedConfig = loadKioskConfig();
+  const initialConfig: KioskConfig | null = (urlEvent && urlToken)
+    ? { token: urlToken, eventId: urlEvent, stationId: urlStation || 'kiosk-1' }
+    : savedConfig;
+
+  const [config, setConfig] = useState<KioskConfig | null>(initialConfig);
+  const [screen, setScreen] = useState<Screen>(initialConfig ? 'welcome' : 'setup');
   const [eventInfo, setEventInfo] = useState<{ id: string; name: string; date: string; venue: string; eventType: string } | null>(null);
   const [attendees, setAttendees] = useState<KioskAttendee[]>([]);
   const [stats, setStats] = useState({ registered: 0, checkedIn: 0, enterprise: 0, vendor: 0 });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!initialConfig);
   const [error, setError] = useState('');
   const [confirmedAttendee, setConfirmedAttendee] = useState<{ name: string; company: string; title: string; type: string; linkedinUrl?: string } | null>(null);
   const [pendingEmail, setPendingEmail] = useState('');
   const [showPrinterSettings, setShowPrinterSettings] = useState(false);
   const idleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  // Derived values
+  const eventId = config?.eventId || '';
+  const kioskToken = config?.token || '';
+  const stationId = config?.stationId || 'kiosk-1';
+
+  // Apply config from setup
+  const applyConfig = (newConfig: KioskConfig) => {
+    saveKioskConfig(newConfig);
+    setConfig(newConfig);
+    setLoading(true);
+    setScreen('welcome');
+  };
+
   // Load event data
   const loadData = useCallback(async () => {
     if (!eventId || !kioskToken) {
-      setError('Missing event ID or kiosk token. URL format: /kiosk?event=e1&token=YOUR_TOKEN');
       setLoading(false);
       return;
     }
@@ -333,6 +375,21 @@ export function KioskPage() {
     }
   };
 
+  // Show setup screen when no config
+  if (screen === 'setup' || !config) {
+    return (
+      <div style={fullScreen}>
+        <style dangerouslySetInnerHTML={{ __html: kioskResponsiveCSS }} />
+        <KioskSetup
+          initialToken={config?.token || ''}
+          initialEventId={config?.eventId || ''}
+          initialStationId={config?.stationId || 'kiosk-1'}
+          onConfigure={applyConfig}
+        />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div style={{ ...fullScreen, justifyContent: 'center', alignItems: 'center' }}>
@@ -345,6 +402,17 @@ export function KioskPage() {
     return (
       <div style={{ ...fullScreen, justifyContent: 'center', alignItems: 'center' }}>
         <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, color: K.red, textAlign: 'center', maxWidth: 500, padding: 40 }}>{error}</div>
+        <button
+          onClick={() => { setScreen('setup'); setError(''); }}
+          style={{
+            marginTop: 20, background: K.accent, border: 'none', borderRadius: 10,
+            padding: '12px 28px', cursor: 'pointer',
+            fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700, color: '#fff',
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}
+        >
+          <Icon name="settings" size={18} color="#fff" /> OPEN SETTINGS
+        </button>
       </div>
     );
   }
@@ -387,14 +455,14 @@ export function KioskPage() {
           ))}
           <button
             onClick={() => setShowPrinterSettings(true)}
-            title="Printer Settings"
+            title="Kiosk Settings"
             style={{
               background: K.surface, border: `1px solid ${K.border}`, borderRadius: 8,
               padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center',
               marginLeft: 8,
             }}
           >
-            <Icon name="print" size={18} color={K.muted} />
+            <Icon name="settings" size={18} color={K.muted} />
           </button>
         </div>
       </div>
@@ -469,22 +537,86 @@ export function KioskPage() {
         </div>
       )}
 
-      {/* Printer Settings Modal */}
+      {/* Kiosk Settings Modal */}
       {showPrinterSettings && (
         <div style={modalOverlayStyle} onClick={() => setShowPrinterSettings(false)}>
           <div
             onClick={e => e.stopPropagation()}
             style={{
               background: K.card, border: `1px solid ${K.border}`, borderRadius: 16,
-              width: '92%', maxWidth: 480, padding: '28px 32px',
+              width: '92%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto',
+              padding: '28px 32px',
               boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <Icon name="print" size={24} color={K.accent} />
-              <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 24, color: K.text, margin: 0 }}>
-                Printer Settings
+              <Icon name="settings" size={24} color={K.accent} />
+              <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 24, color: K.text, margin: 0, flex: 1 }}>
+                Kiosk Settings
               </h2>
+              <button onClick={() => setShowPrinterSettings(false)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+              }}>
+                <Icon name="close" size={20} color={K.muted} />
+              </button>
+            </div>
+
+            {/* Current event */}
+            <div style={{
+              background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
+              padding: '14px 16px', marginBottom: 16,
+            }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 8 }}>
+                ACTIVE EVENT
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Icon name="event" size={18} color={K.accent} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 18, color: K.text }}>
+                    {eventInfo?.name || 'Unknown Event'}
+                  </div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted }}>
+                    {eventInfo?.date} — {eventInfo?.venue || 'No venue set'}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
+                <button
+                  onClick={() => { setShowPrinterSettings(false); setScreen('setup'); }}
+                  style={{
+                    background: K.accent + '22', border: `1px solid ${K.accent}44`, borderRadius: 8,
+                    padding: '8px 16px', cursor: 'pointer',
+                    fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.accent,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  <Icon name="swap_horiz" size={14} color={K.accent} /> CHANGE EVENT
+                </button>
+                <button
+                  onClick={() => { loadData(); }}
+                  style={{
+                    background: 'transparent', border: `1px solid ${K.border}`, borderRadius: 8,
+                    padding: '8px 16px', cursor: 'pointer',
+                    fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: K.muted,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  <Icon name="refresh" size={14} color={K.muted} /> RELOAD DATA
+                </button>
+              </div>
+            </div>
+
+            {/* Station ID */}
+            <div style={{
+              background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
+              padding: '14px 16px', marginBottom: 16,
+            }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 6 }}>
+                STATION ID
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.text }}>
+                {stationId}
+              </div>
             </div>
 
             {/* Printer status */}
@@ -496,7 +628,7 @@ export function KioskPage() {
                 LABEL PRINTER
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Icon name="check_circle" size={16} color={K.green} filled />
+                <Icon name="print" size={18} color={K.green} />
                 <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.text }}>
                   Brother QL-800
                 </span>
@@ -504,38 +636,6 @@ export function KioskPage() {
               <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted, marginTop: 4 }}>
                 Label: DK-2251 (62mm continuous, red/black)
               </div>
-            </div>
-
-            {/* Setup instructions */}
-            <div style={{
-              background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
-              padding: '14px 16px', marginBottom: 16,
-            }}>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 8 }}>
-                SETUP INSTRUCTIONS
-              </div>
-              {[
-                { step: '1', text: 'Connect Brother QL-800 via USB to this computer' },
-                { step: '2', text: 'Install Brother P-touch Editor or printer driver' },
-                { step: '3', text: 'Load DK-2251 label roll (62mm red/black)' },
-                { step: '4', text: 'Set QL-800 as default printer in system settings' },
-                { step: '5', text: 'In print dialog, set paper size to "62mm" or "DK-2251"' },
-              ].map(item => (
-                <div key={item.step} style={{ display: 'flex', gap: 10, marginBottom: 6 }}>
-                  <span style={{
-                    width: 20, height: 20, borderRadius: '50%', background: K.accent + '22',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.accent,
-                  }}>{item.step}</span>
-                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.text }}>
-                    {item.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Test print */}
-            <div style={{ display: 'flex', gap: 12 }}>
               <button
                 onClick={() => {
                   const w = window.open('', '_blank', 'width=300,height=400');
@@ -563,26 +663,36 @@ html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
                   w.document.close();
                 }}
                 style={{
-                  flex: 1,
+                  marginTop: 10,
                   background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
-                  border: 'none', borderRadius: 10, padding: '12px',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700, color: '#fff',
+                  border: 'none', borderRadius: 8, padding: '8px 20px',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+                  fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: '#fff',
                 }}
               >
-                <Icon name="print" size={18} color="#fff" /> TEST PRINT
-              </button>
-              <button
-                onClick={() => setShowPrinterSettings(false)}
-                style={{
-                  background: 'transparent', border: `2px solid ${K.border}`,
-                  borderRadius: 10, padding: '12px 24px', cursor: 'pointer',
-                  fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700, color: K.muted,
-                }}
-              >
-                CLOSE
+                <Icon name="print" size={16} color="#fff" /> TEST PRINT
               </button>
             </div>
+
+            {/* Reset kiosk */}
+            <button
+              onClick={() => {
+                if (confirm('Reset kiosk configuration? You will need to re-enter the kiosk token and select an event.')) {
+                  clearKioskConfig();
+                  setConfig(null);
+                  setShowPrinterSettings(false);
+                  setScreen('setup');
+                }
+              }}
+              style={{
+                width: '100%', background: 'transparent', border: `1px solid ${K.red}44`,
+                borderRadius: 10, padding: '10px', cursor: 'pointer',
+                fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: K.red,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              <Icon name="restart_alt" size={16} color={K.red} /> RESET KIOSK
+            </button>
           </div>
         </div>
       )}
@@ -616,6 +726,397 @@ const modalContentStyle: React.CSSProperties = {
 };
 
 // ── Welcome Screen ──
+// ── Kiosk Setup Screen ──
+function KioskSetup({ initialToken, initialEventId, initialStationId, onConfigure }: {
+  initialToken: string; initialEventId: string; initialStationId: string;
+  onConfigure: (config: KioskConfig) => void;
+}) {
+  type SetupStep = 'token' | 'event' | 'printer';
+  const [step, setStep] = useState<SetupStep>(initialToken ? 'event' : 'token');
+  const [token, setToken] = useState(initialToken);
+  const [stationId, setStationId] = useState(initialStationId || 'kiosk-1');
+  const [selectedEvent, setSelectedEvent] = useState(initialEventId);
+  const [events, setEvents] = useState<{ id: string; name: string; date: string; venue: string; eventType: string; attendeeCount: number; checkedInCount: number }[]>([]);
+  const [verifying, setVerifying] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [tokenError, setTokenError] = useState('');
+  const [printerOk, setPrinterOk] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, [step]);
+
+  // If we already have a valid token, load events immediately
+  useEffect(() => {
+    if (initialToken && step === 'event') {
+      loadEvents(initialToken);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const verifyToken = async () => {
+    if (!token.trim()) { setTokenError('Please enter a kiosk token'); return; }
+    setVerifying(true);
+    setTokenError('');
+    try {
+      await api.kioskVerifyToken(token.trim());
+      await loadEvents(token.trim());
+      setStep('event');
+    } catch {
+      setTokenError('Invalid kiosk token. Check with your administrator.');
+    }
+    setVerifying(false);
+  };
+
+  const loadEvents = async (t: string) => {
+    setLoadingEvents(true);
+    try {
+      const result = await api.kioskListEvents(t);
+      setEvents(result.events);
+    } catch { /* ignore */ }
+    setLoadingEvents(false);
+  };
+
+  const testPrint = () => {
+    const w = window.open('', '_blank', 'width=300,height=400');
+    if (!w) return;
+    w.document.write(
+`<!DOCTYPE html><html><head><style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
+@page{size:62mm auto;margin:0;}
+@media print{html,body{width:62mm;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+.test{width:62mm;padding:4mm;border:2px solid #111;border-radius:2px;text-align:center;}
+.t1{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20pt;color:#000;text-transform:uppercase;}
+.t2{font-family:'Inter',sans-serif;font-size:8pt;color:#666;margin-top:2mm;}
+.t3{font-family:'Inter',sans-serif;font-size:7pt;color:#999;margin-top:3mm;border-top:0.5px solid #ccc;padding-top:2mm;}
+</style></head><body>
+<div class="test">
+<div class="t1">TEST PRINT</div>
+<div class="t2">Brother QL-800 — DK-2251</div>
+<div class="t3">If this prints correctly on a single label,<br/>your printer is properly configured.</div>
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print();window.close();},600);};</script>
+</body></html>`
+    );
+    w.document.close();
+    setPrinterOk(true);
+  };
+
+  const iStyle: React.CSSProperties = {
+    width: '100%', background: K.surface, border: `2px solid ${K.accent}44`,
+    borderRadius: 10, padding: '14px 16px',
+    fontFamily: "'Inter', sans-serif", fontSize: 18, color: K.text, outline: 'none',
+  };
+
+  const sectionStyle: React.CSSProperties = {
+    background: K.card, border: `1px solid ${K.border}`, borderRadius: 16,
+    padding: '32px', width: '100%', maxWidth: 560,
+  };
+
+  // Step indicators
+  const steps: { key: SetupStep; label: string; icon: string }[] = [
+    { key: 'token', label: 'Authenticate', icon: 'key' },
+    { key: 'event', label: 'Select Event', icon: 'event' },
+    { key: 'printer', label: 'Printer', icon: 'print' },
+  ];
+  const stepIndex = steps.findIndex(s => s.key === step);
+
+  return (
+    <div style={{
+      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', padding: 32, position: 'relative', overflow: 'hidden',
+    }}>
+      {/* Background */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.3 }}>
+        <SecurityIconsGrid color={K.accent} opacity={0.04} />
+      </div>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, pointerEvents: 'none' }}>
+        <KioskSkyline color={K.accent} opacity={0.08} />
+      </div>
+
+      {/* Logo + title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32, position: 'relative', zIndex: 1 }}>
+        <img src="/badge.png" alt="" width="48" height="48" style={{ borderRadius: '50%' }} />
+        <div>
+          <h1 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 32, color: K.text, margin: 0 }}>
+            Kiosk Setup
+          </h1>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: 0 }}>
+            Atlanta IAM — Check-in Station Configuration
+          </p>
+        </div>
+      </div>
+
+      {/* Step indicators */}
+      <div style={{ display: 'flex', gap: 0, marginBottom: 28, position: 'relative', zIndex: 1 }}>
+        {steps.map((s, i) => {
+          const active = i === stepIndex;
+          const done = i < stepIndex;
+          return (
+            <div key={s.key} style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 16px', borderRadius: 20,
+                background: active ? K.accent + '22' : done ? K.green + '22' : 'transparent',
+                border: `1px solid ${active ? K.accent + '66' : done ? K.green + '44' : K.border}`,
+              }}>
+                <Icon name={done ? 'check_circle' : s.icon} size={16} color={active ? K.accent : done ? K.green : K.muted} filled={done} />
+                <span style={{
+                  fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700,
+                  color: active ? K.accent : done ? K.green : K.muted,
+                }}>{s.label}</span>
+              </div>
+              {i < steps.length - 1 && (
+                <div style={{ width: 32, height: 1, background: done ? K.green + '44' : K.border }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Step content */}
+      <div style={{ ...sectionStyle, position: 'relative', zIndex: 1 }}>
+        {step === 'token' && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <Icon name="key" size={22} color={K.accent} />
+              <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 22, color: K.text, margin: 0 }}>
+                Kiosk Authentication
+              </h2>
+            </div>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: '0 0 16px' }}>
+              Enter the kiosk access token provided by your administrator.
+            </p>
+            <input
+              ref={inputRef}
+              type="password"
+              value={token}
+              onChange={e => { setToken(e.target.value); setTokenError(''); }}
+              onKeyDown={e => e.key === 'Enter' && verifyToken()}
+              placeholder="Enter kiosk token..."
+              style={iStyle}
+            />
+            {tokenError && (
+              <div style={{
+                marginTop: 8, padding: '8px 12px', borderRadius: 8,
+                background: K.red + '22', border: `1px solid ${K.red}44`,
+                fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.red,
+              }}>
+                <Icon name="error" size={14} color={K.red} /> {tokenError}
+              </div>
+            )}
+            <button
+              onClick={verifyToken}
+              disabled={verifying || !token.trim()}
+              style={{
+                width: '100%', marginTop: 16,
+                background: token.trim() ? `linear-gradient(135deg, ${K.accent}, ${K.purple})` : K.surface,
+                border: 'none', borderRadius: 12, padding: '14px',
+                cursor: token.trim() ? 'pointer' : 'not-allowed',
+                fontFamily: "'Rajdhani', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              <Icon name={verifying ? 'progress_activity' : 'login'} size={20} color="#fff" />
+              {verifying ? 'VERIFYING...' : 'AUTHENTICATE'}
+            </button>
+          </>
+        )}
+
+        {step === 'event' && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <Icon name="event" size={22} color={K.accent} />
+              <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 22, color: K.text, margin: 0 }}>
+                Select Event
+              </h2>
+            </div>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: '0 0 12px' }}>
+              Choose which event this kiosk station will manage.
+            </p>
+
+            {/* Station ID */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: K.muted, letterSpacing: '0.06em', marginBottom: 4, display: 'block' }}>
+                STATION NAME
+              </label>
+              <input
+                value={stationId}
+                onChange={e => setStationId(e.target.value)}
+                placeholder="kiosk-1"
+                style={{ ...iStyle, fontSize: 15, padding: '10px 14px' }}
+              />
+            </div>
+
+            {/* Events list */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
+              {loadingEvents ? (
+                <div style={{ padding: 20, textAlign: 'center', fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.muted }}>
+                  <Icon name="progress_activity" size={18} color={K.muted} /> Loading events...
+                </div>
+              ) : events.length === 0 ? (
+                <div style={{ padding: 20, textAlign: 'center', fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.muted }}>
+                  No events found. Create an event in the admin panel first.
+                </div>
+              ) : events.map(ev => {
+                const sel = selectedEvent === ev.id;
+                const evDate = new Date(ev.date);
+                const isPast = evDate < new Date(new Date().toDateString());
+                return (
+                  <button
+                    key={ev.id}
+                    onClick={() => setSelectedEvent(ev.id)}
+                    style={{
+                      background: sel ? K.accent + '18' : K.surface,
+                      border: `1.5px solid ${sel ? K.accent : K.border}`,
+                      borderRadius: 10, padding: '14px 16px',
+                      cursor: 'pointer', textAlign: 'left', width: '100%',
+                      transition: 'all 0.15s',
+                      opacity: isPast ? 0.5 : 1,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Icon
+                        name={sel ? 'radio_button_checked' : 'radio_button_unchecked'}
+                        size={20}
+                        color={sel ? K.accent : K.muted}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 18, color: K.text }}>
+                          {ev.name}
+                        </div>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                          <span><Icon name="calendar_today" size={12} color={K.muted} /> {ev.date}</span>
+                          {ev.venue && <span><Icon name="location_on" size={12} color={K.muted} /> {ev.venue}</span>}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: K.accent }}>
+                          {ev.attendeeCount}
+                        </div>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: K.muted }}>
+                          registered
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              <button
+                onClick={() => setStep('token')}
+                style={{
+                  background: 'transparent', border: `2px solid ${K.border}`, borderRadius: 12,
+                  padding: '12px 20px', cursor: 'pointer',
+                  fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700, color: K.muted,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}
+              >
+                <Icon name="arrow_back" size={16} color={K.muted} /> BACK
+              </button>
+              <button
+                onClick={() => selectedEvent && setStep('printer')}
+                disabled={!selectedEvent}
+                style={{
+                  flex: 1,
+                  background: selectedEvent ? `linear-gradient(135deg, ${K.accent}, ${K.purple})` : K.surface,
+                  border: 'none', borderRadius: 12, padding: '12px',
+                  cursor: selectedEvent ? 'pointer' : 'not-allowed',
+                  fontFamily: "'Rajdhani', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                NEXT <Icon name="arrow_forward" size={18} color="#fff" />
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 'printer' && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <Icon name="print" size={22} color={K.accent} />
+              <h2 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 22, color: K.text, margin: 0 }}>
+                Printer Setup
+              </h2>
+            </div>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: '0 0 16px' }}>
+              Verify your Brother QL-800 label printer is connected and ready.
+            </p>
+
+            {/* Setup checklist */}
+            <div style={{
+              background: K.surface, border: `1px solid ${K.border}`, borderRadius: 10,
+              padding: '14px 16px', marginBottom: 16,
+            }}>
+              {[
+                { text: 'Brother QL-800 connected via USB', icon: 'usb' },
+                { text: 'DK-2251 label roll loaded (62mm)', icon: 'receipt_long' },
+                { text: 'Set as default printer in system settings', icon: 'settings' },
+                { text: 'Paper size set to "62mm" or "DK-2251"', icon: 'straighten' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < 3 ? `1px solid ${K.border}` : 'none' }}>
+                  <Icon name={item.icon} size={18} color={K.muted} />
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.text, flex: 1 }}>
+                    {item.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Test print button */}
+            <button
+              onClick={testPrint}
+              style={{
+                width: '100%', marginBottom: 12,
+                background: K.surface, border: `1.5px solid ${printerOk ? K.green : K.accent}`,
+                borderRadius: 12, padding: '14px',
+                cursor: 'pointer',
+                fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700,
+                color: printerOk ? K.green : K.accent,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              <Icon name={printerOk ? 'check_circle' : 'print'} size={20} color={printerOk ? K.green : K.accent} filled={printerOk} />
+              {printerOk ? 'TEST SENT — VERIFY LABEL PRINTED' : 'SEND TEST PRINT'}
+            </button>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setStep('event')}
+                style={{
+                  background: 'transparent', border: `2px solid ${K.border}`, borderRadius: 12,
+                  padding: '12px 20px', cursor: 'pointer',
+                  fontFamily: "'Rajdhani', sans-serif", fontSize: 18, fontWeight: 700, color: K.muted,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}
+              >
+                <Icon name="arrow_back" size={16} color={K.muted} /> BACK
+              </button>
+              <button
+                onClick={() => onConfigure({ token: token.trim(), eventId: selectedEvent, stationId: stationId || 'kiosk-1' })}
+                style={{
+                  flex: 1,
+                  background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,
+                  border: 'none', borderRadius: 12, padding: '12px',
+                  cursor: 'pointer',
+                  fontFamily: "'Rajdhani', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                <Icon name="check" size={20} color="#fff" /> LAUNCH KIOSK
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function WelcomeScreen({ eventName, onCheckIn, onWalkIn }: {
   eventName: string; onCheckIn: () => void; onWalkIn: () => void;
 }) {
