@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import { Icon } from '../components/ui/Icon';
 import type { EventType } from '../types';
 import { EVENT_TYPE_LABELS } from '../types';
+import QRCode from 'qrcode';
 
 /* ── Atlanta Skyline SVG ── */
 function KioskSkyline({ color, opacity = 0.1 }: { color: string; opacity?: number }) {
@@ -149,7 +150,7 @@ const EVENT_TYPE_COLORS: Record<string, string> = {
 
 type KioskAttendee = {
   id: string; name: string; email: string; company: string;
-  title: string; type: string; checkedIn: boolean;
+  title: string; type: string; checkedIn: boolean; linkedinUrl?: string;
 };
 
 type Screen = 'welcome' | 'search' | 'walkin' | 'confirm' | 'printing';
@@ -205,7 +206,7 @@ export function KioskPage() {
   const [stats, setStats] = useState({ registered: 0, checkedIn: 0, enterprise: 0, vendor: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [confirmedAttendee, setConfirmedAttendee] = useState<{ name: string; company: string; title: string; type: string } | null>(null);
+  const [confirmedAttendee, setConfirmedAttendee] = useState<{ name: string; company: string; title: string; type: string; linkedinUrl?: string } | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Load event data
@@ -269,6 +270,7 @@ export function KioskPage() {
       setConfirmedAttendee({
         name: attendee.name, company: attendee.company,
         title: attendee.title, type: attendee.type,
+        linkedinUrl: attendee.linkedinUrl,
       });
       setPrintAfterConfirm(true);
       setScreen('confirm');
@@ -907,7 +909,7 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
                 display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center',
               }}
             >
-              <Icon name={submitting ? 'progress_activity' : 'how_to_reg'} size={20} color="#fff" /> {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN + PRINT BADGE'}
+              <Icon name={submitting ? 'progress_activity' : 'how_to_reg'} size={20} color="#fff" /> {submitting ? 'REGISTERING...' : 'REGISTER & CHECK IN + PRINT NAMETAG'}
             </button>
           </>
         )}
@@ -918,12 +920,25 @@ function WalkInScreen({ onSubmit, onBack, error, onClearError }: {
 
 // ── Confirmation Screen ──
 function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
-  attendee: { name: string; company: string; title: string; type: string };
+  attendee: { name: string; company: string; title: string; type: string; linkedinUrl?: string };
   eventName: string; autoPrint: boolean; onDone: () => void;
 }) {
   const [printing, setPrinting] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
   const [countdown, setCountdown] = useState(autoPrint ? 30 : 10);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+  // Generate QR code on mount if LinkedIn URL available
+  useEffect(() => {
+    if (attendee.linkedinUrl) {
+      QRCode.toDataURL(attendee.linkedinUrl, {
+        width: 200,
+        margin: 1,
+        color: { dark: '#000000', light: '#ffffff' },
+        errorCorrectionLevel: 'M',
+      }).then(url => setQrDataUrl(url)).catch(() => setQrDataUrl(null));
+    }
+  }, [attendee.linkedinUrl]);
 
   // Countdown timer — runs once on mount, no reset mid-flow
   useEffect(() => {
@@ -937,19 +952,32 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-print if requested
+  // Auto-print if requested (delay slightly longer if QR needs to generate)
   useEffect(() => {
     if (autoPrint) {
-      setTimeout(() => printBadge(), 500);
+      setTimeout(() => printBadge(), attendee.linkedinUrl ? 800 : 500);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const printBadge = () => {
+  const isVendorOrSponsor = attendee.type === 'vendor';
+  const qrBorderColor = isVendorOrSponsor ? '#D32F2F' : 'transparent';
+
+  const printBadge = async () => {
     setPrinting(true);
     setCountdown(30);
-    const badgeEl = badgeRef.current;
-    if (!badgeEl) return;
+
+    // Generate QR for print if LinkedIn URL exists
+    let printQrDataUrl = qrDataUrl;
+    if (attendee.linkedinUrl && !printQrDataUrl) {
+      try {
+        printQrDataUrl = await QRCode.toDataURL(attendee.linkedinUrl, {
+          width: 300, margin: 1,
+          color: { dark: '#000000', light: '#ffffff' },
+          errorCorrectionLevel: 'M',
+        });
+      } catch { /* no QR */ }
+    }
 
     const printWindow = window.open('', '_blank', 'width=400,height=600');
     if (!printWindow) {
@@ -957,41 +985,90 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
       return;
     }
 
-    const typeColor = attendee.type === 'enterprise' ? '#4f8cff' : '#f0b429';
+    const typeColor = attendee.type === 'enterprise' ? '#E8560A' : '#D4A017';
     const typeLabel = attendee.type === 'enterprise' ? 'ENTERPRISE' : 'VENDOR';
+    const hasQR = !!printQrDataUrl && !!attendee.linkedinUrl;
+    const qrBorder = isVendorOrSponsor ? '3px solid #D32F2F' : '3px solid transparent';
 
+    // Brother QL-800: 62mm wide continuous labels (~2.4in)
+    // Design for 62mm x 100mm label (2.4in x 3.9in) at 300dpi
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Badge — ${attendee.name}</title>
+        <title>Nametag — ${attendee.name}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;600;700&display=swap');
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 4in 3in; margin: 0; }
+          @page { size: 62mm 100mm; margin: 0; }
+          @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
           body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fff; }
-          .badge {
-            width: 4in; height: 3in; padding: 0.3in 0.4in;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; border: 2px dashed #ccc; border-radius: 12px;
+          .nametag {
+            width: 62mm; height: 100mm; padding: 3mm 4mm;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; overflow: hidden;
           }
-          .event-name { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
-          .name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 32px; color: #111; text-transform: uppercase; line-height: 1.1; }
-          .detail { font-family: 'Inter', sans-serif; font-size: 14px; color: #555; margin-top: 2px; }
-          .type-bar { margin-top: 12px; padding: 6px 24px; border-radius: 6px; background: ${typeColor}; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; }
+          .event-name {
+            font-family: 'Inter', sans-serif; font-size: 7px; font-weight: 700;
+            color: #888; letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 2mm; width: 100%;
+            border-bottom: 1px solid #ddd; padding-bottom: 2mm;
+          }
+          .name {
+            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 22px;
+            color: #111; text-transform: uppercase; line-height: 1.1; margin-top: 1mm;
+            word-break: break-word; max-width: 100%;
+          }
+          .detail {
+            font-family: 'Inter', sans-serif; font-size: 10px; color: #555;
+            margin-top: 1px; word-break: break-word; max-width: 100%;
+          }
+          .type-bar {
+            margin-top: 2mm; padding: 2px 12px; border-radius: 3px;
+            background: ${typeColor}; color: #fff;
+            font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 700;
+            letter-spacing: 0.1em;
+          }
+          .qr-section {
+            margin-top: auto; padding-top: 2mm;
+            display: flex; flex-direction: column; align-items: center;
+          }
+          .qr-wrap {
+            padding: 2px; border: ${qrBorder}; border-radius: 4px;
+            display: inline-block;
+          }
+          .qr-wrap img { display: block; width: 22mm; height: 22mm; }
+          .qr-label {
+            font-family: 'Inter', sans-serif; font-size: 6px; color: #999;
+            margin-top: 1mm; letter-spacing: 0.05em;
+          }
         </style>
       </head>
       <body>
-        <div class="badge">
+        <div class="nametag">
           <div class="event-name">${eventName}</div>
           <div class="name">${attendee.name}</div>
           ${attendee.title ? `<div class="detail">${attendee.title}</div>` : ''}
-          ${attendee.company ? `<div class="detail">${attendee.company}</div>` : ''}
+          ${attendee.company ? `<div class="detail" style="font-weight:600">${attendee.company}</div>` : ''}
           <div class="type-bar">${typeLabel}</div>
+          ${hasQR ? `
+            <div class="qr-section">
+              <div class="qr-wrap">
+                <img src="${printQrDataUrl}" alt="LinkedIn QR" />
+              </div>
+              <div class="qr-label">SCAN FOR LINKEDIN</div>
+            </div>
+          ` : `
+            <div class="qr-section">
+              <div style="width:22mm;height:22mm;display:flex;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:4px;">
+                <span style="font-family:'Inter',sans-serif;font-size:7px;color:#bbb;">NO LINKEDIN</span>
+              </div>
+            </div>
+          `}
         </div>
         <script>
           window.onload = function() {
-            setTimeout(function() { window.print(); window.close(); }, 400);
+            setTimeout(function() { window.print(); window.close(); }, 600);
           };
         </script>
       </body>
@@ -1060,7 +1137,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
           </div>
         )}
         {attendee.company && (
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: '#555' }}>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: '#555', fontWeight: 600 }}>
             {attendee.company}
           </div>
         )}
@@ -1071,6 +1148,32 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
           letterSpacing: '0.12em', textTransform: 'uppercase',
         }}>
           {attendee.type === 'enterprise' ? 'ENTERPRISE' : 'VENDOR'}
+        </div>
+
+        {/* QR Code preview */}
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {qrDataUrl && attendee.linkedinUrl ? (
+            <>
+              <div style={{
+                padding: 3,
+                border: `3px solid ${qrBorderColor}`,
+                borderRadius: 6,
+                display: 'inline-block',
+              }}>
+                <img src={qrDataUrl} alt="LinkedIn QR" style={{ width: 80, height: 80, display: 'block' }} />
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: '#999', marginTop: 4, letterSpacing: '0.05em' }}>
+                SCAN FOR LINKEDIN
+              </div>
+            </>
+          ) : (
+            <div style={{
+              width: 80, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1px dashed #ccc', borderRadius: 6,
+            }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, color: '#bbb' }}>NO LINKEDIN</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1087,7 +1190,7 @@ function ConfirmScreen({ attendee, eventName, autoPrint, onDone }: {
         >
           <Icon name={printing ? 'progress_activity' : 'print'} size={20} color="#fff" />
           <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: '#fff' }}>
-            {printing ? 'PRINTING...' : 'PRINT BADGE'}
+            {printing ? 'PRINTING...' : 'PRINT NAMETAG'}
           </span>
         </button>
 

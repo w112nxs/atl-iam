@@ -246,13 +246,13 @@ export const api = {
   kioskGetEventData: (eventId: string, kioskToken: string) =>
     request<{
       event: { id: string; name: string; date: string; venue: string; eventType: string };
-      attendees: { id: string; name: string; email: string; company: string; title: string; type: string; checkedIn: boolean }[];
+      attendees: { id: string; name: string; email: string; company: string; title: string; type: string; checkedIn: boolean; linkedinUrl?: string }[];
       stats: { registered: number; checkedIn: number; enterprise: number; vendor: number };
     }>(`/kiosk/event/${eventId}/data`, {
       headers: { Authorization: `Bearer kiosk:${kioskToken}` },
     }),
   kioskCheckIn: (eventId: string, attendeeId: string, kioskToken: string, stationId?: string) =>
-    request<{ success: boolean; attendee: { id: string; name: string; company: string; title: string; type: string } }>(
+    request<{ success: boolean; attendee: { id: string; name: string; company: string; title: string; type: string; linkedinUrl?: string } }>(
       `/kiosk/event/${eventId}/checkin/${attendeeId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer kiosk:${kioskToken}` },
@@ -264,7 +264,7 @@ export const api = {
     company?: string; title?: string; type?: string; linkedinUrl?: string;
     termsAccepted: boolean; consentEmail: boolean; consentText: boolean; consentDataSharing: boolean;
   }, kioskToken: string) =>
-    request<{ success: boolean; existing?: boolean; attendee: { id: string; name: string; company: string; title: string; type: string } }>(
+    request<{ success: boolean; existing?: boolean; attendee: { id: string; name: string; company: string; title: string; type: string; linkedinUrl?: string } }>(
       `/kiosk/event/${eventId}/walkin`, {
         method: 'POST',
         headers: { Authorization: `Bearer kiosk:${kioskToken}` },

@@ -41,7 +41,11 @@ app.get('/event/:id/data', async (c) => {
   const [eventRow, attendeesRes, stats] = await Promise.all([
     c.env.DB.prepare('SELECT * FROM events WHERE id = ?').bind(eventId).first(),
     c.env.DB.prepare(
-      'SELECT id, name, email, company, title, type, checked_in FROM attendees WHERE event_id = ? ORDER BY name ASC'
+      `SELECT a.id, a.name, a.email, a.company, a.title, a.type, a.checked_in,
+              COALESCE(u.linkedin_url, '') as linkedin_url
+       FROM attendees a
+       LEFT JOIN users u ON LOWER(a.email) = LOWER(u.email)
+       WHERE a.event_id = ? ORDER BY a.name ASC`
     ).bind(eventId).all(),
     computeStats(c.env.DB, eventId),
   ]);
@@ -64,6 +68,7 @@ app.get('/event/:id/data', async (c) => {
       title: String(a.title || ''),
       type: String(a.type || 'enterprise'),
       checkedIn: Boolean(a.checked_in),
+      linkedinUrl: String(a.linkedin_url || ''),
     })),
     stats,
   });
@@ -76,7 +81,10 @@ app.post('/event/:eventId/checkin/:attendeeId', async (c) => {
   const body = await c.req.json<{ stationId?: string }>().catch(() => ({}));
 
   const attendee = await c.env.DB.prepare(
-    'SELECT * FROM attendees WHERE id = ? AND event_id = ?'
+    `SELECT a.*, COALESCE(u.linkedin_url, '') as linkedin_url
+     FROM attendees a
+     LEFT JOIN users u ON LOWER(a.email) = LOWER(u.email)
+     WHERE a.id = ? AND a.event_id = ?`
   ).bind(attendeeId, eventId).first();
 
   if (!attendee) return c.json({ error: 'Attendee not found' }, 404);
@@ -97,6 +105,7 @@ app.post('/event/:eventId/checkin/:attendeeId', async (c) => {
       company: String(attendee.company || ''),
       title: String(attendee.title || ''),
       type: String(attendee.type || 'enterprise'),
+      linkedinUrl: String(attendee.linkedin_url || ''),
     },
   });
 });
@@ -136,7 +145,12 @@ app.post('/event/:eventId/walkin', async (c) => {
         'UPDATE attendees SET checked_in = 1, checked_in_at = ?, checked_in_by = ? WHERE id = ?'
       ).bind(now, 'kiosk-walkin', String(existingAttendee.id)).run();
     }
-    const row = await c.env.DB.prepare('SELECT * FROM attendees WHERE id = ?').bind(String(existingAttendee.id)).first();
+    const row = await c.env.DB.prepare(
+      `SELECT a.*, COALESCE(u.linkedin_url, '') as linkedin_url
+       FROM attendees a
+       LEFT JOIN users u ON LOWER(a.email) = LOWER(u.email)
+       WHERE a.id = ?`
+    ).bind(String(existingAttendee.id)).first();
     return c.json({
       success: true,
       existing: true,
@@ -146,6 +160,7 @@ app.post('/event/:eventId/walkin', async (c) => {
         company: String(row!.company || ''),
         title: String(row!.title || ''),
         type: String(row!.type || 'enterprise'),
+        linkedinUrl: String(row!.linkedin_url || ''),
       },
     });
   }
@@ -193,6 +208,7 @@ app.post('/event/:eventId/walkin', async (c) => {
       company: body.company || '',
       title: body.title || '',
       type: attendeeType,
+      linkedinUrl: body.linkedinUrl || '',
     },
   });
 });
