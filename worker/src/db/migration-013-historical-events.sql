@@ -66,5 +66,14 @@ INSERT OR IGNORE INTO events (id, name, date, venue, event_type, stats_registere
   ('ev-2025q3', 'Atlanta IAM User Group — Q3 2025', 'August 28, 2025', 'Iron Hill Brewery & Restaurant, Dunwoody', 'quarterly_meetup', 116, 0, 0, 0);
 
 -- ── 2026 — Upcoming ──
-INSERT OR IGNORE INTO events (id, name, date, venue, event_type, stats_registered, stats_checked_in, stats_enterprise, stats_vendor) VALUES
-  ('ev-2026q1', 'Atlanta IAM User Group — Q1 2026', 'March 31, 2026', 'Iron Hill Brewery & Restaurant, Dunwoody', 'quarterly_meetup', 42, 0, 0, 0);
+INSERT OR IGNORE INTO events (id, name, date, venue, event_type, description, stats_registered, stats_checked_in, stats_enterprise, stats_vendor) VALUES
+  ('ev-2026q1', 'Atlanta IAM User Group — Q1 2026', 'March 31, 2026', 'Politan Row, Atlanta', 'quarterly_meetup',
+   'AI x IAM: How practitioners are leveraging AI to modernize legacy IAM. Real architecture decisions, real tradeoffs, no keynote fluff. Drinks & heavy hors d''oeuvres with local Identity rockstars.',
+   42, 0, 0, 0);
+
+INSERT OR IGNORE INTO sessions (id, event_id, title, speaker, session_time, cpe) VALUES
+  ('s-2026q1-1', 'ev-2026q1', 'Enterprise IAM Modernization with AI — Legacy Migrations, Sunset Strategies & Business Case', 'Craig Baltes & Kyle Rand (Aflac)', '5:30 PM', 1),
+  ('s-2026q1-2', 'ev-2026q1', 'Escaping Legacy Gravity with Identity — Breaking Free from IAM Debt', 'Nishad Sankaranarayanan (Genuine Parts Company)', '6:15 PM', 1);
+
+INSERT OR IGNORE INTO event_sponsors (event_id, sponsor_id, sponsor_name, tier) VALUES
+  ('ev-2026q1', 'sp-ping', 'Ping Identity', 'Gold');
