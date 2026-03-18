@@ -76,7 +76,7 @@ jobs:
         run: |
           # Create migrations tracking table and seed all previously-applied migrations
           npx wrangler d1 execute $D1_DB_NAME --remote --command="CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TEXT DEFAULT (datetime('now')))"
-          npx wrangler d1 execute $D1_DB_NAME --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('migration-001-auth.sql'),('migration-002-onboarding.sql'),('migration-003-privacy.sql'),('migration-004-sessions.sql'),('migration-005-profile-updated.sql'),('migration-006-rate-limits.sql'),('migration-007-normalize-emails.sql'),('migration-008-privacy-defaults.sql'),('migration-009-event-types-checkin.sql'),('migration-010-invites.sql'),('migration-011-speaking-fields.sql')"
+          npx wrangler d1 execute $D1_DB_NAME --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('migration-001-auth.sql'),('migration-002-onboarding.sql'),('migration-003-privacy.sql'),('migration-004-sessions.sql'),('migration-005-profile-updated.sql'),('migration-006-rate-limits.sql'),('migration-007-normalize-emails.sql'),('migration-008-privacy-defaults.sql'),('migration-009-event-types-checkin.sql'),('migration-010-invites.sql'),('migration-011-speaking-fields.sql'),('migration-012-speaking-wizard.sql')"
 
           # Run each migration only if not already tracked
           for migration in src/db/migration-*.sql; do
