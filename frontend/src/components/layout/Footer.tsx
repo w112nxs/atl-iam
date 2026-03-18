@@ -64,7 +64,7 @@ export function Footer({ onNavigate }: FooterProps) {
             lineHeight: 1.6,
             transition: 'color 0.25s',
           }}>
-            Atlanta's practitioner-first, vendor-neutral IAM community. Building connections since 2023.
+            Atlanta's practitioner-first, vendor-neutral IAM community. Building connections since 2014.
           </p>
         </div>
 
