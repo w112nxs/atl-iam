@@ -25,10 +25,41 @@ import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { CodeOfConductPage } from './pages/CodeOfConductPage';
 import { InviteModal } from './components/modals/InviteModal';
 
+const IS_DEV = (import.meta.env.VITE_API_URL || '').includes('dev.');
+
 function DevBanner() {
   const { T } = useTheme();
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
+
+  if (IS_DEV) {
+    return (
+      <div style={{
+        background: 'repeating-linear-gradient(135deg, #1a1a2e, #1a1a2e 10px, #16213e 10px, #16213e 20px)',
+        borderBottom: '3px solid #f59e0b',
+        color: '#f59e0b',
+        textAlign: 'center',
+        padding: '8px 40px 8px 16px',
+        fontFamily: "'Inter', sans-serif",
+        fontSize: 13,
+        fontWeight: 700,
+        letterSpacing: '0.06em',
+        position: 'relative',
+      }}>
+        DEV ENVIRONMENT — dev.atlantaiam.com — Changes here do not affect production
+        <button
+          onClick={() => setDismissed(true)}
+          style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            background: 'none', border: 'none', color: '#f59e0b',
+            fontSize: 18, cursor: 'pointer', fontWeight: 700, lineHeight: 1, padding: '0 4px',
+          }}
+          aria-label="Dismiss banner"
+        >x</button>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       background: `linear-gradient(90deg, ${T.gold}, ${T.accent})`,
@@ -45,23 +76,12 @@ function DevBanner() {
       <button
         onClick={() => setDismissed(true)}
         style={{
-          position: 'absolute',
-          right: 12,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          background: 'none',
-          border: 'none',
-          color: '#000',
-          fontSize: 18,
-          cursor: 'pointer',
-          fontWeight: 700,
-          lineHeight: 1,
-          padding: '0 4px',
+          position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+          background: 'none', border: 'none', color: '#000',
+          fontSize: 18, cursor: 'pointer', fontWeight: 700, lineHeight: 1, padding: '0 4px',
         }}
         aria-label="Dismiss banner"
-      >
-        x
-      </button>
+      >x</button>
     </div>
   );
 }
