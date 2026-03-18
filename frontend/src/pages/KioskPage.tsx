@@ -155,10 +155,28 @@ type KioskAttendee = {
 
 type Screen = 'setup' | 'welcome' | 'search' | 'walkin' | 'linkedin' | 'confirm' | 'printing';
 
+type PrinterModel = 'ql800' | 'ql810w';
+
+const PRINTERS: Record<PrinterModel, { name: string; label: string; connection: string; features: string }> = {
+  ql800: {
+    name: 'Brother QL-800',
+    label: 'DK-2251 (62mm continuous, red/black)',
+    connection: 'USB',
+    features: 'Red + black printing on DK-2251 labels',
+  },
+  ql810w: {
+    name: 'Brother QL-810W',
+    label: 'DK-2251 (62mm continuous, red/black)',
+    connection: 'USB / Wi-Fi / AirPrint',
+    features: 'Wireless printing, AirPrint support, red + black on DK-2251',
+  },
+};
+
 type KioskConfig = {
   token: string;
   eventId: string;
   stationId: string;
+  printer?: PrinterModel;
 };
 
 function loadKioskConfig(): KioskConfig | null {
@@ -394,6 +412,7 @@ export function KioskPage() {
           initialToken={config?.token || ''}
           initialEventId={config?.eventId || ''}
           initialStationId={config?.stationId || 'kiosk-1'}
+          initialPrinter={config?.printer}
           onConfigure={applyConfig}
           onCancel={config ? () => setScreen('welcome') : undefined}
         />
@@ -641,11 +660,11 @@ export function KioskPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon name="print" size={18} color={K.green} />
                 <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: K.text }}>
-                  Brother QL-800
+                  {PRINTERS[config?.printer || 'ql800'].name}
                 </span>
               </div>
               <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted, marginTop: 4 }}>
-                Label: DK-2251 (62mm continuous, red/black)
+                {PRINTERS[config?.printer || 'ql800'].label} — {PRINTERS[config?.printer || 'ql800'].connection}
               </div>
               <button
                 onClick={() => {
@@ -665,7 +684,7 @@ html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
 </style></head><body>
 <div class="test">
 <div class="t1">TEST PRINT</div>
-<div class="t2">Brother QL-800 — DK-2251</div>
+<div class="t2">${PRINTERS[config?.printer || 'ql800'].name} — DK-2251</div>
 <div class="t3">If this prints correctly on a single label,<br/>your printer is properly configured.</div>
 </div>
 <script>window.onload=function(){setTimeout(function(){window.print();window.close();},600);};</script>
@@ -833,8 +852,8 @@ function KioskLanding({ onEnterSetup }: { onEnterSetup: () => void }) {
 }
 
 // ── Kiosk Setup Screen ──
-function KioskSetup({ initialToken, initialEventId, initialStationId, onConfigure, onCancel }: {
-  initialToken: string; initialEventId: string; initialStationId: string;
+function KioskSetup({ initialToken, initialEventId, initialStationId, initialPrinter, onConfigure, onCancel }: {
+  initialToken: string; initialEventId: string; initialStationId: string; initialPrinter?: PrinterModel;
   onConfigure: (config: KioskConfig) => void;
   onCancel?: () => void;
 }) {
@@ -843,6 +862,7 @@ function KioskSetup({ initialToken, initialEventId, initialStationId, onConfigur
   const [token, setToken] = useState(initialToken);
   const [stationId, setStationId] = useState(initialStationId || 'kiosk-1');
   const [selectedEvent, setSelectedEvent] = useState(initialEventId);
+  const [selectedPrinter, setSelectedPrinter] = useState<PrinterModel>(initialPrinter || 'ql800');
   const [events, setEvents] = useState<{ id: string; name: string; date: string; venue: string; eventType: string; attendeeCount: number; checkedInCount: number }[]>([]);
   const [verifying, setVerifying] = useState(false);
   const [loadingEvents, setLoadingEvents] = useState(false);
@@ -884,6 +904,7 @@ function KioskSetup({ initialToken, initialEventId, initialStationId, onConfigur
   };
 
   const testPrint = () => {
+    const printerInfo = PRINTERS[selectedPrinter];
     const w = window.open('', '_blank', 'width=300,height=400');
     if (!w) return;
     w.document.write(
@@ -900,7 +921,7 @@ html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
 </style></head><body>
 <div class="test">
 <div class="t1">TEST PRINT</div>
-<div class="t2">Brother QL-800 — DK-2251</div>
+<div class="t2">${printerInfo.name} — DK-2251</div>
 <div class="t3">If this prints correctly on a single label,<br/>your printer is properly configured.</div>
 </div>
 <script>window.onload=function(){setTimeout(function(){window.print();window.close();},600);};</script>
@@ -1165,8 +1186,53 @@ html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
               Printer Setup
             </h2>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: K.muted, margin: '0 0 16px' }}>
-              Verify your Brother QL-800 label printer is connected and ready.
+              Select your label printer and verify it is connected.
             </p>
+
+            {/* Printer selection */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+              {(Object.keys(PRINTERS) as PrinterModel[]).map(key => {
+                const p = PRINTERS[key];
+                const sel = selectedPrinter === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => { setSelectedPrinter(key); setPrinterOk(false); }}
+                    style={{
+                      background: sel ? K.accent + '18' : K.surface,
+                      border: `1.5px solid ${sel ? K.accent : K.border}`,
+                      borderRadius: 10, padding: '14px 16px',
+                      cursor: 'pointer', textAlign: 'left', width: '100%',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{
+                        width: 20, height: 20, borderRadius: '50%',
+                        border: `2px solid ${sel ? K.accent : K.muted}`,
+                        background: sel ? K.accent : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                        fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: '#fff',
+                      }}>
+                        {sel ? '\u2713' : ''}
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 18, color: K.text }}>
+                          {p.name}
+                        </div>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: K.muted }}>
+                          {p.label} — {p.connection}
+                        </div>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: K.muted, opacity: 0.7, marginTop: 2 }}>
+                          {p.features}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Setup checklist */}
             <div style={{
@@ -1174,7 +1240,7 @@ html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
               padding: '14px 16px', marginBottom: 16,
             }}>
               {[
-                'Brother QL-800 connected via USB',
+                `${PRINTERS[selectedPrinter].name} connected via ${PRINTERS[selectedPrinter].connection}`,
                 'DK-2251 label roll loaded (62mm)',
                 'Set as default printer in system settings',
                 'Paper size set to "62mm" or "DK-2251"',
@@ -1223,7 +1289,7 @@ html,body{width:62mm;height:auto;background:#fff;overflow:hidden;}
                 BACK
               </button>
               <button
-                onClick={() => onConfigure({ token: token.trim(), eventId: selectedEvent, stationId: stationId || 'kiosk-1' })}
+                onClick={() => onConfigure({ token: token.trim(), eventId: selectedEvent, stationId: stationId || 'kiosk-1', printer: selectedPrinter })}
                 style={{
                   flex: 1,
                   background: `linear-gradient(135deg, ${K.accent}, ${K.purple})`,

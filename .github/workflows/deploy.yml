@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   workflow_dispatch:
 
 env:
@@ -55,6 +55,9 @@ jobs:
     needs: security-check
     permissions:
       contents: read
+    env:
+      WRANGLER_ENV: ${{ github.ref_name == 'dev' && 'dev' || '' }}
+      D1_DB_NAME: ${{ github.ref_name == 'dev' && 'atlanta-iam-db-dev' || 'atlanta-iam-db' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -72,19 +75,19 @@ jobs:
         working-directory: worker
         run: |
           # Create migrations tracking table and seed all previously-applied migrations
-          npx wrangler d1 execute atlanta-iam-db --remote --command="CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TEXT DEFAULT (datetime('now')))"
-          npx wrangler d1 execute atlanta-iam-db --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('migration-001-auth.sql'),('migration-002-onboarding.sql'),('migration-003-privacy.sql'),('migration-004-sessions.sql'),('migration-005-profile-updated.sql'),('migration-006-rate-limits.sql'),('migration-007-normalize-emails.sql'),('migration-008-privacy-defaults.sql'),('migration-009-event-types-checkin.sql'),('migration-010-invites.sql'),('migration-011-speaking-fields.sql')"
+          npx wrangler d1 execute $D1_DB_NAME --remote --command="CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TEXT DEFAULT (datetime('now')))"
+          npx wrangler d1 execute $D1_DB_NAME --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('migration-001-auth.sql'),('migration-002-onboarding.sql'),('migration-003-privacy.sql'),('migration-004-sessions.sql'),('migration-005-profile-updated.sql'),('migration-006-rate-limits.sql'),('migration-007-normalize-emails.sql'),('migration-008-privacy-defaults.sql'),('migration-009-event-types-checkin.sql'),('migration-010-invites.sql'),('migration-011-speaking-fields.sql')"
 
           # Run each migration only if not already tracked
           for migration in src/db/migration-*.sql; do
             name=$(basename "$migration")
-            result=$(npx wrangler d1 execute atlanta-iam-db --remote --command="SELECT name FROM _migrations WHERE name = '$name'" --json 2>/dev/null || echo "[]")
+            result=$(npx wrangler d1 execute $D1_DB_NAME --remote --command="SELECT name FROM _migrations WHERE name = '$name'" --json 2>/dev/null || echo "[]")
             if echo "$result" | node -e "const d=JSON.parse(require('fs').readFileSync(0,'utf8')); process.exit(d[0]?.results?.length > 0 ? 0 : 1)" 2>/dev/null; then
               echo "⏭ $name (already applied)"
             else
               echo "▶ Running $name..."
-              npx wrangler d1 execute atlanta-iam-db --remote --file="$migration"
-              npx wrangler d1 execute atlanta-iam-db --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('$name')"
+              npx wrangler d1 execute $D1_DB_NAME --remote --file="$migration"
+              npx wrangler d1 execute $D1_DB_NAME --remote --command="INSERT OR IGNORE INTO _migrations (name) VALUES ('$name')"
               echo "✓ $name applied"
             fi
           done
@@ -95,7 +98,8 @@ jobs:
       - name: Set LinkedIn secrets
         working-directory: worker
         run: |
-          echo '{"LINKEDIN_CLIENT_ID":"'"$LINKEDIN_CLIENT_ID"'","LINKEDIN_CLIENT_SECRET":"'"$LINKEDIN_CLIENT_SECRET"'"}' | npx wrangler secret bulk
+          ENV_FLAG="${WRANGLER_ENV:+--env $WRANGLER_ENV}"
+          echo '{"LINKEDIN_CLIENT_ID":"'"$LINKEDIN_CLIENT_ID"'","LINKEDIN_CLIENT_SECRET":"'"$LINKEDIN_CLIENT_SECRET"'"}' | npx wrangler secret bulk $ENV_FLAG
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -108,7 +112,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
-          command: deploy
+          command: deploy ${{ env.WRANGLER_ENV && format('--env {0}', env.WRANGLER_ENV) || '' }}
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -127,7 +131,7 @@ jobs:
       - name: Install & Build
         working-directory: frontend
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_API_URL: ${{ github.ref_name == 'dev' && 'https://dev.atlantaiam.com/api' || vars.VITE_API_URL }}
         run: |
           npm ci
           npm run build
@@ -137,4 +141,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy frontend/dist --project-name=atlanta-iam
+          command: pages deploy frontend/dist --project-name=atlanta-iam --branch=${{ github.ref_name }}

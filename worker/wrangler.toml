@@ -3,12 +3,11 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Route under custom domain
+# ── Production ──
 routes = [
   { pattern = "atlantaiam.com/api/*", zone_name = "atlantaiam.com" }
 ]
 
-# D1 binding — fill database_id after running: wrangler d1 create atlanta-iam-db
 [[d1_databases]]
 binding = "DB"
 database_name = "atlanta-iam-db"
@@ -16,3 +15,18 @@ database_id = "ca35d4e7-e076-4a73-bb84-7a99ff981f9c"
 
 [vars]
 FRONTEND_URL = "https://atlantaiam.com"
+
+# ── Dev Environment ──
+[env.dev]
+name = "atlanta-iam-api-dev"
+routes = [
+  { pattern = "dev.atlantaiam.com/api/*", zone_name = "atlantaiam.com" }
+]
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "atlanta-iam-db-dev"
+database_id = "1bd9929d-fc59-43f8-a8f3-f26888fdc6af"
+
+[env.dev.vars]
+FRONTEND_URL = "https://dev.atlantaiam.com"
