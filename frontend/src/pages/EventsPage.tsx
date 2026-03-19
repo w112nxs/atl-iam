@@ -179,27 +179,52 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
 
         return (
           <>
-            {/* ── UPCOMING ── */}
+            {/* ── UPCOMING — Hero-style banner section ── */}
             {upcomingEvents.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
+              <div style={{
+                marginBottom: 36,
+                background: `linear-gradient(135deg, ${T.accentDim}, ${T.card} 60%, ${T.accentDim})`,
+                border: `1.5px solid ${T.accent}33`,
+                borderRadius: 16,
+                padding: '28px 28px 24px',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                {/* Background glow */}
+                <div style={{
+                  position: 'absolute', top: -60, right: -60,
+                  width: 200, height: 200, borderRadius: '50%',
+                  background: `radial-gradient(circle, ${T.accent}15, transparent 70%)`,
+                  pointerEvents: 'none',
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: -40, left: -40,
+                  width: 160, height: 160, borderRadius: '50%',
+                  background: `radial-gradient(circle, ${T.gold}10, transparent 70%)`,
+                  pointerEvents: 'none',
+                }} />
+
                 <div style={{
                   fontFamily: "'Space Mono', monospace",
                   fontSize: 10,
                   letterSpacing: '0.26em',
                   textTransform: 'uppercase' as const,
                   color: T.accent,
-                  marginBottom: 14,
+                  marginBottom: 16,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
+                  position: 'relative',
                 }}>
                   Upcoming Events
                   <span style={{ flex: '0 0 40px', height: 1, background: T.accent, display: 'inline-block' }} />
                 </div>
+
                 <div className="grid-3col" style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gridTemplateColumns: upcomingEvents.length === 1 ? '1fr' : 'repeat(3, 1fr)',
                   gap: 16,
+                  position: 'relative',
                 }}>
                   {upcomingEvents.map(evt => (
                     <EventTile key={evt.id} evt={evt} upcoming T={T} onSelect={setSelectedEvent} />
