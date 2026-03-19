@@ -175,9 +175,9 @@ export function AboutPage() {
               <div>hello@atlantaiam.com</div>
               <div>Atlanta, Georgia</div>
               <div style={{ marginTop: 6 }}>
-                <Pill label="LinkedIn" color={T.accent} size={9} />
-                {' '}
-                <Pill label="Meetup" color={T.red} size={9} />
+                <a href="https://www.linkedin.com/company/atlanta-iam/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <Pill label="LinkedIn" color={T.accent} size={9} />
+                </a>
               </div>
             </div>
           </Card>
