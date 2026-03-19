@@ -157,10 +157,26 @@ const aboutCards = [
   },
 ];
 
+function parseEventDate(dateStr: string): Date {
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) return d;
+  return new Date(0);
+}
+
+function findNextUpcomingEvent(events: Event[]): Event | null {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  // Find the nearest future event
+  const upcoming = events
+    .filter(e => parseEventDate(e.date) >= now)
+    .sort((a, b) => parseEventDate(a.date).getTime() - parseEventDate(b.date).getTime());
+  return upcoming[0] || null;
+}
+
 export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps) {
   const { T } = useTheme();
   const { events } = useEvents();
-  const nextEvent = events[0];
+  const nextEvent = findNextUpcomingEvent(events);
 
   return (
     <div>
@@ -363,148 +379,238 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
           Next Event
           <span style={{ flex: '0 0 40px', height: 1, background: T.accent, display: 'inline-block' }} />
         </div>
-        <h2 style={{
-          fontFamily: "'Rajdhani', sans-serif",
-          fontSize: 'clamp(28px, 4vw, 48px)',
-          fontWeight: 700,
-          color: T.text,
-          letterSpacing: '0.04em',
-          margin: '0 0 12px',
-          transition: 'color 0.25s',
-        }}>
-          {nextEvent.name.split(' ').slice(0, -1).join(' ')}{' '}
-          <span style={{ color: T.accent }}>{nextEvent.name.split(' ').slice(-1)}</span>
-        </h2>
-        <p style={{
-          fontSize: 15,
-          color: T.muted,
-          maxWidth: 560,
-          lineHeight: 1.75,
-          margin: '0 0 32px',
-        }}>
-          {nextEvent.date} · {nextEvent.venue}. Sponsored by {nextEvent.sponsors[0]?.name || 'our partners'}.
-        </p>
 
-        <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr minmax(0, 300px)', gap: 20, alignItems: 'start' }}>
-          {/* Left: Event card */}
-          <Card style={{ position: 'relative', overflow: 'hidden', borderRadius: 16 }}>
-            {/* Accent left border */}
-            <div style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: 4,
-              background: `linear-gradient(180deg, ${T.accent}, ${T.accent}66)`,
-              borderRadius: '10px 0 0 10px',
-            }} />
-            <div style={{ paddingLeft: 12 }}>
-              {/* Date badge */}
-              <div style={{
-                display: 'inline-flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                background: T.accent,
-                padding: '7px 14px',
-                borderRadius: 7,
-                marginBottom: 16,
-              }}>
-                <span style={{
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: 9,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase' as const,
-                  color: 'rgba(255,255,255,.8)',
-                }}>
-                  {nextEvent.date.split(' ')[0]} {nextEvent.date.split(' ').pop()}
-                </span>
-                <span style={{
-                  fontFamily: "'Rajdhani', sans-serif",
-                  fontSize: 28,
-                  fontWeight: 700,
-                  color: '#fff',
-                  lineHeight: 1,
-                }}>
-                  {nextEvent.date.match(/\d+/)?.[0] || ''}
-                </span>
+        {nextEvent ? (
+          <>
+            <h2 style={{
+              fontFamily: "'Rajdhani', sans-serif",
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              fontWeight: 700,
+              color: T.text,
+              letterSpacing: '0.04em',
+              margin: '0 0 12px',
+              transition: 'color 0.25s',
+            }}>
+              {nextEvent.name.split(' ').slice(0, -1).join(' ')}{' '}
+              <span style={{ color: T.accent }}>{nextEvent.name.split(' ').slice(-1)}</span>
+            </h2>
+            <p style={{
+              fontSize: 15,
+              color: T.muted,
+              maxWidth: 560,
+              lineHeight: 1.75,
+              margin: '0 0 32px',
+            }}>
+              {nextEvent.date} · {nextEvent.venue}. Sponsored by {nextEvent.sponsors[0]?.name || 'our partners'}.
+            </p>
+
+            <div className="grid-sidebar" style={{ display: 'grid', gridTemplateColumns: '1fr minmax(0, 300px)', gap: 20, alignItems: 'start' }}>
+              {/* Left: Event card */}
+              <Card style={{ position: 'relative', overflow: 'hidden', borderRadius: 16 }}>
+                {/* Accent left border */}
+                <div style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 4,
+                  background: `linear-gradient(180deg, ${T.accent}, ${T.accent}66)`,
+                  borderRadius: '10px 0 0 10px',
+                }} />
+                <div style={{ paddingLeft: 12 }}>
+                  {/* Date badge */}
+                  <div style={{
+                    display: 'inline-flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    background: T.accent,
+                    padding: '7px 14px',
+                    borderRadius: 7,
+                    marginBottom: 16,
+                  }}>
+                    <span style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 9,
+                      letterSpacing: '0.18em',
+                      textTransform: 'uppercase' as const,
+                      color: 'rgba(255,255,255,.8)',
+                    }}>
+                      {nextEvent.date.split(' ')[0]} {nextEvent.date.split(' ').pop()}
+                    </span>
+                    <span style={{
+                      fontFamily: "'Rajdhani', sans-serif",
+                      fontSize: 28,
+                      fontWeight: 700,
+                      color: '#fff',
+                      lineHeight: 1,
+                    }}>
+                      {nextEvent.date.match(/\d+/)?.[0] || ''}
+                    </span>
+                  </div>
+
+                  <h3 style={{
+                    fontFamily: "'Rajdhani', sans-serif",
+                    fontSize: 26,
+                    fontWeight: 700,
+                    color: T.text,
+                    letterSpacing: '0.04em',
+                    margin: '0 0 5px',
+                    transition: 'color 0.25s',
+                  }}>
+                    {nextEvent.name}
+                  </h3>
+                  <div style={{ fontSize: 13, color: T.muted, marginBottom: 18 }}>
+                    {nextEvent.venue}
+                  </div>
+
+                  {/* Sessions */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 18 }}>
+                    {nextEvent.sessions.map((s, i) => (
+                      <div key={s.id} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 0',
+                        borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontWeight: 700,
+                            fontSize: 11,
+                            color: T.muted,
+                            minWidth: 56,
+                          }}>
+                            {s.time}
+                          </span>
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: T.text, transition: 'color 0.25s' }}>
+                              {s.title}
+                            </div>
+                            <div style={{ fontSize: 11, color: T.muted }}>{s.speaker}</div>
+                          </div>
+                        </div>
+                        <Pill label={`${s.cpe} CPE`} color={T.accent} size={9} />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Featured Speakers */}
+                  <div style={{
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 9,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase' as const,
+                    color: T.accent,
+                    marginBottom: 9,
+                  }}>
+                    Featured Speakers
+                  </div>
+                  <div style={{ marginBottom: 18 }}>
+                    {nextEvent.sessions.slice(0, 2).map(s => (
+                      <div key={s.id} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        marginBottom: 5,
+                        fontSize: 13,
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, flexShrink: 0 }} />
+                        <span style={{ color: T.text, fontWeight: 600 }}>{s.speaker.split('—')[0].trim()}</span>
+                        {s.speaker.includes('—') && (
+                          <span style={{ color: T.muted }}>— {s.speaker.split('—')[1].trim()}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => onNavigate('/events')}
+                    style={{
+                      background: T.accent,
+                      border: 'none',
+                      borderRadius: 7,
+                      color: '#fff',
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      letterSpacing: '0.06em',
+                      padding: '11px 24px',
+                      cursor: 'pointer',
+                      transition: 'background 0.25s',
+                    }}
+                  >
+                    Register at atlantaiam.com →
+                  </button>
+                </div>
+              </Card>
+
+              {/* Right: Quick Links */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <SectionLabel text="Quick Links" color={T.accent} />
+                <Card>
+                  {[
+                    { label: 'Submit a Speaking Proposal', path: '/submit-speaking', icon: '→' },
+                    { label: 'Become a Sponsor', path: '/submit-sponsor', icon: '→' },
+                    { label: 'View Past Events', path: '/events', icon: '→' },
+                    { label: 'About Our Community', path: '/about', icon: '→' },
+                  ].map((link, i) => (
+                    <div
+                      key={link.path}
+                      onClick={() => link.path.startsWith('/submit') && !user ? onSignIn() : onNavigate(link.path)}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '7px 0',
+                        borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        color: T.subtle,
+                        transition: 'color 0.25s, border-color 0.25s',
+                      }}
+                    >
+                      {link.label}
+                      <span style={{ color: T.accent, fontSize: 14 }}>{link.icon}</span>
+                    </div>
+                  ))}
+                </Card>
               </div>
-
-              <h3 style={{
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 style={{
+              fontFamily: "'Rajdhani', sans-serif",
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              fontWeight: 700,
+              color: T.text,
+              letterSpacing: '0.04em',
+              margin: '0 0 12px',
+              transition: 'color 0.25s',
+            }}>
+              Next Event <span style={{ color: T.accent }}>Coming Soon</span>
+            </h2>
+            <Card style={{ maxWidth: 600, padding: '32px 28px', textAlign: 'center' as const }}>
+              <div style={{
                 fontFamily: "'Rajdhani', sans-serif",
-                fontSize: 26,
+                fontSize: 22,
                 fontWeight: 700,
                 color: T.text,
-                letterSpacing: '0.04em',
-                margin: '0 0 5px',
+                marginBottom: 10,
                 transition: 'color 0.25s',
               }}>
-                {nextEvent.name}
-              </h3>
-              <div style={{ fontSize: 13, color: T.muted, marginBottom: 18 }}>
-                {nextEvent.venue}
+                Our next meetup is in the works
               </div>
-
-              {/* Sessions */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 18 }}>
-                {nextEvent.sessions.map((s, i) => (
-                  <div key={s.id} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 0',
-                    borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{
-                        fontFamily: "'Inter', sans-serif",
-                        fontWeight: 700,
-                        fontSize: 11,
-                        color: T.muted,
-                        minWidth: 56,
-                      }}>
-                        {s.time}
-                      </span>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: T.text, transition: 'color 0.25s' }}>
-                          {s.title}
-                        </div>
-                        <div style={{ fontSize: 11, color: T.muted }}>{s.speaker}</div>
-                      </div>
-                    </div>
-                    <Pill label={`${s.cpe} CPE`} color={T.accent} size={9} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Featured Speakers */}
-              <div style={{
-                fontFamily: "'Space Mono', monospace",
-                fontSize: 9,
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase' as const,
-                color: T.accent,
-                marginBottom: 9,
+              <p style={{
+                fontSize: 14,
+                color: T.muted,
+                lineHeight: 1.7,
+                margin: '0 0 20px',
               }}>
-                Featured Speakers
-              </div>
-              <div style={{ marginBottom: 18 }}>
-                {nextEvent.sessions.slice(0, 2).map(s => (
-                  <div key={s.id} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    marginBottom: 5,
-                    fontSize: 13,
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, flexShrink: 0 }} />
-                    <span style={{ color: T.text, fontWeight: 600 }}>{s.speaker.split('—')[0].trim()}</span>
-                    {s.speaker.includes('—') && (
-                      <span style={{ color: T.muted }}>— {s.speaker.split('—')[1].trim()}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-
+                Stay tuned — we're lining up speakers, securing a venue, and planning another great evening
+                of identity security conversations. Check back soon or follow us for updates.
+              </p>
               <button
                 onClick={() => onNavigate('/events')}
                 style={{
@@ -521,100 +627,11 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
                   transition: 'background 0.25s',
                 }}
               >
-                Register at atlantaiam.com →
-              </button>
-            </div>
-          </Card>
-
-          {/* Right: Quick Links + Sponsors + Focus Areas */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <SectionLabel text="Quick Links" color={T.accent} />
-            <Card>
-              {[
-                { label: 'Submit a Speaking Proposal', path: '/submit-speaking', icon: '→' },
-                { label: 'Become a Sponsor', path: '/submit-sponsor', icon: '→' },
-                { label: 'View Past Events', path: '/events', icon: '→' },
-                { label: 'About Our Community', path: '/about', icon: '→' },
-              ].map((link, i) => (
-                <div
-                  key={link.path}
-                  onClick={() => link.path.startsWith('/submit') && !user ? onSignIn() : onNavigate(link.path)}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '7px 0',
-                    borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    color: T.subtle,
-                    transition: 'color 0.25s, border-color 0.25s',
-                  }}
-                >
-                  {link.label}
-                  <span style={{ color: T.accent, fontSize: 14 }}>{link.icon}</span>
-                </div>
-              ))}
-            </Card>
-
-            <SectionLabel text="Event Sponsors" color={T.gold} />
-            <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {nextEvent.sponsors.map(sp => (
-                  <div key={sp.id} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
-                    <span style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: T.text,
-                      transition: 'color 0.25s',
-                    }}>
-                      {sp.name}
-                    </span>
-                    <Pill
-                      label={sp.tier}
-                      color={sp.tier === 'Gold' ? T.gold : sp.tier === 'Silver' ? T.subtle : T.accent}
-                      size={9}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={() => onNavigate('/sponsors')}
-                style={{
-                  background: 'transparent',
-                  border: `1px solid ${T.border}`,
-                  borderRadius: 5,
-                  color: T.muted,
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 10,
-                  letterSpacing: '0.08em',
-                  padding: '5px 0',
-                  cursor: 'pointer',
-                  transition: 'color 0.25s, border-color 0.25s',
-                  width: '100%',
-                  marginTop: 10,
-                }}
-              >
-                VIEW ALL SPONSORS
+                View Past Events →
               </button>
             </Card>
-
-            <SectionLabel text="Focus Areas" color={T.purple} />
-            <Card>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {['Zero Trust', 'IGA', 'PAM', 'CIAM', 'Passwordless', 'Cloud IAM', 'Identity Security', 'Compliance'].map(tag => (
-                  <Pill key={tag} label={tag} color={T.purple} size={9} />
-                ))}
-              </div>
-            </Card>
-
-          </div>
-        </div>
+          </>
+        )}
       </section>
 
       {/* ─── Network divider ─── */}
