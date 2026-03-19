@@ -132,10 +132,11 @@ export function AboutPage() {
           <SectionLabel text="At a Glance" color={T.accent} />
           <Card>
             {[
-              { label: 'Founded', value: '2023' },
+              { label: 'Founded', value: '2014' },
               { label: 'Location', value: 'Atlanta, GA' },
-              { label: 'Events per year', value: '4-6' },
-              { label: 'Avg. attendance', value: '80+' },
+              { label: 'Total events', value: '25' },
+              { label: 'Events per year', value: '2-4' },
+              { label: 'Avg. attendance', value: '45+' },
               { label: 'CPE credits', value: '1 per session' },
             ].map((item, i) => (
               <div key={item.label} style={{
