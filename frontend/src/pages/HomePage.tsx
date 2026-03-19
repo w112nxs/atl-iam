@@ -3,7 +3,7 @@ import { Card } from '../components/ui/Card';
 import { Pill } from '../components/ui/Pill';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { useEvents } from '../hooks/useEvents';
-import type { User, ThemeTokens } from '../types';
+import type { User, ThemeTokens, Event } from '../types';
 
 /* ── Atlanta Skyline SVG (simplified silhouette) ── */
 function AtlantaSkyline({ color, opacity = 0.08 }: { color: string; opacity?: number }) {
