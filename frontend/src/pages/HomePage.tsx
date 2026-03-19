@@ -8,7 +8,7 @@ import type { User, ThemeTokens, Event } from '../types';
 /* ── Atlanta Skyline SVG (simplified silhouette) ── */
 function AtlantaSkyline({ color, opacity = 0.08 }: { color: string; opacity?: number }) {
   return (
-    <svg viewBox="0 0 1440 200" fill="none" preserveAspectRatio="none" style={{ width: '100%', height: 200, display: 'block' }}>
+    <svg viewBox="0 0 1440 200" fill="none" preserveAspectRatio="none" style={{ width: '100%', height: 100, display: 'block' }}>
       <path
         d={
           'M0 200 L0 160 L60 160 L60 130 L80 130 L80 110 L100 110 L100 130 L120 130 ' +
@@ -83,7 +83,7 @@ function NetworkPattern({ T }: { T: ThemeTokens }) {
   const o = T.mode === 'dark' ? 0.1 : 0.04;
   return (
     <svg viewBox="0 0 600 120" fill="none" preserveAspectRatio="none"
-      style={{ width: '100%', height: 120, display: 'block', opacity: o }}>
+      style={{ width: '100%', height: 48, display: 'block', opacity: o }}>
       {/* Connection lines */}
       <line x1="60" y1="40" x2="150" y2="70" stroke={c} strokeWidth="1" />
       <line x1="150" y1="70" x2="250" y2="30" stroke={c} strokeWidth="1" />
@@ -183,7 +183,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
       {/* ─── HERO ─── */}
       <section style={{
         background: T.bg,
-        padding: '80px 0 0',
+        padding: '48px 0 0',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -290,7 +290,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
               color: T.subtle,
               lineHeight: 1.75,
               maxWidth: 520,
-              margin: '0 0 36px',
+              margin: '0 0 24px',
             }}>
               A practitioner-first community for identity and access management professionals
               across the greater Atlanta metro. Peer-to-peer. Vendor-neutral. Quarterly events.
@@ -358,13 +358,13 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
         </div>
 
         {/* Atlanta skyline silhouette at bottom of hero */}
-        <div style={{ position: 'relative', marginTop: 40, zIndex: 1 }}>
+        <div style={{ position: 'relative', marginTop: 20, zIndex: 1 }}>
           <AtlantaSkyline color={T.accent} opacity={T.mode === 'dark' ? 0.14 : 0.07} />
         </div>
       </section>
 
       {/* ─── NEXT EVENT + QUICK LINKS ─── */}
-      <section style={{ padding: '48px 0', width: '90%', margin: '0 auto' }}>
+      <section style={{ padding: '28px 0 24px', width: '90%', margin: '0 auto' }}>
         <div style={{
           fontFamily: "'Space Mono', monospace",
           fontSize: 10,
@@ -399,7 +399,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
               color: T.muted,
               maxWidth: 560,
               lineHeight: 1.75,
-              margin: '0 0 32px',
+              margin: '0 0 20px',
             }}>
               {nextEvent.date} · {nextEvent.venue}. Sponsored by {nextEvent.sponsors[0]?.name || 'our partners'}.
             </p>
@@ -638,7 +638,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
       <NetworkPattern T={T} />
 
       {/* ─── ABOUT ─── */}
-      <section style={{ padding: '48px 0 56px', width: '90%', margin: '0 auto', position: 'relative' }}>
+      <section style={{ padding: '24px 0 28px', width: '90%', margin: '0 auto', position: 'relative' }}>
         <div style={{
           fontFamily: "'Space Mono', monospace",
           fontSize: 10,
@@ -670,7 +670,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
           color: T.muted,
           maxWidth: 560,
           lineHeight: 1.75,
-          margin: '0 0 32px',
+          margin: '0 0 20px',
         }}>
           Built by and for identity security practitioners. No vendor hype. No sales pitches.
           Just real practitioners solving real problems.
@@ -682,7 +682,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
           gap: 16,
         }}>
           {aboutCards.map(card => (
-            <Card key={card.title} style={{ padding: '28px 24px' }}>
+            <Card key={card.title} style={{ padding: '20px 20px' }}>
               <div style={{
                 width: 40,
                 height: 40,
@@ -719,7 +719,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
       </section>
 
       {/* ─── COMMUNITY RULES + ACTIONS ─── */}
-      <section style={{ padding: '0 0 48px', width: '90%', margin: '0 auto' }}>
+      <section style={{ padding: '0 0 24px', width: '90%', margin: '0 auto' }}>
         <SectionLabel text="Community Rules" color={T.gold} />
         <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
           <Card style={{ borderLeft: `3px solid ${T.accent}` }}>
@@ -790,7 +790,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
               background: T.card,
               border: `1px solid ${T.border}`,
               borderRadius: 10,
-              padding: '20px 24px',
+              padding: '16px 20px',
               cursor: 'pointer',
               textAlign: 'left',
               transition: 'border-color 0.25s, background 0.25s',
@@ -826,7 +826,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
               background: T.card,
               border: `1px solid ${T.border}`,
               borderRadius: 10,
-              padding: '20px 24px',
+              padding: '16px 20px',
               cursor: 'pointer',
               textAlign: 'left',
               transition: 'border-color 0.25s, background 0.25s',
