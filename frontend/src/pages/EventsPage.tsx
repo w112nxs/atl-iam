@@ -172,132 +172,73 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
         </div>
       </div>
 
-      {/* Event Tiles */}
-      <div className="grid-3col" style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 16,
-      }}>
-        {filtered.map(evt => {
-          const upcoming = isUpcoming(evt.date);
-          const typeLabel = EVENT_TYPE_LABELS[(evt.eventType || 'quarterly_meetup') as EventType] || 'Event';
+      {/* Split into upcoming vs past */}
+      {(() => {
+        const upcomingEvents = filtered.filter(e => isUpcoming(e.date));
+        const pastEvents = filtered.filter(e => !isUpcoming(e.date));
 
-          return (
-            <div
-              key={evt.id}
-              onClick={() => setSelectedEvent(evt)}
-              style={{ cursor: 'pointer' }}
-            >
-              <Card style={{
-                padding: '20px 20px',
-                borderTop: `3px solid ${upcoming ? T.accent : T.border}`,
-                transition: 'border-color 0.25s, transform 0.15s, box-shadow 0.15s',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}>
-                {/* Top row: date + type badge */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: 10,
-                    letterSpacing: '0.12em',
-                    color: upcoming ? T.accent : T.muted,
-                    fontWeight: 700,
-                  }}>
-                    {evt.date}
-                  </span>
-                  {upcoming && (
-                    <Pill label="UPCOMING" color={T.green} size={8} />
-                  )}
-                </div>
-
-                {/* Event name */}
-                <h3 style={{
-                  fontFamily: "'Rajdhani', sans-serif",
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: T.text,
-                  margin: '0 0 4px',
-                  letterSpacing: '0.03em',
-                  lineHeight: 1.2,
-                  transition: 'color 0.25s',
-                }}>
-                  {evt.name}
-                </h3>
-
-                {/* Venue */}
+        return (
+          <>
+            {/* ── UPCOMING ── */}
+            {upcomingEvents.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
                 <div style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 11,
-                  color: T.muted,
-                  marginBottom: 12,
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: 10,
+                  letterSpacing: '0.26em',
+                  textTransform: 'uppercase' as const,
+                  color: T.accent,
+                  marginBottom: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
                 }}>
-                  {evt.venue}
+                  Upcoming Events
+                  <span style={{ flex: '0 0 40px', height: 1, background: T.accent, display: 'inline-block' }} />
                 </div>
-
-                {/* Speakers */}
-                {evt.sessions.length > 0 && (
-                  <div style={{ marginBottom: 12, flex: 1 }}>
-                    {evt.sessions.slice(0, 2).map(s => (
-                      <div key={s.id} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 7,
-                        marginBottom: 6,
-                      }}>
-                        <span style={{
-                          width: 6, height: 6, borderRadius: '50%',
-                          background: T.accent, flexShrink: 0,
-                        }} />
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{
-                            fontFamily: "'Inter', sans-serif",
-                            fontSize: 12,
-                            fontWeight: 600,
-                            color: T.text,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}>
-                            {s.speaker}
-                          </div>
-                          <div style={{
-                            fontFamily: "'Inter', sans-serif",
-                            fontSize: 10,
-                            color: T.muted,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}>
-                            {s.title}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {evt.sessions.length > 2 && (
-                      <div style={{ fontSize: 10, color: T.muted, marginLeft: 13 }}>
-                        +{evt.sessions.length - 2} more session{evt.sessions.length - 2 > 1 ? 's' : ''}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Bottom: type + sponsors */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 'auto' }}>
-                  <Pill label={typeLabel} color={T.accent} size={8} />
-                  {evt.sponsors.slice(0, 2).map(sp => (
-                    <Pill key={sp.id} label={sp.name} color={T.gold} size={8} />
+                <div className="grid-3col" style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: 16,
+                }}>
+                  {upcomingEvents.map(evt => (
+                    <EventTile key={evt.id} evt={evt} upcoming T={T} onSelect={setSelectedEvent} />
                   ))}
-                  {evt.sessions.length > 0 && (
-                    <Pill label={`${evt.sessions.reduce((sum, s) => sum + s.cpe, 0)} CPE`} color={T.purple} size={8} />
-                  )}
                 </div>
-              </Card>
-            </div>
-          );
-        })}
-      </div>
+              </div>
+            )}
+
+            {/* ── PAST ── */}
+            {pastEvents.length > 0 && (
+              <div>
+                <div style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: 10,
+                  letterSpacing: '0.26em',
+                  textTransform: 'uppercase' as const,
+                  color: T.muted,
+                  marginBottom: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                }}>
+                  Past Events
+                  <span style={{ flex: '0 0 40px', height: 1, background: T.border, display: 'inline-block' }} />
+                </div>
+                <div className="grid-3col" style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: 16,
+                }}>
+                  {pastEvents.map(evt => (
+                    <EventTile key={evt.id} evt={evt} upcoming={false} T={T} onSelect={setSelectedEvent} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* Event Detail Modal */}
       {selectedEvent && (
@@ -309,6 +250,128 @@ export function EventsPage({ user, onNavigate }: EventsPageProps) {
           onNavigate={onNavigate}
         />
       )}
+    </div>
+  );
+}
+
+/* ── Event Tile ── */
+function EventTile({ evt, upcoming, T, onSelect }: {
+  evt: Event; upcoming: boolean; T: ThemeTokens; onSelect: (e: Event) => void;
+}) {
+  const typeLabel = EVENT_TYPE_LABELS[(evt.eventType || 'quarterly_meetup') as EventType] || 'Event';
+
+  return (
+    <div onClick={() => onSelect(evt)} style={{ cursor: 'pointer' }}>
+      <Card style={{
+        padding: '20px 20px',
+        borderTop: upcoming ? `3px solid ${T.accent}` : `2px solid ${T.border}`,
+        background: upcoming ? `linear-gradient(180deg, ${T.accentDim}, ${T.card})` : T.card,
+        transition: 'border-color 0.25s, transform 0.15s, box-shadow 0.15s',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Subtle glow for upcoming */}
+        {upcoming && (
+          <div style={{
+            position: 'absolute',
+            top: -30,
+            right: -30,
+            width: 100,
+            height: 100,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${T.accent}18, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
+        )}
+
+        {/* Top row: date + badge */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 10,
+            letterSpacing: '0.12em',
+            color: upcoming ? T.accent : T.muted,
+            fontWeight: 700,
+          }}>
+            {evt.date}
+          </span>
+          {upcoming && <Pill label="UPCOMING" color={T.green} size={8} />}
+        </div>
+
+        {/* Event name */}
+        <h3 style={{
+          fontFamily: "'Rajdhani', sans-serif",
+          fontSize: 18,
+          fontWeight: 700,
+          color: upcoming ? T.text : T.subtle,
+          margin: '0 0 4px',
+          letterSpacing: '0.03em',
+          lineHeight: 1.2,
+          transition: 'color 0.25s',
+        }}>
+          {evt.name}
+        </h3>
+
+        {/* Venue */}
+        <div style={{
+          fontFamily: "'Inter', sans-serif",
+          fontSize: 11,
+          color: T.muted,
+          marginBottom: 12,
+        }}>
+          {evt.venue}
+        </div>
+
+        {/* Speakers */}
+        {evt.sessions.length > 0 && (
+          <div style={{ marginBottom: 12, flex: 1 }}>
+            {evt.sessions.slice(0, 2).map(s => (
+              <div key={s.id} style={{
+                display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6,
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: upcoming ? T.accent : T.muted, flexShrink: 0,
+                }} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600,
+                    color: upcoming ? T.text : T.subtle,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {s.speaker}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.muted,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {s.title}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {evt.sessions.length > 2 && (
+              <div style={{ fontSize: 10, color: T.muted, marginLeft: 13 }}>
+                +{evt.sessions.length - 2} more session{evt.sessions.length - 2 > 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bottom: type + sponsors */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 'auto' }}>
+          <Pill label={typeLabel} color={upcoming ? T.accent : T.muted} size={8} />
+          {evt.sponsors.slice(0, 2).map(sp => (
+            <Pill key={sp.id} label={sp.name} color={upcoming ? T.gold : T.muted} size={8} />
+          ))}
+          {evt.sessions.length > 0 && (
+            <Pill label={`${evt.sessions.reduce((sum, s) => sum + s.cpe, 0)} CPE`} color={upcoming ? T.purple : T.muted} size={8} />
+          )}
+        </div>
+      </Card>
     </div>
   );
 }
