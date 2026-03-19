@@ -133,11 +133,6 @@ export function AboutPage() {
           <Card>
             {[
               { label: 'Founded', value: '2014' },
-              { label: 'Location', value: 'Atlanta, GA' },
-              { label: 'Total events', value: '25' },
-              { label: 'Events per year', value: '2-4' },
-              { label: 'Avg. attendance', value: '45+' },
-              { label: 'CPE credits', value: '1 per session' },
             ].map((item, i) => (
               <div key={item.label} style={{
                 display: 'flex',
