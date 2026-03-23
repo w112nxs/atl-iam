@@ -160,15 +160,6 @@ export function AboutPage() {
             </div>
           </Card>
 
-          <SectionLabel text="Represented Companies" color={T.gold} />
-          <Card>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-              {['Delta Air Lines', 'Home Depot', 'UPS', 'Chick-fil-A', 'Equifax', 'NCR Voyix', 'Wells Fargo', 'Genuine Parts'].map(co => (
-                <Pill key={co} label={co} color={T.subtle} size={9} />
-              ))}
-            </div>
-          </Card>
-
           <SectionLabel text="Contact" color={T.green} />
           <Card>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.subtle, lineHeight: 1.8, transition: 'color 0.25s' }}>
