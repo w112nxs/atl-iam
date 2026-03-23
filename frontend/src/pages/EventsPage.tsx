@@ -685,69 +685,73 @@ function EventDetailModal({ T, event, isAdmin, onClose, onNavigate }: {
               </button>
             )}
 
-            {/* Share: divider */}
-            <div style={{ flex: 1 }} />
+            {(upcoming || isAdmin) && (
+              <>
+                {/* Share: divider */}
+                <div style={{ flex: 1 }} />
 
-            {/* Copy Link */}
-            <button
-              onClick={handleCopyLink}
-              style={{
-                background: T.surface,
-                border: `1px solid ${copied ? T.green + '66' : T.border}`,
-                borderRadius: 8,
-                color: copied ? T.green : T.subtle,
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                fontSize: 11,
-                letterSpacing: '0.06em',
-                padding: '10px 16px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                transition: 'all 0.2s',
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {copied ? (
-                  <path d="M20 6L9 17l-5-5" />
-                ) : (
-                  <>
-                    <rect x="9" y="9" width="13" height="13" rx="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </>
-                )}
-              </svg>
-              {copied ? 'COPIED' : 'COPY LINK'}
-            </button>
+                {/* Copy Link */}
+                <button
+                  onClick={handleCopyLink}
+                  style={{
+                    background: T.surface,
+                    border: `1px solid ${copied ? T.green + '66' : T.border}`,
+                    borderRadius: 8,
+                    color: copied ? T.green : T.subtle,
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 11,
+                    letterSpacing: '0.06em',
+                    padding: '10px 16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {copied ? (
+                      <path d="M20 6L9 17l-5-5" />
+                    ) : (
+                      <>
+                        <rect x="9" y="9" width="13" height="13" rx="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </>
+                    )}
+                  </svg>
+                  {copied ? 'COPIED' : 'COPY LINK'}
+                </button>
 
-            {/* Email */}
-            <a
-              href={`mailto:?subject=${shareSubject}&body=${shareBody}`}
-              style={{
-                background: T.surface,
-                border: `1px solid ${T.border}`,
-                borderRadius: 8,
-                color: T.subtle,
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                fontSize: 11,
-                letterSpacing: '0.06em',
-                padding: '10px 16px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                textDecoration: 'none',
-                transition: 'all 0.2s',
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="M22 7l-10 7L2 7" />
-              </svg>
-              EMAIL
-            </a>
+                {/* Email */}
+                <a
+                  href={`mailto:?subject=${shareSubject}&body=${shareBody}`}
+                  style={{
+                    background: T.surface,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 8,
+                    color: T.subtle,
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 11,
+                    letterSpacing: '0.06em',
+                    padding: '10px 16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    textDecoration: 'none',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="M22 7l-10 7L2 7" />
+                  </svg>
+                  EMAIL
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
