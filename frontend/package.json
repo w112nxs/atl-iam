@@ -28,6 +28,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "flatted": "^3.4.2",
     "globals": "^16.5.0",
+    "picomatch": "^4.0.4",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1"
