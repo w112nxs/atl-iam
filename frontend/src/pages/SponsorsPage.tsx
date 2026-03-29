@@ -2,8 +2,9 @@ import { useTheme } from '../context/ThemeContext';
 import { Card } from '../components/ui/Card';
 import { Pill } from '../components/ui/Pill';
 import { SectionLabel } from '../components/ui/SectionLabel';
+import { Icon } from '../components/ui/Icon';
 
-export function SponsorsPage() {
+export function SponsorsPage({ onNavigate }: { onNavigate: (path: string) => void }) {
   const { T } = useTheme();
 
   return (
@@ -159,6 +160,30 @@ export function SponsorsPage() {
               Ready to support the Atlanta IAM community? Submit a sponsorship request or reach out directly.
             </p>
             <Pill label="sponsors@atlantaiam.com" color={T.green} size={9} />
+            <button
+              onClick={() => onNavigate('/get-involved')}
+              style={{
+                marginTop: 12,
+                background: T.gold,
+                border: 'none',
+                borderRadius: 8,
+                color: '#000',
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 12,
+                letterSpacing: '0.06em',
+                padding: '10px 20px',
+                cursor: 'pointer',
+                transition: 'background 0.25s',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                width: '100%',
+                justifyContent: 'center',
+              }}
+            >
+              <Icon name="send" size={14} color="#000" /> SUBMIT SPONSORSHIP REQUEST
+            </button>
           </Card>
         </div>
       </div>

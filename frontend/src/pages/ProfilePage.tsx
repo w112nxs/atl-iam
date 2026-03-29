@@ -509,8 +509,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
             {[
               { label: 'View Events', color: T.accent, path: '/events' },
               { label: 'Member Directory', color: T.accent, path: '/members' },
-              { label: 'Submit a Talk', color: T.accent, path: '/submit-speaking' },
-              { label: 'Sponsorship Info', color: T.gold, path: '/submit-sponsor' },
+              { label: 'Get Involved', color: T.accent, path: '/get-involved' },
             ].map((item, i) => (
               <div
                 key={item.label}

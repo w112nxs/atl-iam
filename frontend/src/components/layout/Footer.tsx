@@ -84,7 +84,7 @@ export function Footer({ onNavigate }: FooterProps) {
           </div>
           <button onClick={() => onNavigate('/events')} style={linkStyle}>Upcoming Events</button>
           <button onClick={() => onNavigate('/sponsors')} style={linkStyle}>Our Sponsors</button>
-          <button onClick={() => onNavigate('/submit-speaking')} style={linkStyle}>Submit a Talk</button>
+          <button onClick={() => onNavigate('/get-involved')} style={linkStyle}>Get Involved</button>
           <button onClick={() => onNavigate('/about')} style={linkStyle}>About Us</button>
         </div>
 

@@ -12,8 +12,8 @@ import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { EventsPage } from './pages/EventsPage';
 import { SponsorsPage } from './pages/SponsorsPage';
-import { SpeakingForm } from './pages/SpeakingForm';
-import { SponsorshipForm } from './pages/SponsorshipForm';
+import { GetInvolvedPage } from './pages/GetInvolvedPage';
+import { SignInPrompt } from './pages/SignInPrompt';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminView } from './pages/AdminView';
 import { AccessDenied } from './pages/AccessDenied';
@@ -187,11 +187,13 @@ function AppInner() {
       case '/events':
         return <EventsPage user={user} onNavigate={navigate} />;
       case '/sponsors':
-        return <SponsorsPage />;
+        return <SponsorsPage onNavigate={navigate} />;
+      case '/get-involved':
+        return isMember ? <GetInvolvedPage user={user!} onToast={showToast} /> : <SignInPrompt onSignIn={() => setShowAuth(true)} onNavigate={navigate} />;
       case '/submit-speaking':
-        return isMember ? <SpeakingForm user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
+        return isMember ? <GetInvolvedPage user={user!} onToast={showToast} initialTab="speak" /> : <SignInPrompt onSignIn={() => setShowAuth(true)} onNavigate={navigate} />;
       case '/submit-sponsor':
-        return isMember ? <SponsorshipForm user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
+        return isMember ? <GetInvolvedPage user={user!} onToast={showToast} initialTab="sponsor" /> : <SignInPrompt onSignIn={() => setShowAuth(true)} onNavigate={navigate} />;
       case '/members':
         return isMember ? <MemberDirectory user={user!} onInvite={() => setShowInvite(true)} /> : <AccessDenied onNavigate={navigate} />;
       case '/my-profile':

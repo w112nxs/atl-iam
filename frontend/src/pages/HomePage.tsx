@@ -550,8 +550,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
                 <SectionLabel text="Quick Links" color={T.accent} />
                 <Card>
                   {[
-                    { label: 'Submit a Speaking Proposal', path: '/submit-speaking', icon: '→' },
-                    { label: 'Become a Sponsor', path: '/submit-sponsor', icon: '→' },
+                    { label: 'Submit a Talk or Sponsor', path: '/get-involved', icon: '→' },
                     { label: 'View Past Events', path: '/events', icon: '→' },
                     { label: 'About Our Community', path: '/about', icon: '→' },
                   ].map((link, i) => (
@@ -785,7 +784,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
         {/* Submit actions */}
         <div className={user && onInvite ? 'grid-3col' : 'grid-2col'} style={{ display: 'grid', gridTemplateColumns: user && onInvite ? 'repeat(3, 1fr)' : '1fr 1fr', gap: 12, marginTop: 16 }}>
           <button
-            onClick={() => user ? onNavigate('/submit-speaking') : onSignIn()}
+            onClick={() => user ? onNavigate('/get-involved') : onSignIn()}
             style={{
               background: T.card,
               border: `1px solid ${T.border}`,
@@ -821,7 +820,7 @@ export function HomePage({ user, onNavigate, onSignIn, onInvite }: HomePageProps
             </div>
           </button>
           <button
-            onClick={() => user ? onNavigate('/submit-sponsor') : onSignIn()}
+            onClick={() => user ? onNavigate('/get-involved') : onSignIn()}
             style={{
               background: T.card,
               border: `1px solid ${T.border}`,
