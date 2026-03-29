@@ -51,10 +51,12 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
     setUserMenuOpen(false);
   };
 
+  const isAdmin = user?.role === 'admin';
   const userMenuItems: { icon: string; label: string; action: () => void; color?: string; divider?: boolean }[] = [
     { icon: 'account_circle', label: 'My Account', action: () => handleNav('/my-profile') },
     ...(onInvite ? [{ icon: 'person_add', label: 'Invite Colleague', action: () => { setUserMenuOpen(false); onInvite(); } }] : []),
-    { icon: 'logout', label: 'Sign Out', action: () => { setUserMenuOpen(false); onSignOut(); }, color: T.red, divider: true },
+    ...(isAdmin ? [{ icon: 'admin_panel_settings', label: 'Admin Portal', action: () => handleNav('/admin'), color: T.red, divider: true }] : []),
+    { icon: 'logout', label: 'Sign Out', action: () => { setUserMenuOpen(false); onSignOut(); }, color: T.red, divider: !isAdmin },
   ];
 
   return (
