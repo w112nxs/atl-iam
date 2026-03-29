@@ -53,7 +53,6 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
 
   const userMenuItems: { icon: string; label: string; action: () => void; color?: string; divider?: boolean }[] = [
     { icon: 'account_circle', label: 'My Account', action: () => handleNav('/my-profile') },
-    { icon: 'settings', label: 'Settings', action: () => handleNav('/my-profile') },
     ...(onInvite ? [{ icon: 'person_add', label: 'Invite Colleague', action: () => { setUserMenuOpen(false); onInvite(); } }] : []),
     { icon: 'logout', label: 'Sign Out', action: () => { setUserMenuOpen(false); onSignOut(); }, color: T.red, divider: true },
   ];
