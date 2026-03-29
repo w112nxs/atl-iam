@@ -37,7 +37,6 @@ function rowToUser(row: Record<string, unknown>) {
     email: String(row.email),
     role: String(row.role),
     company: String(row.company || ''),
-    sponsorId: row.sponsor_id ? String(row.sponsor_id) : null,
     termsAccepted: Boolean(row.terms_accepted),
     avatarUrl: String(row.avatar_url || ''),
     firstName: String(row.first_name || ''),

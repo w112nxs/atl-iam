@@ -19,7 +19,7 @@ export interface Event {
   eventType?: EventType;
   description?: string;
   maxCapacity?: number;
-  sponsors: { id: string; name: string; tier: 'Gold' | 'Silver' | 'Community' }[];
+  sponsors: { id: string; name: string }[];
   sessions: { id: string; title: string; speaker: string; time: string; cpe: number }[];
   attendees: Attendee[];
   stats: { registered: number; checkedIn: number; enterprise: number; vendor: number };
@@ -34,16 +34,14 @@ export interface Attendee {
   type: 'enterprise' | 'vendor';
   email: string;
   sessions: string[];
-  sponsorConsent: boolean;
 }
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'guest' | 'member' | 'sponsor' | 'admin';
+  role: 'guest' | 'member' | 'admin';
   company: string;
-  sponsorId: string | null;
   termsAccepted: boolean;
   avatarUrl?: string;
   firstName?: string;
@@ -139,8 +137,6 @@ export interface SpeakingFormData {
   consentLinkedinLinked: boolean;
   consentWebsiteListed: boolean;
 }
-
-export type Tier = 'Gold' | 'Silver' | 'Community';
 
 export interface ThemeTokens {
   bg: string;

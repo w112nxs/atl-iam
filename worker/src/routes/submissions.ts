@@ -295,13 +295,13 @@ app.delete('/speaking/:id', requireAuth, async (c) => {
 // Submit sponsorship request
 app.post('/sponsor', requireAuth, async (c) => {
   const user = c.get('user');
-  const { companyName, contactEmail, tier, notes } = await c.req.json();
+  const { companyName, contactEmail, notes } = await c.req.json();
   const id = crypto.randomUUID();
 
   await c.env.DB.prepare(
-    'INSERT INTO submissions_sponsor (id, user_id, tier, company_name, contact_email, notes) VALUES (?, ?, ?, ?, ?, ?)',
+    'INSERT INTO submissions_sponsor (id, user_id, company_name, contact_email, notes) VALUES (?, ?, ?, ?, ?)',
   )
-    .bind(id, user.id, tier, companyName, contactEmail, notes || null)
+    .bind(id, user.id, companyName, contactEmail, notes || null)
     .run();
 
   return c.json({ success: true });

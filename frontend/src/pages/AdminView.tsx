@@ -127,8 +127,6 @@ function EventsTab() {
   const [adding, setAdding] = useState(false);
   const [editingSession, setEditingSession] = useState<{ id: string; title: string; speaker: string; time: string; cpe: number } | null>(null);
   const [addingSession, setAddingSession] = useState(false);
-  const [sponsorContacts, setSponsorContacts] = useState<Record<string, { id: string; name: string; email: string; title: string; phone: string }[]>>({});
-  const [expandedSponsor, setExpandedSponsor] = useState<string | null>(null);
   const [toast, setToast] = useState('');
 
   // Drill-down state for interactive stats
@@ -166,25 +164,6 @@ function EventsTab() {
 
   const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
   const selectedEvent = events.find(e => e.id === selectedEventId);
-
-  const tierColor = (tier: string) =>
-    tier === 'Gold' ? T.gold : tier === 'Silver' ? T.subtle : T.accent;
-
-  const handleToggleSponsorContacts = async (sponsorId: string) => {
-    if (expandedSponsor === sponsorId) {
-      setExpandedSponsor(null);
-      return;
-    }
-    setExpandedSponsor(sponsorId);
-    if (!sponsorContacts[sponsorId]) {
-      try {
-        const contacts = await api.getAdminSponsorContacts(sponsorId);
-        setSponsorContacts(prev => ({ ...prev, [sponsorId]: contacts }));
-      } catch {
-        setSponsorContacts(prev => ({ ...prev, [sponsorId]: [] }));
-      }
-    }
-  };
 
   const handleDeleteEvent = async (id: string, name: string) => {
     if (!confirm(`Delete event "${name}"? This will remove all sessions, sponsors, and attendees for this event.`)) return;
@@ -324,51 +303,14 @@ function EventsTab() {
             <StatBox label="Sponsors" value={selectedEvent.sponsors.length} color={T.gold} />
           </div>
 
-          {/* Sponsors with contacts */}
+          {/* Sponsors */}
           <Card>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '0.2em', color: T.muted, marginBottom: 14 }}>
-              SPONSOR BREAKDOWN
+              SPONSORS
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {selectedEvent.sponsors.map(sp => (
-                <div key={sp.id}>
-                  <div
-                    onClick={() => handleToggleSponsorContacts(sp.id)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
-                      padding: '6px 8px', borderRadius: 6,
-                      background: expandedSponsor === sp.id ? T.surface : 'transparent',
-                      transition: 'background 0.2s',
-                    }}
-                  >
-                    <Pill label={sp.tier} color={tierColor(sp.tier)} />
-                    <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 15, color: T.text, flex: 1 }}>{sp.name}</span>
-                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.muted }}>
-                      {expandedSponsor === sp.id ? '▾' : '▸'} contacts
-                    </span>
-                  </div>
-                  {expandedSponsor === sp.id && (
-                    <div style={{ marginLeft: 28, marginTop: 6, marginBottom: 4 }}>
-                      {!sponsorContacts[sp.id] ? (
-                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.muted }}>Loading...</span>
-                      ) : sponsorContacts[sp.id].length === 0 ? (
-                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.muted }}>No contacts linked to this sponsor</span>
-                      ) : (
-                        sponsorContacts[sp.id].map(c => (
-                          <div key={c.id} style={{
-                            display: 'flex', gap: 12, padding: '4px 0', alignItems: 'center',
-                            fontFamily: "'Inter', sans-serif", fontSize: 12,
-                          }}>
-                            <span style={{ fontWeight: 600, color: T.text, minWidth: 120 }}>{c.name}</span>
-                            <span style={{ color: T.muted }}>{c.email}</span>
-                            {c.title && <span style={{ color: T.subtle }}>{c.title}</span>}
-                            {c.phone && <span style={{ color: T.subtle }}>{c.phone}</span>}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
+                <Pill key={sp.id} label={sp.name} color={T.gold} />
               ))}
               {selectedEvent.sponsors.length === 0 && (
                 <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted }}>No sponsors for this event</span>
@@ -805,7 +747,7 @@ function MembersTab() {
                 fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.muted,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>{m.email}</div>
-              <Pill label={m.role} color={m.role === 'admin' ? T.red : m.role === 'sponsor' ? T.gold : T.accent} size={9} />
+              <Pill label={m.role} color={m.role === 'admin' ? T.red : T.accent} size={9} />
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: T.muted }}>
                 {m.userType || '—'}
               </span>
@@ -896,7 +838,6 @@ function EditMemberModal({ T, member, saving, onSave, onClose }: {
             <select style={{ ...inputStyle(T), cursor: 'pointer' }} value={form.role} onChange={e => set('role', e.target.value)}>
               <option value="guest">Guest</option>
               <option value="member">Member</option>
-              <option value="sponsor">Sponsor</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -941,7 +882,7 @@ function EditMemberModal({ T, member, saving, onSave, onClose }: {
 function SponsorsTab() {
   const { T } = useTheme();
   const [events, setEvents] = useState<Event[]>([]);
-  const [sponsors, setSponsors] = useState<{ eventId: string; eventName: string; sponsorId: string; sponsorName: string; tier: string }[]>([]);
+  const [sponsors, setSponsors] = useState<{ eventId: string; eventName: string; sponsorId: string; sponsorName: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<typeof sponsors[0] | null>(null);
   const [adding, setAdding] = useState(false);
@@ -973,7 +914,7 @@ function SponsorsTab() {
     } catch { flash('Failed to remove'); }
   };
 
-  const handleSaveEdit = async (eventId: string, sponsorId: string, data: { sponsorName?: string; tier?: string }) => {
+  const handleSaveEdit = async (eventId: string, sponsorId: string, data: { sponsorName?: string }) => {
     try {
       await api.updateAdminSponsor(eventId, sponsorId, data);
       setEditing(null);
@@ -982,7 +923,7 @@ function SponsorsTab() {
     } catch { flash('Failed to update'); }
   };
 
-  const handleAdd = async (data: { eventId: string; sponsorId: string; sponsorName: string; tier: string }) => {
+  const handleAdd = async (data: { eventId: string; sponsorId: string; sponsorName: string }) => {
     try {
       await api.addAdminSponsor(data);
       setAdding(false);
@@ -990,9 +931,6 @@ function SponsorsTab() {
       flash('Sponsor added');
     } catch { flash('Failed to add'); }
   };
-
-  const tierColor = (tier: string) =>
-    tier === 'Gold' ? T.gold : tier === 'Silver' ? T.subtle : T.accent;
 
   return (
     <>
@@ -1021,23 +959,22 @@ function SponsorsTab() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{
-            display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 80px 100px',
+            display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 100px',
             gap: 8, padding: '6px 12px',
           }}>
-            {['Event', 'Sponsor', 'Tier', 'Actions'].map(h => (
+            {['Event', 'Sponsor', 'Actions'].map(h => (
               <span key={h} style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: T.subtle, letterSpacing: '0.1em' }}>{h}</span>
             ))}
           </div>
 
           {sponsors.map(s => (
             <div key={`${s.eventId}-${s.sponsorId}`} style={{
-              display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 80px 100px',
+              display: 'grid', gridTemplateColumns: '1.5fr 1.5fr 100px',
               gap: 8, padding: '10px 12px', alignItems: 'center',
               background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`,
             }}>
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text }}>{s.eventName}</span>
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.text }}>{s.sponsorName}</span>
-              <Pill label={s.tier} color={tierColor(s.tier)} size={9} />
               <div style={{ display: 'flex', gap: 4 }}>
                 <button onClick={() => setEditing(s)} style={{
                   background: 'transparent', border: `1px solid ${T.accent}44`, borderRadius: 4,
@@ -1068,28 +1005,19 @@ function SponsorsTab() {
 
 function EditSponsorModal({ T, sponsor, onSave, onClose }: {
   T: ThemeTokens;
-  sponsor: { eventId: string; sponsorId: string; sponsorName: string; tier: string };
-  onSave: (eventId: string, sponsorId: string, data: { sponsorName?: string; tier?: string }) => void;
+  sponsor: { eventId: string; sponsorId: string; sponsorName: string };
+  onSave: (eventId: string, sponsorId: string, data: { sponsorName?: string }) => void;
   onClose: () => void;
 }) {
   const [name, setName] = useState(sponsor.sponsorName);
-  const [tier, setTier] = useState(sponsor.tier);
 
   return (
     <div onClick={onClose} style={modalOverlay(onClose)}>
       <div onClick={e => e.stopPropagation()} style={modalBox(T, 380)}>
         <h3 style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 20, color: T.text, margin: '0 0 16px' }}>Edit Sponsor</h3>
-        <div style={{ marginBottom: 10 }}>
+        <div style={{ marginBottom: 16 }}>
           <label style={labelStyle(T)}>SPONSOR NAME</label>
           <input style={inputStyle(T)} value={name} onChange={e => setName(e.target.value)} />
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle(T)}>TIER</label>
-          <select style={{ ...inputStyle(T), cursor: 'pointer' }} value={tier} onChange={e => setTier(e.target.value)}>
-            <option value="Gold">Gold</option>
-            <option value="Silver">Silver</option>
-            <option value="Community">Community</option>
-          </select>
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={onClose} style={{
@@ -1098,7 +1026,7 @@ function EditSponsorModal({ T, sponsor, onSave, onClose }: {
             fontSize: 12, fontWeight: 700, color: T.muted,
             display: 'inline-flex', alignItems: 'center', gap: 4,
           }}><Icon name="close" size={14} /> CANCEL</button>
-          <button onClick={() => onSave(sponsor.eventId, sponsor.sponsorId, { sponsorName: name, tier })} style={{
+          <button onClick={() => onSave(sponsor.eventId, sponsor.sponsorId, { sponsorName: name })} style={{
             background: T.gold, border: 'none', borderRadius: 6,
             padding: '8px 18px', cursor: 'pointer', fontFamily: "'Inter', sans-serif",
             fontSize: 12, fontWeight: 700, color: '#fff',
@@ -1113,10 +1041,10 @@ function EditSponsorModal({ T, sponsor, onSave, onClose }: {
 function AddSponsorModal({ T, events, onAdd, onClose }: {
   T: ThemeTokens;
   events: { id: string; name: string }[];
-  onAdd: (data: { eventId: string; sponsorId: string; sponsorName: string; tier: string }) => void;
+  onAdd: (data: { eventId: string; sponsorId: string; sponsorName: string }) => void;
   onClose: () => void;
 }) {
-  const [form, setForm] = useState({ eventId: events[0]?.id || '', sponsorId: '', sponsorName: '', tier: 'Gold' });
+  const [form, setForm] = useState({ eventId: events[0]?.id || '', sponsorId: '', sponsorName: '' });
   const set = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
 
   return (
@@ -1133,17 +1061,9 @@ function AddSponsorModal({ T, events, onAdd, onClose }: {
           <label style={labelStyle(T)}>SPONSOR ID</label>
           <input style={inputStyle(T)} value={form.sponsorId} onChange={e => set('sponsorId', e.target.value)} placeholder="e.g. saviynt" />
         </div>
-        <div style={{ marginBottom: 10 }}>
+        <div style={{ marginBottom: 16 }}>
           <label style={labelStyle(T)}>SPONSOR NAME</label>
           <input style={inputStyle(T)} value={form.sponsorName} onChange={e => set('sponsorName', e.target.value)} placeholder="e.g. Saviynt" />
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle(T)}>TIER</label>
-          <select style={{ ...inputStyle(T), cursor: 'pointer' }} value={form.tier} onChange={e => set('tier', e.target.value)}>
-            <option value="Gold">Gold</option>
-            <option value="Silver">Silver</option>
-            <option value="Community">Community</option>
-          </select>
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={onClose} style={{

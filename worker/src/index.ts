@@ -7,7 +7,6 @@ import userRoutes from './routes/users';
 import submissionRoutes from './routes/submissions';
 import adminRoutes from './routes/admin';
 import kioskRoutes from './routes/kiosk';
-import auditRoutes from './routes/audit';
 import calendarRoutes from './routes/calendar';
 import inviteRoutes from './routes/invites';
 import type { Bindings, Variables } from './types';
@@ -35,7 +34,6 @@ app.route('/api/users', userRoutes);
 app.route('/api/submissions', submissionRoutes);
 app.route('/api/admin', adminRoutes);
 app.route('/api/kiosk', kioskRoutes);
-app.route('/api/audit', auditRoutes);
 app.route('/api/calendar', calendarRoutes);
 app.route('/api/invites', inviteRoutes);
 

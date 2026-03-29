@@ -36,7 +36,7 @@ app.get('/events', requireAuth, requireRole('admin'), async (c) => {
       maxCapacity: e.max_capacity || 0,
       sponsors: (sponsorsRes.results || [])
         .filter((sp) => sp.event_id === e.id)
-        .map((sp) => ({ id: sp.sponsor_id, name: sp.sponsor_name, tier: sp.tier })),
+        .map((sp) => ({ id: sp.sponsor_id, name: sp.sponsor_name })),
       sessions: (sessionsRes.results || [])
         .filter((ss) => ss.event_id === e.id)
         .map((ss) => ({ id: ss.id, title: ss.title, speaker: ss.speaker, time: ss.session_time, cpe: ss.cpe })),
@@ -196,30 +196,13 @@ app.delete('/sessions/:id', requireAuth, requireRole('admin'), async (c) => {
 // List all sponsors (across all events)
 app.get('/sponsors', requireAuth, requireRole('admin'), async (c) => {
   const rows = await c.env.DB.prepare(
-    'SELECT es.event_id, es.sponsor_id, es.sponsor_name, es.tier, e.name as event_name FROM event_sponsors es JOIN events e ON es.event_id = e.id ORDER BY e.date DESC, es.tier ASC'
+    'SELECT es.event_id, es.sponsor_id, es.sponsor_name, e.name as event_name FROM event_sponsors es JOIN events e ON es.event_id = e.id ORDER BY e.date DESC'
   ).all();
   return c.json(rows.results.map(r => ({
     eventId: r.event_id,
     eventName: r.event_name,
     sponsorId: r.sponsor_id,
     sponsorName: r.sponsor_name,
-    tier: r.tier,
-  })));
-});
-
-// Get sponsor contacts (users with matching sponsor_id)
-app.get('/sponsors/:sponsorId/contacts', requireAuth, requireRole('admin'), async (c) => {
-  const sponsorId = c.req.param('sponsorId');
-  const rows = await c.env.DB.prepare(
-    'SELECT id, name, email, company, title, phone FROM users WHERE sponsor_id = ? ORDER BY name ASC'
-  ).bind(sponsorId).all();
-  return c.json(rows.results.map(r => ({
-    id: r.id,
-    name: r.name,
-    email: r.email,
-    company: r.company,
-    title: r.title,
-    phone: r.phone,
   })));
 });
 
@@ -229,16 +212,15 @@ app.post('/sponsors', requireAuth, requireRole('admin'), async (c) => {
     eventId: string;
     sponsorId: string;
     sponsorName: string;
-    tier: 'Gold' | 'Silver' | 'Community';
   }>();
 
-  if (!body.eventId || !body.sponsorId || !body.sponsorName || !body.tier) {
+  if (!body.eventId || !body.sponsorId || !body.sponsorName) {
     return c.json({ error: 'All fields are required' }, 400);
   }
 
   await c.env.DB.prepare(
-    'INSERT OR REPLACE INTO event_sponsors (event_id, sponsor_id, sponsor_name, tier) VALUES (?, ?, ?, ?)'
-  ).bind(body.eventId, body.sponsorId, body.sponsorName, body.tier).run();
+    'INSERT OR REPLACE INTO event_sponsors (event_id, sponsor_id, sponsor_name) VALUES (?, ?, ?)'
+  ).bind(body.eventId, body.sponsorId, body.sponsorName).run();
 
   return c.json({ success: true });
 });
@@ -247,23 +229,13 @@ app.post('/sponsors', requireAuth, requireRole('admin'), async (c) => {
 app.put('/sponsors/:eventId/:sponsorId', requireAuth, requireRole('admin'), async (c) => {
   const eventId = c.req.param('eventId');
   const sponsorId = c.req.param('sponsorId');
-  const body = await c.req.json<{
-    sponsorName?: string;
-    tier?: 'Gold' | 'Silver' | 'Community';
-  }>();
+  const body = await c.req.json<{ sponsorName?: string }>();
 
-  const updates: string[] = [];
-  const values: unknown[] = [];
+  if (!body.sponsorName) return c.json({ error: 'No fields to update' }, 400);
 
-  if (body.sponsorName !== undefined) { updates.push('sponsor_name = ?'); values.push(body.sponsorName); }
-  if (body.tier !== undefined) { updates.push('tier = ?'); values.push(body.tier); }
-
-  if (updates.length === 0) return c.json({ error: 'No fields to update' }, 400);
-
-  values.push(eventId, sponsorId);
   await c.env.DB.prepare(
-    `UPDATE event_sponsors SET ${updates.join(', ')} WHERE event_id = ? AND sponsor_id = ?`
-  ).bind(...values).run();
+    'UPDATE event_sponsors SET sponsor_name = ? WHERE event_id = ? AND sponsor_id = ?'
+  ).bind(body.sponsorName, eventId, sponsorId).run();
 
   return c.json({ success: true });
 });

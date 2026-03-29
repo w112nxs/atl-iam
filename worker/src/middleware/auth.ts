@@ -50,25 +50,3 @@ export function requireRole(...roles: string[]) {
   );
 }
 
-export function requireSponsorAccess(eventIdParam: string) {
-  return createMiddleware<{ Bindings: Bindings; Variables: Variables }>(
-    async (c, next) => {
-      const user = c.get('user');
-      if (!user) return c.json({ error: 'Unauthorized' }, 401);
-      if (user.role === 'admin') {
-        await next();
-        return;
-      }
-      const eventId = c.req.param(eventIdParam);
-      const sponsor = await c.env.DB.prepare(
-        'SELECT 1 FROM event_sponsors WHERE event_id = ? AND sponsor_id = ?',
-      )
-        .bind(eventId, user.sponsorId)
-        .first();
-      if (!sponsor) {
-        return c.json({ error: 'No sponsor access to this event' }, 403);
-      }
-      await next();
-    },
-  );
-}

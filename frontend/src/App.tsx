@@ -15,7 +15,6 @@ import { SponsorsPage } from './pages/SponsorsPage';
 import { SpeakingForm } from './pages/SpeakingForm';
 import { SponsorshipForm } from './pages/SponsorshipForm';
 import { ProfilePage } from './pages/ProfilePage';
-import { SponsorPortal } from './pages/SponsorPortal';
 import { AdminView } from './pages/AdminView';
 import { AccessDenied } from './pages/AccessDenied';
 import { MemberDirectory } from './pages/MemberDirectory';
@@ -126,7 +125,6 @@ function AppInner() {
           email: payload.email,
           role: payload.role,
           company: payload.company || '',
-          sponsorId: payload.sponsorId || null,
           termsAccepted: Boolean(payload.termsAccepted),
           onboardingComplete: Boolean(payload.onboardingComplete),
           avatarUrl: payload.avatarUrl || '',
@@ -149,8 +147,7 @@ function AppInner() {
   }, [loginWithToken, showToast]);
 
   const needsOnboarding = user && !user.onboardingComplete;
-  const isMember = user && ['member', 'sponsor', 'admin'].includes(user.role);
-  const isSponsor = user && ['sponsor', 'admin'].includes(user.role);
+  const isMember = user && ['member', 'admin'].includes(user.role);
   const isAdmin = user?.role === 'admin';
 
   // Profile staleness check — prompt if older than 1 year
@@ -199,8 +196,6 @@ function AppInner() {
         return isMember ? <MemberDirectory user={user!} onInvite={() => setShowInvite(true)} /> : <AccessDenied onNavigate={navigate} />;
       case '/my-profile':
         return isMember ? <ProfilePage user={user!} onNavigate={navigate} onUserUpdate={(u) => loginWithToken(localStorage.getItem('atlanta-iam-token') || '', u)} onInvite={() => setShowInvite(true)} /> : <AccessDenied onNavigate={navigate} />;
-      case '/sponsor-portal':
-        return isSponsor ? <SponsorPortal user={user!} onToast={showToast} /> : <AccessDenied onNavigate={navigate} />;
       case '/privacy':
         return <PrivacyPolicyPage onNavigate={navigate} />;
       case '/terms':

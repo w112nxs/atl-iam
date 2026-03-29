@@ -19,7 +19,6 @@ export type UserPayload = {
   email: string;
   role: string;
   company: string;
-  sponsorId: string | null;
   termsAccepted: boolean;
   onboardingComplete: boolean;
   avatarUrl: string;

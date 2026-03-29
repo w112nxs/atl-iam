@@ -111,10 +111,6 @@ export const api = {
 
   // Events
   getEvents: () => request<import('../types').Event[]>('/events'),
-  getEventAttendees: (eventId: string) =>
-    request<import('../types').Attendee[]>(`/events/${eventId}/attendees`),
-  getEventSessions: (eventId: string) =>
-    request<{ id: string; title: string; count: number }[]>(`/events/${eventId}/sessions`),
 
   // Submissions
   submitSpeaking: (data: {
@@ -149,12 +145,8 @@ export const api = {
   reviewSpeakingSubmission: (id: string, data: { status: 'approved' | 'rejected'; comment: string }) =>
     request<{ success: boolean }>(`/admin/speaking-submissions/${id}/review`, { method: 'PUT', body: JSON.stringify(data) }),
 
-  submitSponsor: (data: { companyName: string; contactEmail: string; tier: string; notes?: string }) =>
+  submitSponsor: (data: { companyName: string; contactEmail: string; notes?: string }) =>
     request<{ success: boolean }>('/submissions/sponsor', { method: 'POST', body: JSON.stringify(data) }),
-
-  // Audit
-  logExport: (data: { eventId: string; attendeeCount: number; tier: string; timestamp: string }) =>
-    request<{ success: boolean }>('/audit/export', { method: 'POST', body: JSON.stringify(data) }),
 
   // Admin
   getAdminEvents: () => request<import('../types').Event[]>('/admin/events'),
@@ -203,12 +195,10 @@ export const api = {
     request<{ success: boolean }>(`/admin/sessions/${id}`, { method: 'DELETE' }),
 
   // Admin — Sponsors
-  getAdminSponsors: () => request<{ eventId: string; eventName: string; sponsorId: string; sponsorName: string; tier: string }[]>('/admin/sponsors'),
-  getAdminSponsorContacts: (sponsorId: string) =>
-    request<{ id: string; name: string; email: string; company: string; title: string; phone: string }[]>(`/admin/sponsors/${sponsorId}/contacts`),
-  addAdminSponsor: (data: { eventId: string; sponsorId: string; sponsorName: string; tier: string }) =>
+  getAdminSponsors: () => request<{ eventId: string; eventName: string; sponsorId: string; sponsorName: string }[]>('/admin/sponsors'),
+  addAdminSponsor: (data: { eventId: string; sponsorId: string; sponsorName: string }) =>
     request<{ success: boolean }>('/admin/sponsors', { method: 'POST', body: JSON.stringify(data) }),
-  updateAdminSponsor: (eventId: string, sponsorId: string, data: { sponsorName?: string; tier?: string }) =>
+  updateAdminSponsor: (eventId: string, sponsorId: string, data: { sponsorName?: string }) =>
     request<{ success: boolean }>(`/admin/sponsors/${eventId}/${sponsorId}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAdminSponsor: (eventId: string, sponsorId: string) =>
     request<{ success: boolean }>(`/admin/sponsors/${eventId}/${sponsorId}`, { method: 'DELETE' }),

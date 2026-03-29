@@ -535,23 +535,6 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
             </>
           )}
 
-          {/* Sponsor Portal (if applicable) */}
-          {user.sponsorId && (
-            <>
-              <SectionLabel text="Sponsor Access" color={T.gold} />
-              <Card accent={T.gold}>
-                <div style={{
-                  fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.text,
-                  marginBottom: 6, transition: 'color 0.25s',
-                }}>
-                  You have active sponsor portal access.
-                </div>
-                <div onClick={() => onNavigate?.('/sponsor-portal')} style={{ cursor: 'pointer' }}>
-                  <Pill label="View Sponsor Portal" color={T.gold} size={9} />
-                </div>
-              </Card>
-            </>
-          )}
         </div>
       </div>
     </div>

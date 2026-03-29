@@ -11,7 +11,7 @@ router.use(rateLimit({
   legacyHeaders: false,
 }));
 
-router.post('/speaking', requireAuth, requireRole('member', 'sponsor', 'admin'), (req, res) => {
+router.post('/speaking', requireAuth, requireRole('member', 'admin'), (req, res) => {
   const { title, abstract, company, type, coPresenter } = req.body;
   if (!title || !abstract) {
     res.status(400).json({ error: 'Title and abstract required' });
@@ -21,13 +21,13 @@ router.post('/speaking', requireAuth, requireRole('member', 'sponsor', 'admin'),
   res.json({ success: true, submission: { title, abstract, company, type, coPresenter } });
 });
 
-router.post('/sponsor', requireAuth, requireRole('member', 'sponsor', 'admin'), (req, res) => {
-  const { companyName, contactEmail, tier, notes } = req.body;
+router.post('/sponsor', requireAuth, requireRole('member', 'admin'), (req, res) => {
+  const { companyName, contactEmail, notes } = req.body;
   if (!companyName || !contactEmail) {
     res.status(400).json({ error: 'Company name and email required' });
     return;
   }
-  res.json({ success: true, submission: { companyName, contactEmail, tier, notes } });
+  res.json({ success: true, submission: { companyName, contactEmail, notes } });
 });
 
 export default router;

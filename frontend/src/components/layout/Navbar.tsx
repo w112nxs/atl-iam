@@ -38,13 +38,12 @@ export function Navbar({ user, currentPath, onNavigate, onSignIn, onSignOut, onI
     { label: 'About', path: '/about', color: T.accent },
     { label: 'Events', path: '/events', color: T.accent },
     { label: 'Sponsors', path: '/sponsors', color: T.accent },
-    { label: 'Members', path: '/members', color: T.accent, roles: ['member', 'sponsor', 'admin'] },
-    { label: '\u25C6 Sponsor Portal', path: '/sponsor-portal', color: T.gold, roles: ['sponsor', 'admin'] },
+    { label: 'Members', path: '/members', color: T.accent, roles: ['member', 'admin'] },
     { label: '\u25CF Admin', path: '/admin', color: T.red, roles: ['admin'] },
   ];
 
   const visibleTabs = tabs.filter(t => !t.roles || (user && t.roles.includes(user.role)));
-  const roleColor = user?.role === 'admin' ? T.red : user?.role === 'sponsor' ? T.gold : T.accent;
+  const roleColor = user?.role === 'admin' ? T.red : T.accent;
 
   const handleNav = (path: string) => {
     onNavigate(path);
