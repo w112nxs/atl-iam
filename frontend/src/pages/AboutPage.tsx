@@ -8,7 +8,7 @@ export function AboutPage() {
 
   const rules = [
     { num: '01', title: 'Enterprise-Led Presentations', desc: 'All sessions must feature an enterprise practitioner as primary presenter. Vendor representatives may co-present but never deliver solo content.' },
-    { num: '02', title: 'Vendor Sponsorships', desc: 'Sponsors support our community through tiered partnerships. In return, they receive structured access to consented attendee data through our Sponsor Portal.' },
+    { num: '02', title: 'Vendor Sponsorships', desc: 'Any vendor in the IAM space can sponsor our events. Sponsors receive brand visibility, a co-presentation opportunity, and direct access to the practitioner community.' },
     { num: '03', title: 'Authenticated Submissions', desc: 'Speaking proposals and sponsorship requests require authentication. This maintains the quality and accountability of our community interactions.' },
   ];
 
