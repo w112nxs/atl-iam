@@ -102,7 +102,7 @@ export function ProfilePage({ user, onNavigate, onUserUpdate, onInvite }: Profil
     }
   };
 
-  const roleColor = user.role === 'admin' ? T.red : user.role === 'sponsor' ? T.gold : T.accent;
+  const roleColor = user.role === 'admin' ? T.red : T.accent;
 
   const lastLoginFormatted = user.lastLogin
     ? new Date(user.lastLogin + 'Z').toLocaleString()

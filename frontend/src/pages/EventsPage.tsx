@@ -616,11 +616,6 @@ function EventDetailModal({ T, event, isAdmin, onClose, onNavigate }: {
                     }}>
                       {sp.name}
                     </span>
-                    <Pill
-                      label={sp.tier}
-                      color={sp.tier === 'Gold' ? T.gold : sp.tier === 'Silver' ? T.subtle : T.accent}
-                      size={8}
-                    />
                   </div>
                 ))}
               </div>

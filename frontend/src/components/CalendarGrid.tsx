@@ -274,7 +274,7 @@ export function CalendarGrid({ events, month, onMonthChange }: CalendarGridProps
           {popover.evt.sponsors.length > 0 && (
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               {popover.evt.sponsors.map(sp => (
-                <Pill key={sp.id} label={`${sp.name} · ${sp.tier}`} color={sp.tier === 'Gold' ? T.gold : sp.tier === 'Silver' ? T.subtle : T.accent} size={9} />
+                <Pill key={sp.id} label={sp.name} color={T.gold} size={9} />
               ))}
             </div>
           )}
