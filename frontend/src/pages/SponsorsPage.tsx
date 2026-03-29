@@ -160,30 +160,22 @@ export function SponsorsPage({ onNavigate }: { onNavigate: (path: string) => voi
               Ready to support the Atlanta IAM community? Submit a sponsorship request or reach out directly.
             </p>
             <Pill label="hello@atlantaiam.com" color={T.green} size={9} />
-            <button
+            <div
               onClick={() => onNavigate('/get-involved')}
               style={{
-                marginTop: 12,
-                background: T.gold,
-                border: 'none',
-                borderRadius: 8,
-                color: '#000',
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                fontSize: 12,
-                letterSpacing: '0.06em',
-                padding: '10px 20px',
+                marginTop: 10,
                 cursor: 'pointer',
-                transition: 'background 0.25s',
-                display: 'inline-flex',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 12,
+                color: T.accent,
+                display: 'flex',
                 alignItems: 'center',
-                gap: 6,
-                width: '100%',
-                justifyContent: 'center',
+                gap: 4,
+                transition: 'color 0.25s',
               }}
             >
-              <Icon name="send" size={14} color="#000" /> SUBMIT SPONSORSHIP REQUEST
-            </button>
+              Submit a request <Icon name="arrow_forward" size={14} color={T.accent} />
+            </div>
           </Card>
         </div>
       </div>
