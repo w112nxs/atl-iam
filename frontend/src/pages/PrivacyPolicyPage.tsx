@@ -282,7 +282,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
             <li style={S.li}><strong style={S.strong}>Restrict / Object</strong> — Limit or object to processing</li>
           </ul>
           <p style={{ ...S.p, marginBottom: 0 }}>
-            Contact <strong style={{ color: T.accent }}>privacy@atlantaiam.com</strong>. We respond within 30 days. No discrimination for exercising rights.
+            Contact <strong style={{ color: T.accent }}>hello@atlantaiam.com</strong>. We respond within 30 days. No discrimination for exercising rights.
           </p>
         </>
       ),
@@ -296,7 +296,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
           <h2 style={S.h2}>12. Additional Provisions</h2>
           <h3 style={S.h3}>Children's Privacy</h3>
           <p style={S.p}>
-            Our services are for IAM professionals and not intended for individuals under 18. Contact <strong style={{ color: T.accent }}>privacy@atlantaiam.com</strong> if you believe a minor's data was collected.
+            Our services are for IAM professionals and not intended for individuals under 18. Contact <strong style={{ color: T.accent }}>hello@atlantaiam.com</strong> if you believe a minor's data was collected.
           </p>
           <h3 style={S.h3}>Changes to This Policy</h3>
           <p style={S.p}>
@@ -322,8 +322,7 @@ export function PrivacyPolicyPage({ onNavigate }: { onNavigate?: (p: string) => 
           <h2 style={S.h2}>13. Contact Us</h2>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
             {[
-              ['Privacy Inquiries', 'privacy@atlantaiam.com'],
-              ['General Contact', 'hello@atlantaiam.com'],
+              ['Contact', 'hello@atlantaiam.com'],
               ['Organization', 'Atlanta IAM User Group'],
               ['Location', 'Atlanta, Georgia, United States'],
             ].map(([label, value]) => (

@@ -60,7 +60,6 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
           <ul style={S.ul}>
             <li style={S.li}><strong style={S.strong}>Enterprise Practitioner</strong> — IAM professionals at end-user organizations</li>
             <li style={S.li}><strong style={S.strong}>Vendor / Solution Provider</strong> — Representatives of IAM product/service companies (requires work email verification)</li>
-            <li style={S.li}><strong style={S.strong}>Sponsor</strong> — Vendor accounts with active sponsorship agreements</li>
             <li style={S.li}><strong style={S.strong}>Admin</strong> — Community organizers with administrative access</li>
           </ul>
           <p style={{ ...S.p, marginBottom: 0 }}>
@@ -124,20 +123,8 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
       content: (
         <>
           <h2 style={S.h2}>6. Sponsorship Terms</h2>
-          <h3 style={S.h3}>6.1 Tiered Access</h3>
-          <p style={S.p}>
-            Sponsors receive access to consented attendee data through the Sponsor Portal, tiered by sponsorship level (Gold, Silver, Community). Data access is strictly limited to attendees who have opted in.
-          </p>
-          <h3 style={S.h3}>6.2 Data Usage Restrictions</h3>
-          <ul style={S.ul}>
-            <li style={S.li}>Sponsor data may only be used for professional networking and business development</li>
-            <li style={S.li}>Reselling, redistributing, or sharing attendee data with third parties is prohibited</li>
-            <li style={S.li}>Mass unsolicited communications are prohibited</li>
-            <li style={S.li}>Data must be deleted upon request or after the 12-month access period</li>
-          </ul>
-          <h3 style={S.h3}>6.3 Audit & Compliance</h3>
           <p style={{ ...S.p, marginBottom: 0 }}>
-            All sponsor data access and exports are logged. We reserve the right to audit sponsor data usage and revoke access for violations of these terms.
+            Sponsors support our community by sponsoring events. In return, sponsors receive brand visibility, a co-presentation opportunity alongside an enterprise practitioner, and a presence at in-person events. Sponsorship terms are agreed upon directly between the sponsor and community organizers.
           </p>
         </>
       ),
@@ -280,8 +267,6 @@ export function TermsOfServicePage({ onNavigate }: { onNavigate?: (p: string) =>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
             {[
               ['General', 'hello@atlantaiam.com'],
-              ['Privacy', 'privacy@atlantaiam.com'],
-              ['Sponsorships', 'sponsors@atlantaiam.com'],
               ['Location', 'Atlanta, Georgia'],
             ].map(([label, value]) => (
               <div key={label}>

@@ -152,7 +152,6 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
           <ul style={S.ul}>
             <li style={S.li}>Respect other members' privacy settings and data sharing choices</li>
             <li style={S.li}>Do not attempt to circumvent privacy controls or access restrictions</li>
-            <li style={S.li}>Sponsors must use exported data only as permitted by sponsorship terms</li>
             <li style={S.li}>Report any suspected data breach or misuse immediately</li>
             <li style={S.li}>Do not share other members' personal information without consent</li>
           </ul>
@@ -175,7 +174,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
           </p>
           <ul style={S.ul}>
             <li style={S.li}><strong style={S.strong}>At events:</strong> Speak to any event staff member or organizer immediately</li>
-            <li style={S.li}><strong style={S.strong}>Online:</strong> Email <strong style={{ color: T.accent }}>conduct@atlantaiam.com</strong></li>
+            <li style={S.li}><strong style={S.strong}>Online:</strong> Email <strong style={{ color: T.accent }}>hello@atlantaiam.com</strong></li>
             <li style={S.li}><strong style={S.strong}>Anonymous:</strong> Use the anonymous reporting form on our website (coming soon)</li>
           </ul>
           <h3 style={S.h3}>What Happens Next</h3>
@@ -281,9 +280,7 @@ export function CodeOfConductPage({ onNavigate }: { onNavigate?: (p: string) => 
           <h2 style={S.h2}>12. Contact</h2>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
             {[
-              ['Conduct Reports', 'conduct@atlantaiam.com'],
               ['General', 'hello@atlantaiam.com'],
-              ['Privacy', 'privacy@atlantaiam.com'],
               ['Location', 'Atlanta, Georgia'],
             ].map(([label, value]) => (
               <div key={label}>

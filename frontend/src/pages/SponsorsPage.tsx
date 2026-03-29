@@ -159,7 +159,7 @@ export function SponsorsPage({ onNavigate }: { onNavigate: (path: string) => voi
             }}>
               Ready to support the Atlanta IAM community? Submit a sponsorship request or reach out directly.
             </p>
-            <Pill label="sponsors@atlantaiam.com" color={T.green} size={9} />
+            <Pill label="hello@atlantaiam.com" color={T.green} size={9} />
             <button
               onClick={() => onNavigate('/get-involved')}
               style={{

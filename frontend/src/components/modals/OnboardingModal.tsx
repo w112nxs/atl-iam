@@ -15,8 +15,7 @@ const termsSections = [
   { title: '2. Community Rules', body: 'All presentations must be enterprise-led. Vendor representatives may co-present only alongside an enterprise practitioner. Sponsored content is clearly labeled and separated from community-driven sessions.' },
   { title: '3. Data We Collect', body: 'We collect your name, email address, company affiliation, professional title, and relevant certifications upon registration. Event attendance and session participation data is recorded for CPE tracking purposes.' },
   { title: '4. How We Use Your Data', body: 'Your data is used to manage event logistics, issue CPE certificates, communicate about upcoming events, and improve our programming. We analyze aggregate attendance patterns to better serve the community.' },
-  { title: '5. Sponsor Data Sharing (Optional)', body: 'Event sponsors may receive access to attendee data based on their sponsorship tier. You may opt in or out of sponsor data sharing at any time. Opted-out attendees are never visible to sponsors under any circumstance.' },
-  { title: '6. Your Rights', body: 'You may request access to, correction of, or deletion of your personal data at any time by contacting privacy@atlantaiam.com. You may withdraw consent for sponsor data sharing at any time without affecting your membership status.' },
+  { title: '5. Your Rights', body: 'You may request access to, correction of, or deletion of your personal data at any time by contacting hello@atlantaiam.com.' },
   { title: '7. Limitation of Liability', body: 'The Atlanta IAM User Group provides this platform and events on an "as is" basis. We are not liable for any indirect, incidental, or consequential damages arising from use of this platform or attendance at events.' },
   { title: '8. Governing Law', body: 'These terms are governed by the laws of the State of Georgia. Any disputes shall be resolved in the courts of Fulton County, Georgia.' },
 ];
